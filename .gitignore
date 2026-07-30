@@ -27,3 +27,7 @@ infra/terraform/terraform.tfvars
 .idea/
 .vscode/
 *.swp
+
+# Demo: generated WASM artifacts (built by CI)
+demo/wimse.wasm
+demo/wasm_exec.js

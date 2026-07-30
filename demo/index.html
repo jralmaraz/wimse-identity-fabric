@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIMSE Identity Fabric — Live Demo</title>
+<style>
+  :root {
+    --bg:      #0d1117;
+    --surface: #161b22;
+    --border:  #30363d;
+    --text:    #c9d1d9;
+    --muted:   #8b949e;
+    --blue:    #58a6ff;
+    --green:   #3fb950;
+    --red:     #f85149;
+    --yellow:  #d29922;
+    --purple:  #bc8cff;
+    --orange:  #ffa657;
+    --radius:  8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  a { color: var(--blue); }
+
+  /* Layout */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header h1 { font-size: 20px; font-weight: 600; color: #fff; }
+  header p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(88,166,255,.12); color: var(--blue);
+    border: 1px solid rgba(88,166,255,.3);
+    border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 500;
+  }
+  .badge.green { background: rgba(63,185,80,.12); color: var(--green); border-color: rgba(63,185,80,.3); }
+
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; }
+
+  .intro {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px; margin-bottom: 28px;
+  }
+  .intro h2 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+  .intro p  { color: var(--muted); font-size: 13px; }
+
+  /* Steps */
+  .steps { display: flex; flex-direction: column; gap: 20px; }
+  .step {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .step-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,.02);
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(88,166,255,.15); color: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-title { font-size: 15px; font-weight: 600; color: #fff; flex: 1; }
+  .step-spec  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .step-body  { padding: 20px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 6px; border: 1px solid;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: opacity .15s; text-decoration: none;
+  }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-primary { background: var(--blue); border-color: var(--blue); color: #000; }
+  .btn-primary:hover:not(:disabled) { opacity: .85; }
+  .btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
+  .btn-outline:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+  .btn-danger  { background: rgba(248,81,73,.15); border-color: rgba(248,81,73,.4); color: var(--red); }
+  .btn-danger:hover:not(:disabled) { background: rgba(248,81,73,.25); }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+
+  /* Code / token display */
+  .token-box {
+    background: #010409; border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px 16px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 11px; word-break: break-all; line-height: 1.8;
+    margin-top: 12px; overflow-x: auto;
+  }
+  .part-header    { color: var(--orange); }
+  .part-payload   { color: var(--blue); }
+  .part-signature { color: var(--purple); }
+  .part-sep       { color: var(--muted); }
+  .disc-active    { color: var(--green); }
+  .disc-hidden    { color: #444; text-decoration: line-through; }
+
+  /* Anatomy */
+  .anatomy {
+    display: flex; gap: 0; margin-top: 12px; border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .anatomy-part {
+    flex: 1; padding: 10px 12px; font-size: 11px;
+    border-right: 1px solid var(--border);
+    word-break: break-all; font-family: monospace; line-height: 1.6;
+  }
+  .anatomy-part:last-child { border-right: none; }
+  .anatomy-part .label { font-size: 10px; font-weight: 700; letter-spacing: .05em; margin-bottom: 4px; }
+  .a-header  { background: rgba(255,166,87,.08); }
+  .a-header .label  { color: var(--orange); }
+  .a-payload { background: rgba(88,166,255,.08); }
+  .a-payload .label { color: var(--blue); }
+  .a-sig     { background: rgba(188,140,255,.08); }
+  .a-sig .label     { color: var(--purple); }
+
+  /* Steps list */
+  .steps-list { list-style: none; margin-top: 12px; }
+  .steps-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+    font-size: 13px;
+  }
+  .steps-list li:last-child { border-bottom: none; }
+  .step-icon { flex-shrink: 0; margin-top: 1px; }
+  .pending  { color: var(--muted); }
+  .running  { color: var(--yellow); }
+  .success  { color: var(--green); }
+  .error    { color: var(--red); }
+
+  /* Status banner */
+  .status {
+    padding: 10px 14px; border-radius: 6px; font-size: 13px;
+    margin-top: 12px; display: none;
+  }
+  .status.ok  { background: rgba(63,185,80,.12); border: 1px solid rgba(63,185,80,.3); color: var(--green); display: block; }
+  .status.err { background: rgba(248,81,73,.12); border: 1px solid rgba(248,81,73,.3); color: var(--red); display: block; }
+  .status.info{ background: rgba(88,166,255,.10); border: 1px solid rgba(88,166,255,.3); color: var(--blue); display: block; }
+
+  /* Disclosure cards */
+  .disclosure-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 10px; margin-top: 12px; }
+  .disclosure-card {
+    background: #010409; border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px 14px;
+  }
+  .disclosure-card.revealed { border-color: rgba(63,185,80,.4); }
+  .disclosure-card.hidden   { border-color: rgba(248,81,73,.2); opacity: .5; }
+  .dc-claim { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .dc-claim.revealed { color: var(--green); }
+  .dc-claim.hidden   { color: var(--red); }
+  .dc-value { font-size: 11px; font-family: monospace; color: var(--muted); word-break: break-all; }
+
+  /* Claim chips */
+  .claim-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .chip {
+    padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    border: 1px solid; cursor: pointer; transition: all .15s; user-select: none;
+  }
+  .chip.selected  { background: rgba(63,185,80,.2); border-color: rgba(63,185,80,.5); color: var(--green); }
+  .chip.unselected{ background: transparent; border-color: var(--border); color: var(--muted); }
+
+  /* Architecture diagram */
+  .arch {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin: 12px 0; flex-wrap: wrap;
+  }
+  .arch-node {
+    background: rgba(88,166,255,.08); border: 1px solid rgba(88,166,255,.3);
+    border-radius: 8px; padding: 10px 16px; text-align: center;
+    min-width: 120px;
+  }
+  .arch-node .node-title { font-size: 12px; font-weight: 700; color: var(--blue); }
+  .arch-node .node-sub   { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .arch-arrow { color: var(--muted); padding: 0 8px; font-size: 18px; }
+
+  /* Loading */
+  #loading {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; z-index: 100;
+  }
+  .spinner {
+    width: 40px; height: 40px; border: 3px solid var(--border);
+    border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  details summary { cursor: pointer; color: var(--muted); font-size: 12px; margin-top: 10px; }
+  details summary:hover { color: var(--text); }
+  details .token-box { margin-top: 8px; }
+
+  kbd { background: #21262d; border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11px; }
+
+  .info-row { display: flex; gap: 8px; align-items: baseline; margin: 4px 0; }
+  .info-label { color: var(--muted); font-size: 12px; min-width: 90px; }
+  .info-value { font-family: monospace; font-size: 12px; color: var(--text); word-break: break-all; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--muted);font-size:14px;">Loading WIMSE WASM module…</p>
+</div>
+
+<header>
+  <div>
+    <h1>WIMSE Identity Fabric</h1>
+    <p>Workload Identity in Multi-System Environments — Live Browser Demo</p>
+  </div>
+  <span class="badge">IETF Draft</span>
+  <span class="badge green" id="wasm-status">Loading…</span>
+</header>
+
+<main>
+  <div class="intro">
+    <h2>How this works</h2>
+    <p>
+      All cryptography runs in your browser via <strong>WebAssembly</strong> — compiled from the same Go library
+      that powers the production PoC. No keys, tokens, or claims ever leave your device.
+      Walk through the six steps below to see the full WIMSE + SPICE token lifecycle live.
+    </p>
+    <div class="arch" style="margin-top:16px;">
+      <div class="arch-node"><div class="node-title">IdP</div><div class="node-sub">cloud-a.example</div></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node" style="border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.06)">
+        <div class="node-title" style="color:var(--green)">Workload A</div>
+        <div class="node-sub">spiffe://cloud-a…</div>
+      </div>
+      <span class="arch-arrow">→ WIT+WPT →</span>
+      <div class="arch-node"><div class="node-title">Workload B</div><div class="node-sub">cloud-b.example</div></div>
+    </div>
+  </div>
+
+  <div class="steps">
+
+    <!-- Step 1: Setup -->
+    <div class="step" id="step1">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">IdP Setup — Generate Keys</div>
+          <div class="step-spec">EC P-256 · ECDSA · WIMSE workload-creds-02</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+          The Identity Provider generates an EC P-256 signing key. Workload A also generates its own key pair
+          — the public half will be embedded in the WIT as <kbd>cnf.jwk</kbd>.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="doSetup()">Generate Keys</button>
+        </div>
+        <div id="setup-status" class="status"></div>
+        <div id="setup-output" style="display:none">
+          <div style="margin-top:14px;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px;">IdP Public Key (JWK)</div>
+          <div class="token-box" id="setup-jwk"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Issue WIT -->
+    <div class="step" id="step2">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Issue Workload Identity Token (WIT)</div>
+          <div class="step-spec">typ: wit+jwt · alg: ES256 · cnf.jwk · jti</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+          The IdP signs a WIT binding the workload's identity (<code>sub</code>, <code>trust_domain</code>)
+          to its public key (<code>cnf.jwk</code>). The workload presents this credential on every request.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-issue-wit" disabled onclick="doIssueWIT()">Issue WIT</button>
+        </div>
+        <div id="wit-status" class="status"></div>
+        <div id="wit-output" style="display:none">
+          <div style="margin-top:14px;">
+            <div class="anatomy" id="wit-anatomy">
+              <div class="anatomy-part a-header">
+                <div class="label">HEADER</div>
+                <div id="wit-header-text"></div>
+              </div>
+              <div class="anatomy-part a-payload">
+                <div class="label">PAYLOAD</div>
+                <div id="wit-payload-text"></div>
+              </div>
+              <div class="anatomy-part a-sig">
+                <div class="label">SIGNATURE</div>
+                <div id="wit-sig-text" style="color:var(--purple)"></div>
+              </div>
+            </div>
+          </div>
+          <details><summary>Raw token string</summary>
+            <div class="token-box">
+              <span class="part-header" id="wit-raw-header"></span><span class="part-sep">.</span><span class="part-payload" id="wit-raw-payload"></span><span class="part-sep">.</span><span class="part-signature" id="wit-raw-sig"></span>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Generate WPT -->
+    <div class="step" id="step3">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Generate Workload Proof Token (WPT)</div>
+          <div class="step-spec">typ: application/wpt+jwt · aud · wth=sha256(WIT) · jti</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+          For each outbound request Workload A generates a short-lived WPT signed with its own private key.
+          The <kbd>wth</kbd> claim (WIT hash) cryptographically binds the proof to the credential.
+          The <kbd>aud</kbd> claim pins it to a specific target endpoint.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-gen-wpt" disabled onclick="doGenerateWPT()">Generate WPT</button>
+        </div>
+        <div id="wpt-status" class="status"></div>
+        <div id="wpt-output" style="display:none">
+          <div class="anatomy" id="wpt-anatomy">
+            <div class="anatomy-part a-header">
+              <div class="label">HEADER</div>
+              <div id="wpt-header-text"></div>
+            </div>
+            <div class="anatomy-part a-payload">
+              <div class="label">PAYLOAD</div>
+              <div id="wpt-payload-text"></div>
+            </div>
+            <div class="anatomy-part a-sig">
+              <div class="label">SIGNATURE</div>
+              <div id="wpt-sig-text" style="color:var(--purple)"></div>
+            </div>
+          </div>
+          <div style="margin-top:10px;" id="wth-display"></div>
+          <details><summary>Raw token string</summary>
+            <div class="token-box">
+              <span class="part-header" id="wpt-raw-header"></span><span class="part-sep">.</span><span class="part-payload" id="wpt-raw-payload"></span><span class="part-sep">.</span><span class="part-signature" id="wpt-raw-sig"></span>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Validate Request -->
+    <div class="step" id="step4">
+      <div class="step-header">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Workload B Validates the Request</div>
+          <div class="step-spec">Middleware: sig + exp + iss + aud + wth + jti replay</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+          Workload B's middleware runs eight sequential checks before forwarding the request to the handler.
+          Any failure returns HTTP 401.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-validate" disabled onclick="doValidate()">Validate Request</button>
+        </div>
+        <div id="validate-status" class="status"></div>
+        <ul class="steps-list" id="validate-steps"></ul>
+        <div id="validate-caller" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <!-- Step 5: Replay Attack -->
+    <div class="step" id="step5">
+      <div class="step-header">
+        <div class="step-num">5</div>
+        <div>
+          <div class="step-title">Replay Attack — jti Rejection</div>
+          <div class="step-spec">jti nonce store · per-token expiry tracking</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+          Even a cryptographically valid WPT is rejected if its <kbd>jti</kbd> has already been seen.
+          This prevents an attacker who captured a token from reusing it.
+        </p>
+        <div class="btn-row">
+          <button class="btn btn-danger" id="btn-replay" disabled onclick="doReplay()">Simulate Replay Attack</button>
+        </div>
+        <div id="replay-status" class="status"></div>
+        <div id="replay-output" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Step 6: SD-WIT (SPICE) -->
+    <div class="step" id="step6">
+      <div class="step-header">
+        <div class="step-num">6</div>
+        <div>
+          <div class="step-title">Selective Disclosure WIT (SPICE Extension)</div>
+          <div class="step-spec">SD-JWT · _sd hashes · Holder presentation · cnf key binding</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <p style="color:var(--muted);font-size:13px;margin-bottom:14px;">
+          Phase 5 adds selective disclosure per IETF SPICE: claims are hashed into the JWT payload.
+          The Holder controls which values to reveal — the Verifier sees only what was shared.
+        </p>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-issue-sd" disabled onclick="doIssueSD()">Issue SD-WIT</button>
+        </div>
+        <div id="sd-status" class="status"></div>
+
+        <div id="sd-output" style="display:none">
+          <div style="margin-top:14px;font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">
+            Full SD-JWT (Issuer → Holder)
+          </div>
+          <div class="token-box" id="sd-full-token"></div>
+
+          <div style="margin-top:20px;font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;">
+            Select claims to reveal to Verifier:
+          </div>
+          <p style="color:var(--muted);font-size:12px;margin-bottom:8px;">Toggle which disclosures the Holder includes in the presentation.</p>
+          <div class="claim-chips" id="sd-chips"></div>
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn btn-outline" onclick="doPresent()">Create Presentation</button>
+          </div>
+
+          <div id="sd-presentation" style="display:none">
+            <div style="margin-top:16px;font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">
+              Presentation (Holder → Verifier)
+            </div>
+            <div class="token-box" id="sd-limited-token"></div>
+
+            <div style="margin-top:16px;font-size:13px;font-weight:600;color:#fff;margin-bottom:8px;">
+              Disclosures
+            </div>
+            <div class="disclosure-grid" id="sd-disc-cards"></div>
+
+            <div class="btn-row" style="margin-top:16px;">
+              <button class="btn btn-outline" onclick="doValidateSD()">Validate Presentation</button>
+            </div>
+            <div id="sd-validate-status" class="status"></div>
+            <div id="sd-claims-output" style="display:none;margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- .steps -->
+</main>
+
+<script src="wasm_exec.js"></script>
+<script>
+// ─────────────────────────────────────────────
+// WASM bootstrap
+// ─────────────────────────────────────────────
+const go = new Go();
+WebAssembly.instantiateStreaming(fetch("wimse.wasm"), go.importObject).then(result => {
+  go.run(result.instance);
+  document.getElementById("loading").style.display = "none";
+  const badge = document.getElementById("wasm-status");
+  badge.textContent = "WASM ready";
+  badge.classList.add("green");
+}).catch(err => {
+  document.getElementById("loading").innerHTML =
+    `<p style="color:var(--red)">Failed to load WASM: ${err.message}</p>
+     <p style="color:var(--muted);margin-top:8px;font-size:12px;">
+       This demo requires a server (not file://). Try: <kbd>npx serve demo/</kbd> or <kbd>python3 -m http.server</kbd> in the <code>demo/</code> directory.
+     </p>`;
+});
+
+// ─────────────────────────────────────────────
+// Helper utilities
+// ─────────────────────────────────────────────
+function call(fn, ...args) {
+  try {
+    const raw = wimse[fn](...args);
+    return JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+  } catch(e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.className = "status " + type;
+  el.textContent = msg;
+}
+
+function show(id) { document.getElementById(id).style.display = ""; }
+function hide(id) { document.getElementById(id).style.display = "none"; }
+
+function prettyJSON(obj) {
+  return JSON.stringify(obj, null, 2);
+}
+
+function enableBtn(id) {
+  const el = document.getElementById(id);
+  if (el) el.disabled = false;
+}
+
+// ─────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────
+let sdAvailableClaims = [];
+let sdSelectedClaims  = new Set(["sub", "trust_domain", "roles"]);
+let lastLimitedToken  = "";
+
+// ─────────────────────────────────────────────
+// Step 1: Setup
+// ─────────────────────────────────────────────
+function doSetup() {
+  const r = call("setup");
+  if (!r.ok) { setStatus("setup-status", r.error, "err"); return; }
+  setStatus("setup-status",
+    `EC P-256 key pairs generated for IdP (${r.data.issuerID}) and Workload A.`, "ok");
+  document.getElementById("setup-jwk").textContent = prettyJSON(r.data.idpJWK);
+  show("setup-output");
+  enableBtn("btn-issue-wit");
+}
+
+// ─────────────────────────────────────────────
+// Step 2: Issue WIT
+// ─────────────────────────────────────────────
+function doIssueWIT() {
+  const r = call("issueWIT");
+  if (!r.ok) { setStatus("wit-status", r.error, "err"); return; }
+  const { parts, token } = r.data;
+
+  setStatus("wit-status", "WIT issued and signed by IdP.", "ok");
+
+  document.getElementById("wit-header-text").textContent  = prettyJSON(parts.header);
+  document.getElementById("wit-payload-text").textContent = prettyJSON(parts.payload);
+  document.getElementById("wit-sig-text").textContent     = parts.raw.signature.substring(0,32) + "…";
+
+  document.getElementById("wit-raw-header").textContent  = parts.raw.header;
+  document.getElementById("wit-raw-payload").textContent = parts.raw.payload;
+  document.getElementById("wit-raw-sig").textContent     = parts.raw.signature;
+
+  show("wit-output");
+  enableBtn("btn-gen-wpt");
+}
+
+// ─────────────────────────────────────────────
+// Step 3: Generate WPT
+// ─────────────────────────────────────────────
+function doGenerateWPT() {
+  const r = call("generateWPT");
+  if (!r.ok) { setStatus("wpt-status", r.error, "err"); return; }
+  const { parts, wthDigest } = r.data;
+
+  setStatus("wpt-status", "WPT generated and signed with Workload A's private key.", "ok");
+
+  document.getElementById("wpt-header-text").textContent  = prettyJSON(parts.header);
+  document.getElementById("wpt-payload-text").textContent = prettyJSON(parts.payload);
+  document.getElementById("wpt-sig-text").textContent     = parts.raw.signature.substring(0,32) + "…";
+
+  document.getElementById("wpt-raw-header").textContent  = parts.raw.header;
+  document.getElementById("wpt-raw-payload").textContent = parts.raw.payload;
+  document.getElementById("wpt-raw-sig").textContent     = parts.raw.signature;
+
+  document.getElementById("wth-display").innerHTML =
+    `<div class="info-row"><span class="info-label">wth (sha256)</span>
+     <span class="info-value" style="color:var(--yellow)">${wthDigest}</span></div>
+     <p style="color:var(--muted);font-size:11px;margin-top:4px;">
+       This digest ties the WPT to exactly this WIT — if the WIT is swapped, validation fails.
+     </p>`;
+
+  show("wpt-output");
+  enableBtn("btn-validate");
+  enableBtn("btn-replay");
+  enableBtn("btn-issue-sd");
+}
+
+// ─────────────────────────────────────────────
+// Step 4: Validate
+// ─────────────────────────────────────────────
+async function doValidate() {
+  const r = call("validateRequest");
+  if (!r.ok) { setStatus("validate-status", r.error, "err"); return; }
+
+  setStatus("validate-status", "All checks passed — request authorized.", "ok");
+
+  const list = document.getElementById("validate-steps");
+  list.innerHTML = "";
+  const steps = r.data.steps;
+  for (let i = 0; i < steps.length; i++) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="step-icon pending">○</span><span>${steps[i]}</span>`;
+    list.appendChild(li);
+    await delay(120);
+    li.querySelector(".step-icon").className = "step-icon success";
+    li.querySelector(".step-icon").textContent = "✓";
+  }
+
+  document.getElementById("validate-caller").innerHTML =
+    `<div class="info-row"><span class="info-label">Caller sub</span>
+     <span class="info-value" style="color:var(--green)">${r.data.subject}</span></div>
+     <div class="info-row"><span class="info-label">Trust domain</span>
+     <span class="info-value">${r.data.trustDomain}</span></div>
+     <div class="info-row"><span class="info-label">Target URI</span>
+     <span class="info-value">${r.data.targetURI}</span></div>`;
+  show("validate-caller");
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─────────────────────────────────────────────
+// Step 5: Replay
+// ─────────────────────────────────────────────
+function doReplay() {
+  const r = call("replayAttack");
+  if (!r.ok) { setStatus("replay-status", r.error, "err"); return; }
+
+  const d = r.data;
+  const firstIcon  = d.firstAttemptAllowed  ? "✓" : "✗";
+  const secondIcon = d.secondAttemptBlocked ? "✗" : "✓";
+  const firstCol   = d.firstAttemptAllowed  ? "var(--green)" : "var(--red)";
+  const secondCol  = d.secondAttemptBlocked ? "var(--red)"   : "var(--green)";
+
+  document.getElementById("replay-output").innerHTML = `
+    <div style="margin-top:12px;">
+      <div class="info-row">
+        <span class="info-label">1st request</span>
+        <span class="info-value" style="color:${firstCol}">${firstIcon} ${d.firstAttemptAllowed ? "Allowed" : "Blocked"}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">2nd request</span>
+        <span class="info-value" style="color:${secondCol}">${secondIcon} ${d.secondAttemptBlocked ? "Blocked (jti replayed)" : "Allowed (unexpected!)"}</span>
+      </div>
+      ${d.replayError ? `<div class="info-row"><span class="info-label">Error</span><span class="info-value" style="color:var(--red);font-size:11px;">${d.replayError}</span></div>` : ""}
+      <p style="color:var(--muted);font-size:12px;margin-top:8px;">${d.explanation}</p>
+    </div>`;
+  show("replay-output");
+
+  if (d.secondAttemptBlocked) {
+    setStatus("replay-status", "Replay blocked as expected — jti already used.", "ok");
+  } else {
+    setStatus("replay-status", "Warning: replay was not blocked!", "err");
+  }
+}
+
+// ─────────────────────────────────────────────
+// Step 6: SD-WIT
+// ─────────────────────────────────────────────
+function doIssueSD() {
+  const r = call("issueSDWIT");
+  if (!r.ok) { setStatus("sd-status", r.error, "err"); return; }
+
+  setStatus("sd-status", "SD-WIT issued — all three claims are selectively disclosable.", "ok");
+
+  // Render the raw SD-JWT with colored parts.
+  const parts = r.data.token.split("~").filter(Boolean);
+  const jwtParts = parts[0].split(".");
+  const discParts = parts.slice(1);
+
+  let html = `<span class="part-header">${jwtParts[0]}</span>`
+           + `<span class="part-sep">.</span>`
+           + `<span class="part-payload">${jwtParts[1]}</span>`
+           + `<span class="part-sep">.</span>`
+           + `<span class="part-signature">${jwtParts[2]}</span>`;
+  discParts.forEach(d => {
+    html += `<span class="part-sep">~</span><span class="disc-active">${d}</span>`;
+  });
+  html += `<span class="part-sep">~</span>`;
+  document.getElementById("sd-full-token").innerHTML = html;
+
+  sdAvailableClaims = r.data.revealedClaims || ["sub", "trust_domain", "roles"];
+  sdSelectedClaims  = new Set(sdAvailableClaims);
+  renderChips();
+  show("sd-output");
+}
+
+function renderChips() {
+  const container = document.getElementById("sd-chips");
+  container.innerHTML = "";
+  sdAvailableClaims.forEach(claim => {
+    const chip = document.createElement("span");
+    const sel  = sdSelectedClaims.has(claim);
+    chip.className = "chip " + (sel ? "selected" : "unselected");
+    chip.textContent = claim;
+    chip.onclick = () => {
+      if (sdSelectedClaims.has(claim)) sdSelectedClaims.delete(claim);
+      else sdSelectedClaims.add(claim);
+      renderChips();
+    };
+    container.appendChild(chip);
+  });
+}
+
+function doPresent() {
+  const reveal = [...sdSelectedClaims];
+  const r = call("presentSDWIT", JSON.stringify(reveal));
+  if (!r.ok) { setStatus("sd-status", r.error, "err"); return; }
+
+  lastLimitedToken = r.data.limitedToken;
+
+  // Limited token display.
+  const parts = r.data.limitedToken.split("~").filter(Boolean);
+  const jwtParts = parts[0].split(".");
+  const kept = new Set(r.data.revealedLimited || []);
+  const all  = r.data.revealedFull || [];
+
+  let html = `<span class="part-header">${jwtParts[0]}</span>`
+           + `<span class="part-sep">.</span>`
+           + `<span class="part-payload">${jwtParts[1]}</span>`
+           + `<span class="part-sep">.</span>`
+           + `<span class="part-signature">${jwtParts[2]}</span>`;
+  // Re-attach kept disclosures.
+  (r.data.limitedDisclosures || []).forEach(d => {
+    html += `<span class="part-sep">~</span><span class="disc-active">${d}</span>`;
+  });
+  html += `<span class="part-sep">~</span>`;
+  document.getElementById("sd-limited-token").innerHTML = html;
+
+  // Disclosure cards.
+  const grid = document.getElementById("sd-disc-cards");
+  grid.innerHTML = "";
+  all.forEach(claim => {
+    const revealed = kept.has(claim);
+    const card = document.createElement("div");
+    card.className = "disclosure-card " + (revealed ? "revealed" : "hidden");
+    card.innerHTML = `<div class="dc-claim ${revealed ? "revealed" : "hidden"}">${revealed ? "✓" : "✗"} ${claim}</div>
+      <div class="dc-value">${revealed ? "Included in presentation" : "Hash only — value hidden from Verifier"}</div>`;
+    grid.appendChild(card);
+  });
+
+  // Also show hidden claims cards.
+  (r.data.hiddenClaims || []).forEach(claim => {
+    if (!all.includes(claim)) {
+      const card = document.createElement("div");
+      card.className = "disclosure-card hidden";
+      card.innerHTML = `<div class="dc-claim hidden">✗ ${claim}</div>
+        <div class="dc-value">Not disclosed</div>`;
+      grid.appendChild(card);
+    }
+  });
+
+  show("sd-presentation");
+}
+
+function doValidateSD() {
+  const r = call("validateSDWIT", lastLimitedToken);
+  if (!r.ok) { setStatus("sd-validate-status", r.error, "err"); return; }
+
+  setStatus("sd-validate-status", "Presentation validated successfully.", "ok");
+
+  const d = r.data;
+  const rows = [
+    ["issuer",       d.issuer       || "(present)"],
+    ["subject",      d.subject      || "(hidden — not disclosed)"],
+    ["trust_domain", d.trustDomain  || "(hidden — not disclosed)"],
+    ["roles",        d.roles        ? d.roles.join(", ") : "(hidden — not disclosed)"],
+    ["cnf.jwk",      d.hasKey       ? "Present (always visible)" : "Missing"],
+  ];
+  document.getElementById("sd-claims-output").innerHTML =
+    rows.map(([k,v]) => {
+      const hidden = v.startsWith("(hidden");
+      const color  = hidden ? "var(--muted)" : "var(--green)";
+      return `<div class="info-row">
+        <span class="info-label">${k}</span>
+        <span class="info-value" style="color:${color}">${v}</span>
+      </div>`;
+    }).join("");
+  show("sd-claims-output");
+}
+
+</script>
+</body>
+</html>
