@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored and must never be committed.
+
+gcp_project         = "my-gcp-project-id"
+gcp_region          = "us-central1"
+
+aws_region          = "us-east-1"
+aws_key_pair_name   = "my-aws-key-pair"   # name of an existing EC2 key pair
+
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"   # installed on the GCP VM for SSH
