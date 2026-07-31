@@ -73,19 +73,14 @@ jobs:
 
       - name: Scan for vulnerabilities (Grype)
         uses: anchore/scan-action@v7
-        id: grype
         with:
           sbom: sbom.spdx.json
           fail-build: false         # report only; set true to block on HIGH/CRIT
           severity-cutoff: high
-          output-format: sarif
-          output-file: grype.sarif
-
-      - name: Upload Grype SARIF to Security tab
-        uses: github/codeql-action/upload-sarif@v4.37.3
-        with:
-          sarif_file: grype.sarif
-          category: grype
+          # SARIF upload omitted: Grype SBOM scans produce package-level results
+          # with no source-file artifactLocation, which GitHub Code Scanning rejects.
+          # Findings are visible in the CI log above; the SBOM artifact is the
+          # authoritative supply-chain record.
 
   deploy-demo:
     name: Deploy Demo
