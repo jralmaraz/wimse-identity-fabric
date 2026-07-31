@@ -1,6 +1,10 @@
 # WIMSE Identity Fabric — Proof of Concept
 
-A Go implementation of the **IETF WIMSE** (Workload Identity in Multi-System Environments) standard, built as an incremental five-phase PoC. It demonstrates the complete workload identity stack: token issuance, workload-to-workload authentication over mutual TLS, cross-trust-domain token exchange, and selective disclosure credentials aligned with the IETF SPICE working group.
+A Go implementation of the **IETF WIMSE** (Workload Identity in Multi-System Environments) standard, built as an incremental six-phase PoC. It demonstrates the complete workload identity stack: token issuance, workload-to-workload authentication over mutual TLS, cross-trust-domain token exchange, selective disclosure credentials, and **OpenID Federation 1.0** for dynamic cross-domain trust — all with an interactive browser demo compiled to WebAssembly.
+
+**Demos:**
+- [Standard PoC](demo/index.html) — 10-chapter interactive story running live WASM crypto in your browser
+- [Enterprise Demo](demo/enterprise.html) — Identity sprawl, WIMSE solution, IdP integration patterns (Okta, Entra ID, Keycloak, Vault), centralised vs distributed, secrets management
 
 ## Table of Contents
 
@@ -15,6 +19,9 @@ A Go implementation of the **IETF WIMSE** (Workload Identity in Multi-System Env
 - [Phase 3 — Workload-to-Workload Authentication](#phase-3--workload-to-workload-authentication)
 - [Phase 4 — Token Exchange (Cross-Trust-Domain)](#phase-4--token-exchange-cross-trust-domain)
 - [Phase 5 — Selective Disclosure WIT (SPICE)](#phase-5--selective-disclosure-wit-spice)
+- [Phase 6 — OpenID Federation 1.0](#phase-6--openid-federation-10)
+- [Browser Demo (WASM)](#browser-demo-wasm)
+- [Enterprise Demo](#enterprise-demo)
 - [Token Formats](#token-formats)
 - [Security Properties](#security-properties)
 - [Deployment](#deployment)
@@ -55,6 +62,7 @@ Phase 5 extends WIT with **selective disclosure** (SD-JWT format, IETF SPICE WG)
 | `draft-ietf-oauth-selective-disclosure-jwt` (RFC 9278) | Phase 5 | SD-JWT format, `_sd` hashes, disclosure strings |
 | `draft-ietf-spice-sd-cwt-08` | Phase 5 (reference) | CBOR analog; `cnf` key binding identical to SD-JWT |
 | `draft-mw-wimse-transitive-attestation-00` | Phase 5 (reference) | SPICE as privacy shield layer in WIMSE attestation chains |
+| `openid-federation-1_0` | Phase 6 | Entity Configurations, Subordinate Statements, trust chains, authority_hints |
 
 ---
 
@@ -663,6 +671,102 @@ wptToken, err := wpt.Generate(wpt.GenerateOptions{
 | `TestSDWIT_TamperedDisclosure` | Reject disclosure whose hash is not in _sd |
 | `TestSDWIT_WthBinding` | Full vs. limited presentation produce different wth values |
 | `TestSDWIT_EndToEnd` | Full SPICE flow: issue → present subset → validate → privacy confirmed |
+
+---
+
+## Phase 6 — OpenID Federation 1.0
+
+`pkg/federation` — implements the **OpenID Federation 1.0** trust chain mechanism for dynamic, anchor-governed cross-domain trust. No pre-shared keys between IdPs are required: a single corporate Trust Anchor certifies each IdP's public key via a signed Subordinate Statement.
+
+### New files
+
+| File | Purpose |
+|---|---|
+| `pkg/federation/entity.go` | `BuildEntityConfiguration`, `BuildSubordinateStatement`, `ParseEntityConfiguration`, `VerifyEntityConfiguration`, `ParseSubordinateStatement`, `VerifySubordinateStatement` |
+| `pkg/federation/resolver.go` | `Resolver` interface; `InMemoryResolver` (tests + WASM); `HTTPResolver` (production) |
+| `pkg/federation/federation_test.go` | 11 tests covering build/parse/verify, trust chain resolution, tampered EC, untrusted anchor |
+
+### Trust chain resolution algorithm
+
+```
+1. Parse EC without verification (peek authority_hints)
+2. For each authority_hint → look up Trust Anchor key
+3. VerifySubordinateStatement(ssJWT, anchorPub)  — anchor key is the only pre-configured trust
+4. Extract leaf public key from SS.JWKS
+5. VerifyEntityConfiguration(ecJWT, leafPub)      — verify EC was signed by its certified key
+6. Cache result until min(EC.exp, SS.exp)
+```
+
+### IdP HTTP endpoints (new in Phase 6)
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/.well-known/openid-federation` | Serve IdP's Entity Configuration JWT |
+| `GET` | `/federation/fetch?sub=<url>` | Serve Subordinate Statement for `sub` |
+
+### Token Exchange with OID-FED fallback
+
+`internal/exchange/policy.go` — `TrustPolicy.ResolveIssuerKey(ctx, issuer)` tries static `AllowedIssuers` first (Phase 4 behaviour, unchanged), then falls back to the `Resolver` for dynamically-discovered issuers. Existing tests pass unchanged.
+
+### Tests
+
+| Test | Description |
+|---|---|
+| `TestBuildAndParseEntityConfiguration` | Round-trip EC JWT |
+| `TestVerifyEntityConfiguration_CorrectKey` | Verify with correct key passes |
+| `TestVerifyEntityConfiguration_WrongKey` | Verify with wrong key fails |
+| `TestBuildAndVerifySubordinateStatement` | Round-trip SS JWT |
+| `TestInMemoryResolver_HappyPath` | Full trust chain resolution |
+| `TestInMemoryResolver_UnknownEntity` | Error for unregistered entity |
+| `TestInMemoryResolver_TamperedEC` | Reject EC not matching SS-certified key |
+| `TestInMemoryResolver_UntrustedAnchor` | Reject SS from unknown anchor |
+| `TestExchange_FederationTrust` | Token exchange with dynamically-resolved issuer key |
+
+---
+
+## Browser Demo (WASM)
+
+`demo/index.html` — a 10-chapter interactive story. Every cryptographic operation runs live in your browser via WebAssembly (Go compiled with `GOOS=js GOARCH=wasm`). No server, no installation.
+
+| Chapter | Topic |
+|---|---|
+| 1 | The Problem — why workloads need identity |
+| 2 | WIT — Workload Identity Token anatomy |
+| 3 | mTLS — SPIFFE URI SAN handshake |
+| 4 | WPT — per-request proof of possession |
+| 5 | Validation Dance — 9-step verification walkthrough |
+| 6 | Fine-grained Authorization — ABAC policy engine |
+| 7 | Selective Disclosure — SD-JWT claim filtering |
+| 8 | Token Exchange — cross-trust-domain bridge |
+| 9 | Attacks & Defences — replay, tampering, mTLS bypass |
+| 10 | **OpenID Federation** — trust chain build, verify, federated exchange |
+
+**Rebuild WASM:**
+```bash
+GOOS=js GOARCH=wasm go build -o demo/wimse.wasm ./cmd/demo-wasm/
+```
+
+**Serve locally:**
+```bash
+cd demo && python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+---
+
+## Enterprise Demo
+
+`demo/enterprise.html` — a corporate-focused companion to the Standard PoC. No WASM dependency — fully static HTML with interactive diagrams.
+
+| Scenario | Content |
+|---|---|
+| 1 — Identity Sprawl | Animated diagram showing the same workload with 3 different identities across AWS, Azure, GCP |
+| 2 — WIMSE Solution | Three-layer identity stack: infrastructure / cloud-native / WIMSE |
+| 3 — IdP Integrations | Step-by-step integration guides for Okta/Auth0, Azure Entra ID, Keycloak, HashiCorp Vault |
+| 4 — Trust Governance | OID-FED corporate trust hierarchy: Trust Anchor → per-cloud IdPs → workloads |
+| 5 — Centralised vs Distributed | Decision matrix and pros/cons for identity management models |
+| 6 — Secrets Management | WIMSE distributed keys vs centralised Vault; recommended combined pattern |
+| 7 — Adoption Roadmap | 6-phase enterprise rollout with success metrics |
 
 ---
 

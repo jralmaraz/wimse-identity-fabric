@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/example/wimse-identity-fabric/internal/idp"
+	"github.com/example/wimse-identity-fabric/pkg/federation"
 	"github.com/example/wimse-identity-fabric/pkg/keys"
 	"github.com/example/wimse-identity-fabric/pkg/wit"
 )
@@ -206,5 +207,119 @@ func TestHealth(t *testing.T) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+}
+
+func TestEntityConfig_ServedCorrectly(t *testing.T) {
+	cfg := newConfig(t)
+	cfg.OrganizationName = "Acme Corp Cloud A"
+	cfg.AuthorityHints = []string{"https://trust-anchor.acme.example"}
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	resp, err := srv.Client().Get(srv.URL + "/.well-known/openid-federation")
+	if err != nil {
+		t.Fatalf("GET /.well-known/openid-federation: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+	if ct := resp.Header.Get("Content-Type"); ct != "application/entity-statement+jwt" {
+		t.Errorf("Content-Type: want %q got %q", "application/entity-statement+jwt", ct)
+	}
+
+	var body []byte
+	buf := make([]byte, 4096)
+	for {
+		n, readErr := resp.Body.Read(buf)
+		body = append(body, buf[:n]...)
+		if readErr != nil {
+			break
+		}
+	}
+	ecJWT := string(body)
+	if ecJWT == "" {
+		t.Fatal("expected non-empty entity configuration JWT")
+	}
+
+	// Parse without sig verification.
+	ec, err := federation.ParseEntityConfiguration(ecJWT)
+	if err != nil {
+		t.Fatalf("ParseEntityConfiguration: %v", err)
+	}
+	if ec.Issuer != cfg.IssuerID {
+		t.Errorf("iss: want %q got %q", cfg.IssuerID, ec.Issuer)
+	}
+	if len(ec.AuthorityHints) != 1 || ec.AuthorityHints[0] != "https://trust-anchor.acme.example" {
+		t.Errorf("authority_hints: %v", ec.AuthorityHints)
+	}
+
+	// Verify signature with the IdP's own public key.
+	verified, err := federation.VerifyEntityConfiguration(ecJWT, cfg.SigningKey.Public)
+	if err != nil {
+		t.Fatalf("VerifyEntityConfiguration: %v", err)
+	}
+	if verified.Issuer != cfg.IssuerID {
+		t.Errorf("verified iss: want %q got %q", cfg.IssuerID, verified.Issuer)
+	}
+}
+
+func TestFederationFetch_NotAnchor(t *testing.T) {
+	cfg := newConfig(t) // no TrustAnchorSubjects
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	resp, err := srv.Client().Get(srv.URL + "/federation/fetch?sub=https://idp.other.example")
+	if err != nil {
+		t.Fatalf("GET /federation/fetch: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("expected 404 for non-anchor IdP, got %d", resp.StatusCode)
+	}
+}
+
+func TestFederationFetch_WithSubject(t *testing.T) {
+	cfg := newConfig(t)
+
+	// Pre-build a subordinate statement.
+	leafKP, _ := keys.GenerateECKeyPair()
+	leafID := "https://idp.leaf.example"
+	ssJWT, err := federation.BuildSubordinateStatement(
+		cfg.IssuerID, leafID,
+		leafKP.Public, "leaf-key",
+		cfg.SigningKey.Private, "idp-key",
+		time.Hour,
+	)
+	if err != nil {
+		t.Fatalf("BuildSubordinateStatement: %v", err)
+	}
+	cfg.TrustAnchorSubjects = map[string]string{leafID: ssJWT}
+
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	resp, err := srv.Client().Get(srv.URL + "/federation/fetch?sub=" + leafID)
+	if err != nil {
+		t.Fatalf("GET /federation/fetch: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var body []byte
+	buf := make([]byte, 4096)
+	for {
+		n, readErr := resp.Body.Read(buf)
+		body = append(body, buf[:n]...)
+		if readErr != nil {
+			break
+		}
+	}
+	returned := string(body)
+	if returned != ssJWT {
+		t.Error("returned SS JWT does not match what was registered")
 	}
 }

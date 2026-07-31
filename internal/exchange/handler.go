@@ -44,9 +44,10 @@ func ExchangeHandler(cfg *ExchangeConfig) gin.HandlerFunc {
 			return
 		}
 
-		issuerKey := cfg.Policy.IssuerKey(issuer)
-		if issuerKey == nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": "issuer not trusted"})
+		// Resolve the issuer key: static map first, then OID-FED trust chain.
+		issuerKey, err := cfg.Policy.ResolveIssuerKey(c.Request.Context(), issuer)
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{"error": "issuer not trusted: " + err.Error()})
 			return
 		}
 

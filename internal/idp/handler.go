@@ -3,7 +3,9 @@ package idp
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/example/wimse-identity-fabric/pkg/federation"
 	"github.com/example/wimse-identity-fabric/pkg/keys"
 	"github.com/example/wimse-identity-fabric/pkg/wit"
 	"github.com/gin-gonic/gin"
@@ -96,5 +98,59 @@ func JWKSHandler(cfg *IdPConfig) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, jwksResponse{Keys: []keys.JWK{*jwk}})
+	}
+}
+
+// EntityConfigHandler handles GET /.well-known/openid-federation.
+// It serves a self-signed OID-FED Entity Configuration JWT for this IdP.
+func EntityConfigHandler(cfg *IdPConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ttl := cfg.EntityConfigTTL
+		if ttl == 0 {
+			ttl = 24 * time.Hour
+		}
+		orgName := cfg.OrganizationName
+		if orgName == "" {
+			orgName = cfg.TrustDomain
+		}
+		ecJWT, err := federation.BuildEntityConfiguration(
+			cfg.IssuerID,
+			cfg.SigningKey.Private,
+			"idp-key",
+			orgName,
+			cfg.AuthorityHints,
+			ttl,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "entity configuration build failed"})
+			return
+		}
+		// OID-FED §4 specifies Content-Type: application/entity-statement+jwt
+		c.Header("Content-Type", "application/entity-statement+jwt")
+		c.String(http.StatusOK, ecJWT)
+	}
+}
+
+// FederationFetchHandler handles GET /federation/fetch?sub=<entityID>.
+// When this IdP also acts as a Trust Anchor, it returns the Subordinate Statement
+// it has signed for the given subject entity.
+func FederationFetchHandler(cfg *IdPConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sub := c.Query("sub")
+		if sub == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "sub parameter required"})
+			return
+		}
+		if cfg.TrustAnchorSubjects == nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "this entity is not a trust anchor"})
+			return
+		}
+		ssJWT, ok := cfg.TrustAnchorSubjects[sub]
+		if !ok {
+			c.JSON(http.StatusNotFound, gin.H{"error": "no subordinate statement for subject"})
+			return
+		}
+		c.Header("Content-Type", "application/entity-statement+jwt")
+		c.String(http.StatusOK, ssJWT)
 	}
 }

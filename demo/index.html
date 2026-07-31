@@ -212,6 +212,7 @@ select:focus{outline:none;border-color:var(--blue)}
     <div class="site-logo">WIMSE Identity Fabric</div>
     <div class="site-subtitle">IETF workload identity &mdash; interactive story</div>
   </div>
+  <a href="enterprise.html" style="margin-left:auto;font-size:12px;padding:5px 14px;border-radius:6px;background:#21262d;border:1px solid #30363d;color:#ffa657;text-decoration:none;margin-right:12px" onmouseover="this.style.borderColor='#ffa657'" onmouseout="this.style.borderColor='#30363d'">Enterprise Demo &#x2192;</a>
   <div class="wasm-badge loading" id="wasm-badge">
     <div class="spin"></div> Loading WASM&hellip;
   </div>
@@ -708,7 +709,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 9 — Attacks & Defenses
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch9">
-  <div class="ch-num">Chapter 9 of 9</div>
+  <div class="ch-num">Chapter 9 of 10</div>
   <h1 class="ch-title">Attacks &amp; Defenses</h1>
   <p class="ch-lead">What happens when an attacker captures a valid WPT and tries to replay it? WIMSE's <code>jti</code> tracking makes replay attacks impossible — even with a perfectly valid, unexpired stolen token.</p>
 
@@ -776,11 +777,153 @@ select:focus{outline:none;border-color:var(--blue)}
   </div>
 
   <div class="callout ok" style="margin-top:20px">
-    <strong>Story complete.</strong> From raw TCP with no identity, to cryptographically verifiable, short-lived, replay-protected, fine-grained workload identity — in 9 chapters. All cryptographic operations above ran in real Go code compiled to WebAssembly in your browser.
+    <strong>Defence complete.</strong> From raw TCP with no identity, to cryptographically verifiable, short-lived, replay-protected, fine-grained workload identity. One more chapter shows how <strong>OpenID Federation</strong> lets entirely separate organisations trust each other's IdPs — without a shared secrets or a pre-arranged static key list.
   </div>
 
   <div class="ch-footer">
     <button class="btn btn-secondary" onclick="goChapter(8)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(10)">Next: OpenID Federation &rarr;</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     Ch 10 — OpenID Federation
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch10">
+  <div class="ch-num">Chapter 10 of 10</div>
+  <h1 class="ch-title">OpenID Federation</h1>
+  <p class="ch-lead">Two organisations have their own IdPs and never exchanged a single key out-of-band. <strong>OpenID Federation 1.0</strong> lets a shared Trust Anchor publish cryptographically-signed <em>Subordinate Statements</em> that vouch for each IdP, so any relying party can verify the chain at runtime.</p>
+  <div class="spec-ref">Spec: <a href="https://openid.net/specs/openid-federation-1_0.html" target="_blank">OpenID Federation 1.0</a> — entity statements, trust chains, trust anchors</div>
+
+  <!-- Trust chain diagram -->
+  <div class="diagram">
+    <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+      <!-- Trust Anchor (top centre) -->
+      <rect x="270" y="14" width="160" height="50" rx="8" class="node-box" id="fed-anchor" style="stroke:var(--orange);stroke-width:2"/>
+      <text x="350" y="34" class="node-lbl" style="fill:var(--orange)">Trust Anchor</text>
+      <text x="350" y="49" class="node-sub">trust-anchor.corp.example</text>
+      <text x="350" y="61" class="node-sub" style="fill:var(--orange);font-size:9px">signs Subordinate Statements</text>
+
+      <!-- SS arrows from anchor down to IdP-A and IdP-B -->
+      <line x1="310" y1="64" x2="120" y2="130" class="wire" style="stroke:var(--orange);stroke-dasharray:5,3;stroke-width:1.5" id="fed-wire-a"/>
+      <line x1="390" y1="64" x2="580" y2="130" class="wire" style="stroke:var(--orange);stroke-dasharray:5,3;stroke-width:1.5" id="fed-wire-b"/>
+
+      <!-- SS label left -->
+      <text x="185" y="104" class="pkt-lbl" style="fill:var(--orange);font-size:10px;text-anchor:middle">SS (signed by anchor)</text>
+      <!-- SS label right -->
+      <text x="510" y="104" class="pkt-lbl" style="fill:var(--orange);font-size:10px;text-anchor:middle">SS (signed by anchor)</text>
+
+      <!-- IdP-A (left) -->
+      <rect x="30" y="130" width="160" height="50" rx="8" class="node-box" id="fed-idpa"/>
+      <text x="110" y="150" class="node-lbl">IdP-A</text>
+      <text x="110" y="165" class="node-sub">idp.cloud-a.example</text>
+      <text x="110" y="178" class="node-sub" style="fill:var(--blue);font-size:9px">Entity Configuration JWT</text>
+
+      <!-- IdP-B (right) -->
+      <rect x="510" y="130" width="160" height="50" rx="8" class="node-box" id="fed-idpb"/>
+      <text x="590" y="150" class="node-lbl">IdP-B</text>
+      <text x="590" y="165" class="node-sub">idp.cloud-b.example</text>
+      <text x="590" y="178" class="node-sub" style="fill:var(--green);font-size:9px">Entity Configuration JWT</text>
+
+      <!-- Resolver at bottom -->
+      <rect x="240" y="188" width="220" height="38" rx="8" class="node-box" id="fed-resolver"/>
+      <text x="350" y="205" class="node-lbl">Federation Resolver</text>
+      <text x="350" y="220" class="node-sub">verifies trust chains at runtime</text>
+
+      <!-- Lines resolver ↔ IdPs -->
+      <line x1="190" y1="165" x2="240" y2="207" class="wire" style="stroke:var(--border);stroke-dasharray:3,3;stroke-width:1"/>
+      <line x1="510" y1="165" x2="460" y2="207" class="wire" style="stroke:var(--border);stroke-dasharray:3,3;stroke-width:1"/>
+
+      <!-- Animated packet: SS flowing from anchor to IdP-B -->
+      <rect id="pkt-fed-ss" x="310" y="42" width="64" height="18" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <text x="342" y="55" class="pkt-lbl" style="pointer-events:none">SS JWT</text>
+
+      <!-- Animated packet: resolution success -->
+      <rect id="pkt-fed-ok" x="510" y="155" width="70" height="18" rx="4" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+      <text x="545" y="168" class="pkt-lbl" style="pointer-events:none">Key Resolved</text>
+    </svg>
+  </div>
+
+  <!-- Step 1 -->
+  <h3 style="font-size:14px;font-weight:700;margin:0 0 10px">Step 1 — Build the federation chain</h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Generate a Trust Anchor key pair, an IdP-B key pair, build a self-signed Entity Configuration for IdP-B, and have the Trust Anchor sign a Subordinate Statement certifying IdP-B's public key.</p>
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-fed-build" onclick="doFedBuild()">Build Federation Chain (WASM)</button>
+  </div>
+  <div id="fed-build-out" style="display:none">
+    <div class="info-grid c3">
+      <div class="info-box orange">
+        <div class="ibt">Trust Anchor</div>
+        <div class="ibv" id="fed-anchor-id">—</div>
+      </div>
+      <div class="info-box green">
+        <div class="ibt">IdP-B Entity</div>
+        <div class="ibv" id="fed-idpb-id">—</div>
+      </div>
+      <div class="info-box blue">
+        <div class="ibt">Authority Hint (Trust Anchor)</div>
+        <div class="ibv" id="fed-ec-typ">—</div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div class="ibt" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px">Entity Configuration JWT (IdP-B self-signed)</div>
+      <div class="jwt-raw" id="fed-ec-raw" style="font-size:10px"></div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <h3 style="font-size:14px;font-weight:700;margin:0 0 10px">Step 2 — Verify the trust chain</h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px">The Resolver walks the chain: parse the EC to find <code>authority_hints</code>, fetch the Subordinate Statement from the Trust Anchor, verify the SS signature, extract IdP-B's key from the SS, verify the EC was signed by that key.</p>
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-fed-verify" onclick="doFedVerify()" disabled>Verify Trust Chain (WASM)</button>
+  </div>
+  <div id="fed-verify-out" style="display:none">
+    <div class="vsteps" id="fed-vsteps">
+      <div class="vstep" id="fvs0"><div class="vstep-icon">1</div><div>Parse Entity Configuration — extract <code>authority_hints</code></div></div>
+      <div class="vstep" id="fvs1"><div class="vstep-icon">2</div><div>Locate Trust Anchor key for <code>trust-anchor.corp.example</code></div></div>
+      <div class="vstep" id="fvs2"><div class="vstep-icon">3</div><div>Verify Subordinate Statement ES256 signature (anchor key)</div></div>
+      <div class="vstep" id="fvs3"><div class="vstep-icon">4</div><div>Extract IdP-B public key from certified JWKS in SS</div></div>
+      <div class="vstep" id="fvs4"><div class="vstep-icon">5</div><div>Verify EC self-signature with the key extracted from SS</div></div>
+      <div class="vstep" id="fvs5"><div class="vstep-icon">6</div><div>Cache resolved entity — min(EC.exp, SS.exp)</div></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-box green">
+        <div class="ibt">Resolved key (X coord)</div>
+        <div class="ibv" id="fed-key-x">—</div>
+      </div>
+      <div class="info-box blue">
+        <div class="ibt">Certified Entity</div>
+        <div class="ibv" id="fed-key-exp">—</div>
+      </div>
+    </div>
+    <div class="callout ok">
+      <strong>No pre-shared keys needed.</strong> The resolver derived IdP-B's public key entirely from the signed chain — Trust Anchor → Subordinate Statement → Entity Configuration.
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <h3 style="font-size:14px;font-weight:700;margin:0 0 10px">Step 3 — Federated exchange</h3>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:12px">A workload presents a WIT signed by IdP-B. The relying party has no static entry for IdP-B — it resolves the key dynamically via the federation resolver, then validates the WIT normally.</p>
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-fed-exchange" onclick="doFedExchange()" disabled>Federated Validation (WASM)</button>
+  </div>
+  <div id="fed-exchange-out" style="display:none">
+    <div style="margin-bottom:14px">
+      <div class="ibt" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px">WIT issued by IdP-B (dynamically trusted)</div>
+      <div class="jwt-raw" id="fed-wit-raw" style="font-size:10px"></div>
+    </div>
+    <div id="fed-exchange-result"></div>
+    <div class="callout">
+      <strong>Dynamic trust in action:</strong> The validator held zero static knowledge of IdP-B before this request. Trust was established entirely through the OID-FED chain anchored at <code>trust-anchor.corp.example</code>.
+    </div>
+  </div>
+
+  <div class="callout ok" style="margin-top:20px">
+    <strong>Story complete.</strong> From raw TCP with no identity — to cryptographically verifiable, short-lived, replay-protected, fine-grained, <em>federated</em> workload identity across independent trust domains. All cryptographic operations ran in real Go code compiled to WebAssembly in your browser.
+  </div>
+
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(9)">&larr; Back</button>
     <button class="btn btn-green" onclick="goChapter(1)">Start Over</button>
   </div>
 </section>
@@ -812,7 +955,7 @@ WebAssembly.instantiateStreaming(fetch('wimse.wasm'), go.importObject).then(r =>
 const CH_TITLES = [
   'The Problem', 'WIT: Identity Card', 'mTLS: Lock the Channel',
   'WPT: Prove Each Request', 'The Validation Dance', 'Fine-Grained Authorization',
-  'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses'
+  'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses', 'OpenID Federation'
 ];
 let cur = 1;
 const done = new Set();
@@ -836,7 +979,7 @@ function buildNav() {
 }
 
 function goChapter(n) {
-  if (n < 1 || n > 9) return;
+  if (n < 1 || n > 10) return;
   done.add(cur);
   document.getElementById('ch' + cur).classList.remove('active');
   cur = n;
@@ -1284,6 +1427,120 @@ async function doReplay() {
   }
   nodeClass('ch9-b1', 'ok');
   nodeClass('ch9-b2', 'bad');
+}
+
+// ═══════════════════════════════════════════
+// Ch 10 — OpenID Federation
+// ═══════════════════════════════════════════
+let fedBuilt = false;
+let fedVerified = false;
+
+async function doFedBuild() {
+  const btn = document.getElementById('btn-fed-build');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Building&hellip;';
+  await sleep(50);
+
+  const r = wcall('buildFederationChain');
+  btn.textContent = '✓ Chain built';
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+  const d = r.data;
+  fedBuilt = true;
+
+  document.getElementById('fed-build-out').style.display = 'block';
+  document.getElementById('fed-anchor-id').textContent = d.trustAnchorID || '—';
+  document.getElementById('fed-idpb-id').textContent = d.idpBID || '—';
+  const hints = (d.entityConfig && d.entityConfig.authorityHints) || [];
+  document.getElementById('fed-ec-typ').textContent = hints[0] || 'entity-statement+jwt';
+  renderJWT((d.entityConfig && d.entityConfig.jwt) || '', 'fed-ec-raw');
+
+  // Animate SS packet from anchor to IdP-B area
+  const pkt = document.getElementById('pkt-fed-ss');
+  pkt.style.visibility = 'visible';
+  await pkt.animate([
+    { transform: 'translate(0,0)', opacity: 0 },
+    { transform: 'translate(0,0)', opacity: 0.9, offset: 0.08 },
+    { transform: 'translate(270px,88px)', opacity: 0.9, offset: 0.92 },
+    { transform: 'translate(270px,88px)', opacity: 0 },
+  ], { duration: 1400, easing: 'ease-in-out', fill: 'forwards' }).finished;
+  pkt.style.visibility = 'hidden';
+  pkt.getAnimations().forEach(a => a.cancel());
+
+  nodeClass('fed-idpb', 'ok');
+  document.getElementById('btn-fed-verify').disabled = false;
+}
+
+async function doFedVerify() {
+  if (!fedBuilt) { alert('Complete Step 1 first'); return; }
+  const btn = document.getElementById('btn-fed-verify');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Verifying&hellip;';
+  await sleep(50);
+
+  const r = wcall('verifyTrustChain');
+  btn.textContent = '✓ Chain verified';
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+  const d = r.data;
+  fedVerified = true;
+
+  document.getElementById('fed-verify-out').style.display = 'block';
+
+  // Animate each validation step
+  const steps = ['fvs0','fvs1','fvs2','fvs3','fvs4','fvs5'];
+  for (const id of steps) {
+    await sleep(220);
+    const s = document.getElementById(id);
+    s.classList.add('pass');
+    s.querySelector('.vstep-icon').innerHTML = '&#x2713;';
+  }
+
+  // Animate key-resolved packet
+  const pkt = document.getElementById('pkt-fed-ok');
+  pkt.style.visibility = 'visible';
+  await pkt.animate([
+    { transform: 'translate(0,0)', opacity: 0 },
+    { transform: 'translate(0,0)', opacity: 0.9, offset: 0.08 },
+    { transform: 'translate(-270px,50px)', opacity: 0.9, offset: 0.92 },
+    { transform: 'translate(-270px,50px)', opacity: 0 },
+  ], { duration: 1100, easing: 'ease-in-out', fill: 'forwards' }).finished;
+  pkt.style.visibility = 'hidden';
+  pkt.getAnimations().forEach(a => a.cancel());
+
+  nodeClass('fed-resolver', 'ok');
+  const jwksKeys = (d.resolvedJWKS && d.resolvedJWKS.keys) || [];
+  const keyX = (jwksKeys[0] && jwksKeys[0].x) || '';
+  document.getElementById('fed-key-x').textContent = keyX.slice(0, 22) + (keyX.length > 22 ? '…' : '');
+  document.getElementById('fed-key-exp').textContent = d.certifiedEntity || d.certifiedByAnchor || '—';
+  document.getElementById('btn-fed-exchange').disabled = false;
+}
+
+async function doFedExchange() {
+  if (!fedVerified) { alert('Complete Step 2 first'); return; }
+  const btn = document.getElementById('btn-fed-exchange');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Validating&hellip;';
+  await sleep(50);
+
+  const r = wcall('federatedExchange');
+  btn.textContent = '✓ Validated';
+  btn.disabled = false;
+
+  document.getElementById('fed-exchange-out').style.display = 'block';
+  if (!r.ok) {
+    document.getElementById('fed-exchange-result').innerHTML =
+      `<div class="callout danger"><strong>Failed:</strong> ${r.error}</div>`;
+    return;
+  }
+  const d = r.data;
+  renderJWT(d.exchangedWIT || '', 'fed-wit-raw');
+  document.getElementById('fed-exchange-result').innerHTML = `<div class="verdict allow">
+    <div class="verdict-icon">&#x2713;</div>
+    <div><strong>WIT validated via federation chain</strong><br>
+    <span style="font-size:12px;font-weight:400">
+      sub: <code>${d.targetSubject || '—'}</code> &nbsp;
+      iss: <code>${d.targetIssuer || '—'}</code>
+    </span></div>
+  </div>`;
 }
 
 // ═══════════════════════════════════════════

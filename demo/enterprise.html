@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIMSE Enterprise — Identity Fabric for Multi-Cloud Enterprises</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --blue: #58a6ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --orange: #ffa657;
+  --purple: #bc8cff;
+  --yellow: #d29922;
+  --teal: #39d353;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+
+/* ── Header ── */
+.site-header{border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;background:var(--bg);z-index:100}
+.site-logo{font-size:17px;font-weight:700;color:var(--orange)}
+.site-subtitle{color:var(--muted);font-size:12px}
+.poc-link{margin-left:auto;font-size:12px;padding:5px 14px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--blue);text-decoration:none;transition:border-color 0.15s}
+.poc-link:hover{border-color:var(--blue)}
+
+/* ── Scenario nav (tabs) ── */
+.scenario-nav{background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:0}
+.snav-item{padding:13px 20px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;color:var(--muted);transition:all 0.15s}
+.snav-item:hover{color:var(--text)}
+.snav-item.active{color:var(--orange);border-bottom-color:var(--orange)}
+
+/* ── Scene layout ── */
+.scene{display:none;max-width:960px;margin:0 auto;padding:24px 24px 80px}
+.scene.active{display:block}
+
+/* ── Typography ── */
+.scene-num{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+.scene-title{font-size:26px;font-weight:700;margin-bottom:10px}
+.scene-lead{font-size:15px;color:var(--muted);max-width:720px;margin-bottom:24px}
+
+/* ── Card ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:18px}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px}
+.card h3{font-size:14px;font-weight:700;margin-bottom:8px}
+
+/* ── Problem diagram ── */
+.cloud-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+@media(max-width:680px){.cloud-grid{grid-template-columns:1fr}}
+.cloud-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.cloud-card h4{font-size:12px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.cloud-tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+.aws-tag{background:rgba(255,166,87,0.2);color:var(--orange)}
+.azure-tag{background:rgba(88,166,255,0.2);color:var(--blue)}
+.gcp-tag{background:rgba(63,185,80,0.2);color:var(--green)}
+.identity-pill{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;font-family:monospace;margin-bottom:6px}
+.identity-pill.duplicate{border-color:var(--red);color:var(--red)}
+.identity-pill.ok{border-color:var(--green);color:var(--green)}
+.sprawl-arrow{text-align:center;font-size:22px;margin:8px 0;color:var(--red)}
+
+/* ── Comparison table ── */
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px}
+.compare-table th{background:var(--surface2);padding:9px 13px;text-align:left;border:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted)}
+.compare-table td{padding:9px 13px;border:1px solid var(--border)}
+.compare-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
+.check{color:var(--green);font-weight:700}
+.cross{color:var(--red);font-weight:700}
+.partial{color:var(--orange);font-weight:700}
+
+/* ── IdP card ── */
+.idp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:600px){.idp-grid{grid-template-columns:1fr}}
+.idp-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.idp-card h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.idp-card .idp-type{font-size:11px;color:var(--muted);margin-bottom:12px}
+.idp-card ul{padding-left:16px;font-size:13px;color:var(--muted);line-height:1.8}
+.idp-card ul li strong{color:var(--text)}
+.idp-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:8px}
+.saas-badge{background:rgba(88,166,255,0.15);color:var(--blue)}
+.oss-badge{background:rgba(63,185,80,0.15);color:var(--green)}
+.cloud-badge{background:rgba(255,166,87,0.15);color:var(--orange)}
+.vault-badge{background:rgba(188,140,255,0.15);color:var(--purple)}
+
+/* ── Architecture flow ── */
+.arch-flow{display:flex;flex-direction:column;gap:0;margin-bottom:18px}
+.flow-row{display:flex;align-items:stretch;gap:0}
+.flow-node{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:13px;flex:1}
+.flow-node strong{display:block;font-size:12px;margin-bottom:2px}
+.flow-node span{font-size:11px;color:var(--muted)}
+.flow-connector{display:flex;align-items:center;justify-content:center;width:40px;flex-shrink:0;color:var(--muted);font-size:18px}
+.flow-connector.down{flex-direction:column;height:28px;width:100%;text-align:center}
+
+/* ── Pros/cons ── */
+.pro-con-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:600px){.pro-con-grid{grid-template-columns:1fr}}
+.pros{background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:8px;padding:14px}
+.cons{background:rgba(248,81,73,0.05);border:1px solid rgba(248,81,73,0.3);border-radius:8px;padding:14px}
+.pros h4{color:var(--green);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.cons h4{color:var(--red);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.pros li,.cons li{font-size:13px;color:var(--muted);margin-bottom:5px;padding-left:4px}
+.pros li::before{content:'+ ';color:var(--green);font-weight:700}
+.cons li::before{content:'− ';color:var(--red);font-weight:700}
+
+/* ── Callout ── */
+.callout{border-left:4px solid var(--blue);padding:11px 15px;background:rgba(88,166,255,0.05);border-radius:0 6px 6px 0;margin-bottom:16px;font-size:13px;color:var(--muted)}
+.callout.warn{border-color:var(--orange);background:rgba(255,166,87,0.05)}
+.callout.ok{border-color:var(--green);background:rgba(63,185,80,0.05)}
+.callout.danger{border-color:var(--red);background:rgba(248,81,73,0.05)}
+.callout strong{color:var(--text)}
+
+/* ── Decision matrix ── */
+.matrix{display:grid;grid-template-columns:1fr auto auto;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:18px;font-size:13px}
+.matrix-head{background:var(--surface2);padding:9px 13px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);font-weight:700}
+.matrix-cell{background:var(--surface);padding:9px 13px}
+.matrix-cell.center{text-align:center}
+.rec-badge{font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px}
+.rec-central{background:rgba(88,166,255,0.15);color:var(--blue)}
+.rec-dist{background:rgba(63,185,80,0.15);color:var(--green)}
+.rec-hybrid{background:rgba(255,166,87,0.15);color:var(--orange)}
+
+/* ── Vault diagram ── */
+.vault-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.vault-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;font-size:12px}
+.vault-icon{font-size:24px;margin-bottom:6px}
+
+/* ── Animated sprawl diagram ── */
+.sprawl-diag{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;overflow:hidden}
+.sprawl-diag svg{width:100%;height:auto;display:block}
+
+/* ── Step list ── */
+.step-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.step-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--orange);color:#0d1117;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-item p{color:var(--muted);font-size:12px;margin-top:2px}
+
+/* ── Product table ── */
+.product-section{margin-bottom:28px}
+.product-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.product-name{font-size:16px;font-weight:700}
+.integration-steps{counter-reset:istep;display:flex;flex-direction:column;gap:8px}
+.int-step{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px}
+.int-step::before{counter-increment:istep;content:counter(istep);width:22px;height:22px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted)}
+code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px;color:var(--blue)}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div>
+    <div class="site-logo">WIMSE Enterprise Identity Fabric</div>
+    <div class="site-subtitle">Multi-cloud identity sprawl — patterns, products, and the WIMSE solution</div>
+  </div>
+  <a class="poc-link" href="index.html">&#x2190; Standard PoC</a>
+</header>
+
+<nav class="scenario-nav">
+  <div class="snav-item active" onclick="showScene('sprawl')">1 · Identity Sprawl</div>
+  <div class="snav-item" onclick="showScene('solution')">2 · WIMSE Solution</div>
+  <div class="snav-item" onclick="showScene('products')">3 · IdP Integrations</div>
+  <div class="snav-item" onclick="showScene('federation')">4 · Trust Governance</div>
+  <div class="snav-item" onclick="showScene('central-vs-dist')">5 · Centralised vs Distributed</div>
+  <div class="snav-item" onclick="showScene('secrets')">6 · Secrets Management</div>
+  <div class="snav-item" onclick="showScene('roadmap')">7 · Adoption Roadmap</div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     Scene 1 — Identity Sprawl
+═══════════════════════════════════════════ -->
+<div class="scene active" id="scene-sprawl">
+  <div class="scene-num">Scenario 1</div>
+  <h1 class="scene-title">The Identity Sprawl Problem</h1>
+  <p class="scene-lead">Large enterprises running workloads across AWS, Azure, and GCP accumulate siloed, duplicate identities — one per cloud, per service, per team. The result: unauditable access, orphaned credentials, and a constant risk of lateral movement.</p>
+
+  <div class="sprawl-diag">
+    <svg viewBox="0 0 860 280" xmlns="http://www.w3.org/2000/svg">
+      <!-- Title -->
+      <text x="430" y="22" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="12" font-weight="700" letter-spacing="1">SAME BILLING SERVICE — THREE SEPARATE IDENTITIES</text>
+
+      <!-- AWS box -->
+      <rect x="20" y="38" width="240" height="220" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+      <text x="30" y="60" fill="#ffa657" font-family="sans-serif" font-size="12" font-weight="700">AWS (us-east-1)</text>
+      <rect x="34" y="72" width="212" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="140" y="91" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">billing-svc</text>
+      <text x="140" y="108" text-anchor="middle" fill="#f85149" font-family="monospace" font-size="9">arn:aws:iam::9876:role/billing</text>
+      <rect x="34" y="130" width="212" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="140" y="149" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">payment-svc</text>
+      <text x="140" y="166" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">arn:aws:iam::9876:role/payment</text>
+      <rect x="34" y="188" width="212" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="140" y="207" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">audit-svc</text>
+      <text x="140" y="224" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">arn:aws:iam::9876:role/audit</text>
+
+      <!-- Azure box -->
+      <rect x="310" y="38" width="240" height="220" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+      <text x="320" y="60" fill="#58a6ff" font-family="sans-serif" font-size="12" font-weight="700">Azure (westus2)</text>
+      <rect x="324" y="72" width="212" height="50" rx="6" fill="#21262d" stroke="#f85149" stroke-width="1.5"/>
+      <text x="430" y="91" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">billing-svc</text>
+      <text x="430" y="108" text-anchor="middle" fill="#f85149" font-family="monospace" font-size="9">app:billing-svc@tenant-abc</text>
+      <rect x="324" y="130" width="212" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="430" y="149" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">payment-svc</text>
+      <text x="430" y="166" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">app:payment-svc@tenant-abc</text>
+      <rect x="324" y="188" width="212" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="430" y="207" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">audit-svc</text>
+      <text x="430" y="224" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">app:audit-svc@tenant-abc</text>
+
+      <!-- GCP box -->
+      <rect x="600" y="38" width="240" height="220" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+      <text x="610" y="60" fill="#3fb950" font-family="sans-serif" font-size="12" font-weight="700">GCP (us-central1)</text>
+      <rect x="614" y="72" width="212" height="50" rx="6" fill="#21262d" stroke="#f85149" stroke-width="1.5"/>
+      <text x="720" y="91" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">billing-svc</text>
+      <text x="720" y="108" text-anchor="middle" fill="#f85149" font-family="monospace" font-size="9">billing@proj.iam.gserviceaccount</text>
+      <rect x="614" y="130" width="212" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="720" y="149" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">payment-svc</text>
+      <text x="720" y="166" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">payment@proj.iam.gserviceaccount</text>
+      <rect x="614" y="188" width="212" height="50" rx="6" fill="#21262d" stroke="#30363d"/>
+      <text x="720" y="207" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="600">audit-svc</text>
+      <text x="720" y="224" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">audit@proj.iam.gserviceaccount</text>
+
+      <!-- Red warning arrows between billing-svcs -->
+      <line x1="246" y1="97" x2="324" y2="97" stroke="#f85149" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <line x1="536" y1="97" x2="614" y2="97" stroke="#f85149" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="285" y="90" text-anchor="middle" fill="#f85149" font-family="sans-serif" font-size="9">≠</text>
+      <text x="575" y="90" text-anchor="middle" fill="#f85149" font-family="sans-serif" font-size="9">≠</text>
+    </svg>
+  </div>
+
+  <div class="callout danger">
+    <strong>The billing service is the same logical workload</strong> but it has three different identities, three different access policies, three different audit trails — and no way to answer "which cloud instances of billing-svc called payment-svc last week?" across all three.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Symptoms of identity sprawl</div>
+    <table class="compare-table">
+      <tr><th>Problem</th><th>How it manifests</th><th>Business risk</th></tr>
+      <tr><td><strong>Duplicate credentials</strong></td><td>billing-svc has 3 IAM roles / service principals / SAs</td><td>3× rotation surface, 3× audit burden</td></tr>
+      <tr><td><strong>Orphaned identities</strong></td><td>Decommissioned services leave IAM roles that are never cleaned up</td><td>Lateral movement vector; compliance failure</td></tr>
+      <tr><td><strong>Policy drift</strong></td><td>AWS policy updated; Azure policy forgotten; GCP policy conflicts</td><td>Unintended access granted or blocked</td></tr>
+      <tr><td><strong>Cross-cloud access</strong></td><td>billing-svc (AWS) calls payment-svc (GCP) via long-lived secrets</td><td>Secret leakage = full compromise</td></tr>
+      <tr><td><strong>Audit gaps</strong></td><td>No unified identity → no unified access log across clouds</td><td>SOC 2 / ISO 27001 non-compliance</td></tr>
+    </table>
+  </div>
+
+  <div class="callout">
+    <strong>Root cause:</strong> Every cloud hyperscaler provides its own identity primitive (IAM role, service principal, service account). None of them speak to each other. The workload has no portable, verifiable identity that works outside its originating cloud.
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:32px">
+    <button style="padding:9px 20px;border-radius:6px;background:var(--orange);color:#0d1117;font-weight:700;border:none;cursor:pointer;font-size:13px" onclick="showScene('solution')">See the WIMSE Solution &rarr;</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Scene 2 — WIMSE Solution
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-solution">
+  <div class="scene-num">Scenario 2</div>
+  <h1 class="scene-title">WIMSE + SPIFFE as a Universal Identity Overlay</h1>
+  <p class="scene-lead">WIMSE (Workload Identity in Multi-System Environments) + SPIFFE (Secure Production Identity Framework for Everyone) provides a portable, cryptographic identity layer that sits <em>above</em> cloud-native identity — giving every workload a single canonical identity that works everywhere.</p>
+
+  <div class="card">
+    <div class="card-title">The three-layer identity stack</div>
+    <div class="arch-flow">
+      <div class="flow-row">
+        <div class="flow-node" style="border-color:rgba(255,166,87,0.5)">
+          <strong style="color:var(--orange)">Application Layer — WIMSE + SPIFFE</strong>
+          <span><code>spiffe://corp.example/svc/billing</code> — portable across ALL clouds. WIT + WPT prove identity per request. OID-FED federates trust domains.</span>
+        </div>
+      </div>
+      <div style="text-align:center;padding:4px 0;color:var(--muted);font-size:12px">&#x2193; maps to</div>
+      <div class="flow-row">
+        <div class="flow-node" style="margin-right:8px;border-color:rgba(88,166,255,0.3)">
+          <strong style="color:var(--blue)">Cloud Identity — AWS IAM</strong>
+          <span>arn:aws:iam::9876:role/billing — bootstraps the workload key only</span>
+        </div>
+        <div class="flow-node" style="margin-right:8px;border-color:rgba(88,166,255,0.3)">
+          <strong style="color:var(--blue)">Cloud Identity — Entra ID</strong>
+          <span>billing@tenant-abc — federated to WIMSE IdP via WIF</span>
+        </div>
+        <div class="flow-node" style="border-color:rgba(88,166,255,0.3)">
+          <strong style="color:var(--blue)">Cloud Identity — GCP SA</strong>
+          <span>billing@proj.iam.gserviceaccount.com — workload identity pool bridge</span>
+        </div>
+      </div>
+      <div style="text-align:center;padding:4px 0;color:var(--muted);font-size:12px">&#x2193; runs on</div>
+      <div class="flow-row">
+        <div class="flow-node" style="border-color:rgba(63,185,80,0.3)">
+          <strong style="color:var(--green)">Infrastructure — EC2 / AKS / GKE / On-Prem / Edge</strong>
+          <span>Physical or virtual compute. WIMSE is infrastructure-agnostic — it only requires a key store and an HTTPS endpoint.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="idp-grid">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">What WIMSE provides</div>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div><strong>Portable SPIFFE URIs</strong><p><code>spiffe://corp.example/svc/billing</code> — the same identity string in AWS, Azure, GCP, on-prem, and edge.</p></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div><strong>Short-lived, cryptographic tokens</strong><p>WITs expire in minutes/hours. No long-lived secrets to rotate or leak.</p></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div><strong>Per-request proof</strong><p>WPTs bind each API call to a specific target URI and the caller's private key — replay and forgery are cryptographically impossible.</p></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div><strong>Federated trust</strong><p>OID-FED lets independently-operated IdPs (Okta, Keycloak, Vault, Entra ID) join a common trust fabric without sharing keys.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-title">What stays cloud-native</div>
+      <div class="callout" style="margin-bottom:12px">
+        <strong>WIMSE doesn't replace cloud IAM</strong> — it builds on top of it. Cloud-native identity is used for bootstrapping the workload's EC P-256 key pair. All application-layer calls use WIMSE after that.
+      </div>
+      <table class="compare-table">
+        <tr><th>Layer</th><th>Who owns it</th></tr>
+        <tr><td>Compute (EC2/Pod/VM)</td><td class="check">Cloud provider</td></tr>
+        <tr><td>Bootstrap identity (IRSA/WIF/WIP)</td><td class="check">Cloud provider</td></tr>
+        <tr><td>Workload key generation</td><td class="check">SPIFFE/SPIRE or Vault</td></tr>
+        <tr><td>WIT issuance</td><td style="color:var(--orange);font-weight:700">WIMSE IdP (Okta/Keycloak/Vault)</td></tr>
+        <tr><td>API-level auth (WIT+WPT)</td><td style="color:var(--orange);font-weight:700">WIMSE protocol</td></tr>
+        <tr><td>Cross-cloud trust</td><td style="color:var(--orange);font-weight:700">OID-FED trust anchor</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Scene 3 — IdP Integrations
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-products">
+  <div class="scene-num">Scenario 3</div>
+  <h1 class="scene-title">Integrating Existing IdP Platforms</h1>
+  <p class="scene-lead">Most enterprises already have one (or more) of these identity platforms running. WIMSE can be layered on top of each — you keep your existing investment and add portable workload identity on top.</p>
+
+  <!-- Okta / Auth0 -->
+  <div class="product-section">
+    <div class="product-header">
+      <div class="idp-badge saas-badge">SaaS · Cloud</div>
+      <div class="product-name">Okta Workforce Identity / Auth0</div>
+    </div>
+    <div class="idp-grid">
+      <div class="idp-card">
+        <h4>Integration Pattern</h4>
+        <div class="idp-type">OAuth 2.0 token exchange + custom claims</div>
+        <div class="integration-steps">
+          <div class="int-step">Workload authenticates to Okta using its cloud-native credential (IRSA/WIF/Workload Identity Pool).</div>
+          <div class="int-step">Okta validates the cloud credential and issues an OAuth access token with custom <code>spiffe_uri</code> and <code>workload_key</code> claims.</div>
+          <div class="int-step">A lightweight WIMSE IdP sidecar exchanges the Okta token for a proper WIT (<code>typ: wit+jwt</code>) with correct <code>cnf.jwk</code>.</div>
+          <div class="int-step">The workload uses the WIT + per-request WPT for all subsequent service-to-service calls.</div>
+        </div>
+      </div>
+      <div class="idp-card">
+        <h4>Pros &amp; Cons</h4>
+        <div class="pros" style="margin-bottom:10px">
+          <h4>Pros</h4>
+          <ul>
+            <li>Existing Okta contract; no new vendor</li>
+            <li>Centralised policy (Okta PAM / OIG)</li>
+            <li>Audit log in one place</li>
+            <li>Auth0 great for multi-tenant SaaS workloads</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>SaaS dependency — offline = no tokens</li>
+            <li>Custom claims require Okta hooks (paid tier)</li>
+            <li>Latency overhead on token exchange path</li>
+            <li>Rate limits affect high-throughput workloads</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entra ID -->
+  <div class="product-section">
+    <div class="product-header">
+      <div class="idp-badge cloud-badge">Cloud · Microsoft</div>
+      <div class="product-name">Azure Entra ID (formerly Azure AD)</div>
+    </div>
+    <div class="idp-grid">
+      <div class="idp-card">
+        <h4>Integration Pattern</h4>
+        <div class="idp-type">Workload Identity Federation (WIF) + Managed Identity bridge</div>
+        <div class="integration-steps">
+          <div class="int-step">Configure Entra ID Workload Identity Federation to trust SPIFFE SVIDs from your SPIRE deployment. Entra ID becomes an OID-FED participant.</div>
+          <div class="int-step">Azure Managed Identity or federated identity credential provides the initial bootstrap token for on-prem or multi-cloud workloads.</div>
+          <div class="int-step">WIMSE IdP (Keycloak or Vault) validates the Entra ID token via OIDC and issues a WIT with <code>sub=spiffe://corp.example/...</code>.</div>
+          <div class="int-step">Entra ID's Conditional Access policies govern which workloads may exchange tokens — centralised access control for cross-cloud calls.</div>
+        </div>
+      </div>
+      <div class="idp-card">
+        <h4>Pros &amp; Cons</h4>
+        <div class="pros" style="margin-bottom:10px">
+          <h4>Pros</h4>
+          <ul>
+            <li>Native to Azure workloads (AKS, App Service)</li>
+            <li>WIF eliminates secrets for Azure → AWS/GCP flows</li>
+            <li>Conditional Access = zero-trust policy engine</li>
+            <li>Microsoft 365 compliance logs included</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Strong Azure lock-in outside Azure boundary</li>
+            <li>WIF setup is complex for multi-hop scenarios</li>
+            <li>Requires Azure subscription even for non-Azure workloads</li>
+            <li>Microsoft Graph API dependency for automation</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keycloak -->
+  <div class="product-section">
+    <div class="product-header">
+      <div class="idp-badge oss-badge">Open Source · Self-hosted</div>
+      <div class="product-name">Keycloak</div>
+    </div>
+    <div class="idp-grid">
+      <div class="idp-card">
+        <h4>Integration Pattern</h4>
+        <div class="idp-type">Custom token mapper + OIDC WIT issuance</div>
+        <div class="integration-steps">
+          <div class="int-step">Deploy Keycloak as the central WIMSE IdP. Create a realm per trust domain (<code>cloud-a.example</code>, <code>cloud-b.example</code>).</div>
+          <div class="int-step">Write a Keycloak custom protocol mapper that adds <code>cnf.jwk</code> (workload public key) to the token. This transforms a standard Keycloak JWT into a valid WIT.</div>
+          <div class="int-step">Workloads authenticate via the machine-to-machine client credentials flow, presenting their EC P-256 public key in the token request.</div>
+          <div class="int-step">Keycloak's realm configuration is shared as an OID-FED Entity Configuration, making it a first-class OID-FED participant under the corporate trust anchor.</div>
+        </div>
+      </div>
+      <div class="idp-card">
+        <h4>Pros &amp; Cons</h4>
+        <div class="pros" style="margin-bottom:10px">
+          <h4>Pros</h4>
+          <ul>
+            <li>Fully open source — no vendor lock-in</li>
+            <li>Complete control over token format and claims</li>
+            <li>On-premises deployment for air-gapped environments</li>
+            <li>Rich admin UI; Terraform/Ansible manageable</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Self-managed HA cluster — operational burden</li>
+            <li>Custom mapper requires Java development skills</li>
+            <li>No native SLA; support via Red Hat SSO subscription</li>
+            <li>Scaling to thousands of workloads requires tuning</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HashiCorp Vault -->
+  <div class="product-section">
+    <div class="product-header">
+      <div class="idp-badge vault-badge">OSS + Enterprise · HashiCorp</div>
+      <div class="product-name">HashiCorp Vault</div>
+    </div>
+    <div class="idp-grid">
+      <div class="idp-card">
+        <h4>Integration Pattern</h4>
+        <div class="idp-type">Vault as IdP + PKI secrets engine for mTLS + WIMSE sidecar</div>
+        <div class="integration-steps">
+          <div class="int-step">Use Vault's <strong>PKI secrets engine</strong> to issue mTLS certificates with SPIFFE URI SANs. Each workload pod/container gets a short-lived cert.</div>
+          <div class="int-step">Use Vault's <strong>JWT/OIDC auth method</strong> to accept the mTLS cert identity and issue a Vault token scoped to the workload's policies.</div>
+          <div class="int-step">A WIMSE sidecar (or Vault Agent plugin) exchanges the Vault token for a WIT via the WIMSE IdP endpoint, embedding the workload's public key in <code>cnf.jwk</code>.</div>
+          <div class="int-step">Vault's <strong>audit log</strong> captures every secret access and token exchange — providing the unified identity audit trail that cloud IAM alone cannot.</div>
+        </div>
+      </div>
+      <div class="idp-card">
+        <h4>Pros &amp; Cons</h4>
+        <div class="pros" style="margin-bottom:10px">
+          <h4>Pros</h4>
+          <ul>
+            <li>Unified secrets + identity in one platform</li>
+            <li>Rich audit log across all secret accesses</li>
+            <li>Dynamic secrets eliminate static credentials</li>
+            <li>HCP Vault available as managed service</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Vault Enterprise needed for DR, replication, FIPS</li>
+            <li>Complex HA setup (Raft/Consul); unsealing operational burden</li>
+            <li>WIMSE WIT issuance requires custom plugin or sidecar</li>
+            <li>Per-secret pricing can surprise at scale</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>Recommendation:</strong> Most enterprises use a combination. Vault for secrets + PKI; Keycloak or Okta as the WIMSE IdP; Entra ID for Azure-native workloads. WIMSE's OID-FED layer lets all three coexist under a single corporate trust anchor.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Scene 4 — Trust Governance
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-federation">
+  <div class="scene-num">Scenario 4</div>
+  <h1 class="scene-title">Trust Governance with OpenID Federation</h1>
+  <p class="scene-lead">OID-FED 1.0 is the trust governance layer that links independently-operated IdPs into a coherent enterprise trust fabric — without requiring point-to-point key exchange between every pair of IdPs.</p>
+
+  <div class="card">
+    <div class="card-title">Corporate OID-FED trust hierarchy</div>
+    <div class="sprawl-diag">
+      <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg">
+        <!-- Trust Anchor -->
+        <rect x="310" y="10" width="240" height="50" rx="8" fill="#161b22" stroke="#ffa657" stroke-width="2"/>
+        <text x="430" y="30" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="12" font-weight="700">Corporate Trust Anchor</text>
+        <text x="430" y="48" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="10">trust-anchor.corp.example</text>
+
+        <!-- Subordinate Statement arrows -->
+        <line x1="380" y1="60" x2="160" y2="130" stroke="#ffa657" stroke-dasharray="5,3" stroke-width="1.5"/>
+        <line x1="410" y1="60" x2="350" y2="130" stroke="#ffa657" stroke-dasharray="5,3" stroke-width="1.5"/>
+        <line x1="450" y1="60" x2="510" y2="130" stroke="#ffa657" stroke-dasharray="5,3" stroke-width="1.5"/>
+        <line x1="480" y1="60" x2="700" y2="130" stroke="#ffa657" stroke-dasharray="5,3" stroke-width="1.5"/>
+
+        <!-- SS labels -->
+        <text x="250" y="100" fill="#ffa657" font-family="sans-serif" font-size="9" text-anchor="middle">SS</text>
+        <text x="374" y="100" fill="#ffa657" font-family="sans-serif" font-size="9" text-anchor="middle">SS</text>
+        <text x="486" y="100" fill="#ffa657" font-family="sans-serif" font-size="9" text-anchor="middle">SS</text>
+        <text x="606" y="100" fill="#ffa657" font-family="sans-serif" font-size="9" text-anchor="middle">SS</text>
+
+        <!-- IdP nodes -->
+        <rect x="60" y="130" width="200" height="48" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="160" y="150" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="600">Okta (AWS workloads)</text>
+        <text x="160" y="168" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">idp.aws.corp.example</text>
+
+        <rect x="270" y="130" width="200" height="48" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="370" y="150" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="600">Entra ID (Azure)</text>
+        <text x="370" y="168" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">idp.azure.corp.example</text>
+
+        <rect x="480" y="130" width="200" height="48" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="580" y="150" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="600">Keycloak (GCP / On-Prem)</text>
+        <text x="580" y="168" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">idp.onprem.corp.example</text>
+
+        <rect x="690" y="130" width="150" height="48" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="765" y="150" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="600">Vault (Secrets)</text>
+        <text x="765" y="168" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">idp.vault.corp.example</text>
+
+        <!-- Workload nodes -->
+        <line x1="160" y1="178" x2="160" y2="210" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <rect x="80" y="210" width="160" height="38" rx="6" fill="#21262d" stroke="#30363d"/>
+        <text x="160" y="228" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="10">billing-svc</text>
+        <text x="160" y="242" text-anchor="middle" fill="#3fb950" font-family="monospace" font-size="9">spiffe://corp.example/svc/billing</text>
+
+        <line x1="370" y1="178" x2="370" y2="210" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <rect x="290" y="210" width="160" height="38" rx="6" fill="#21262d" stroke="#30363d"/>
+        <text x="370" y="228" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="10">payment-svc</text>
+        <text x="370" y="242" text-anchor="middle" fill="#3fb950" font-family="monospace" font-size="9">spiffe://corp.example/svc/payment</text>
+
+        <line x1="580" y1="178" x2="580" y2="210" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <rect x="500" y="210" width="160" height="38" rx="6" fill="#21262d" stroke="#30363d"/>
+        <text x="580" y="228" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="10">audit-svc</text>
+        <text x="580" y="242" text-anchor="middle" fill="#3fb950" font-family="monospace" font-size="9">spiffe://corp.example/svc/audit</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>Key insight:</strong> Every workload still has <em>one</em> canonical identity (<code>spiffe://corp.example/svc/billing</code>) regardless of which cloud it runs on or which IdP issued its token. The Trust Anchor is the single source of truth — not any individual IdP.
+  </div>
+
+  <div class="card">
+    <div class="card-title">How trust resolution works at runtime</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div><strong>Token arrives at the gateway</strong><p>The gateway peeks at the <code>iss</code> claim (e.g., <code>idp.azure.corp.example</code>) without verifying the signature yet.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div><strong>Federation resolver kicks in</strong><p>No static key for this issuer? The resolver fetches the Entity Configuration from <code>https://idp.azure.corp.example/.well-known/openid-federation</code>.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div><strong>Walk the trust chain</strong><p>EC's <code>authority_hints</code> points to the corporate Trust Anchor. The resolver fetches the Subordinate Statement and verifies it with the pre-configured anchor key.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div><strong>Validate the token normally</strong><p>The issuer's public key (certified by the SS) is used to verify the WIT signature. If valid, the workload is authenticated.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div><strong>Result is cached</strong><p>Resolved keys are cached until <code>min(EC.exp, SS.exp)</code>. Subsequent requests use the cache; no network round trip needed.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Zero-config expansion:</strong> When a new IdP (e.g., a new GCP project) joins, it only needs to register with the Trust Anchor. Every gateway in the estate automatically trusts tokens from the new IdP — without any reconfiguration.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Scene 5 — Centralised vs Distributed
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-central-vs-dist">
+  <div class="scene-num">Scenario 5</div>
+  <h1 class="scene-title">Centralised vs Distributed Management</h1>
+  <p class="scene-lead">There is no universally correct answer. The right model depends on your organisation's size, regulatory requirements, operational maturity, and tolerance for single points of failure.</p>
+
+  <div class="card">
+    <div class="card-title">Identity management models</div>
+    <div class="pro-con-grid">
+      <div>
+        <h3 style="margin-bottom:12px;color:var(--blue)">Centralised IdP</h3>
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Single audit log for all workload tokens</li>
+            <li>Consistent policy enforcement — one place to update</li>
+            <li>Easier SOC 2 / ISO 27001 evidence collection</li>
+            <li>Fewer infrastructure components to manage overall</li>
+            <li>SPIFFE SPIRE in central mode fits this model</li>
+          </ul>
+        </div>
+        <div class="cons" style="margin-top:10px">
+          <h4>Cons</h4>
+          <ul>
+            <li>Single point of failure — IdP outage = no new tokens</li>
+            <li>Network latency for geographically distributed workloads</li>
+            <li>Large blast radius if IdP is compromised</li>
+            <li>Bottleneck for high-frequency token issuance</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:12px;color:var(--green)">Distributed IdPs (OID-FED)</h3>
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Each cloud/region has a local IdP → low latency</li>
+            <li>No single point of failure — one IdP down ≠ whole estate down</li>
+            <li>Teams own their IdP → faster delivery, less bottleneck</li>
+            <li>Smaller blast radius per IdP compromise</li>
+            <li>Cloud-native IdPs (Entra, GCP WIP) used where they shine</li>
+          </ul>
+        </div>
+        <div class="cons" style="margin-top:10px">
+          <h4>Cons</h4>
+          <ul>
+            <li>More complex: Trust Anchor + per-IdP SS management</li>
+            <li>Policy drift risk if IdPs are not centrally governed</li>
+            <li>Audit logs spread across multiple IdPs → aggregation needed</li>
+            <li>Trust Anchor becomes the new single critical dependency</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Decision matrix — which model fits your context?</div>
+    <div class="matrix">
+      <div class="matrix-head">Situation</div>
+      <div class="matrix-head center">Recommendation</div>
+      <div class="matrix-head">Reason</div>
+
+      <div class="matrix-cell">Single cloud, &lt;50 workloads</div>
+      <div class="matrix-cell center"><span class="rec-badge rec-central">Centralised</span></div>
+      <div class="matrix-cell">Simplicity wins at this scale. One Keycloak or Okta instance suffices.</div>
+
+      <div class="matrix-cell">Multi-cloud, same org, &lt;200 workloads</div>
+      <div class="matrix-cell center"><span class="rec-badge rec-hybrid">Hybrid</span></div>
+      <div class="matrix-cell">Central IdP with regional cache/proxy. OID-FED for cross-cloud validation only.</div>
+
+      <div class="matrix-cell">Multi-cloud, 200+ workloads, SLO &gt; 99.9%</div>
+      <div class="matrix-cell center"><span class="rec-badge rec-dist">Distributed</span></div>
+      <div class="matrix-cell">Per-cloud IdPs (Entra/Keycloak/Vault) federated via Trust Anchor. Local issuance eliminates cross-cloud dependency.</div>
+
+      <div class="matrix-cell">Air-gapped / regulated (FedRAMP, PCI-DSS)</div>
+      <div class="matrix-cell center"><span class="rec-badge rec-central">Centralised</span></div>
+      <div class="matrix-cell">Strict audit and network control requirements favour a single, hardened IdP (Vault Enterprise or on-prem Keycloak).</div>
+
+      <div class="matrix-cell">M&amp;A / acquired subsidiary with own IdP</div>
+      <div class="matrix-cell center"><span class="rec-badge rec-dist">Distributed</span></div>
+      <div class="matrix-cell">OID-FED is the right tool: add the subsidiary IdP as a subordinate under the parent Trust Anchor. No migration needed.</div>
+
+      <div class="matrix-cell">Multi-tenant SaaS platform</div>
+      <div class="matrix-cell center"><span class="rec-badge rec-dist">Distributed</span></div>
+      <div class="matrix-cell">Each tenant's workloads get their own IdP (or realm). Trust Anchor governs cross-tenant access with explicit policy.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Scene 6 — Secrets Management
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-secrets">
+  <div class="scene-num">Scenario 6</div>
+  <h1 class="scene-title">Secrets Management — Centralised vs Distributed</h1>
+  <p class="scene-lead">Workload identity and secrets management are closely related but distinct concerns. WIMSE handles identity (who is this workload?) while secrets management handles access to sensitive data (what secrets may this workload use?).</p>
+
+  <div class="card">
+    <div class="card-title">Two fundamentally different approaches</div>
+    <div class="pro-con-grid">
+      <div>
+        <h3 style="color:var(--purple);margin-bottom:10px">Centralised Secrets (Vault / AWS Secrets Manager)</h3>
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Single audit trail for all secret accesses</li>
+            <li>Dynamic secrets — DB credentials auto-rotated per workload</li>
+            <li>Fine-grained policies: who may read which secret</li>
+            <li>Centralised rotation — no per-workload rotation burden</li>
+          </ul>
+        </div>
+        <div class="cons" style="margin-top:10px">
+          <h4>Cons</h4>
+          <ul>
+            <li>Vault outage = all workloads lose access to secrets</li>
+            <li>Network hop to Vault on every secret access</li>
+            <li>Bootstrapping problem: how does a new workload authenticate to Vault?</li>
+            <li>HA Vault cluster is complex and expensive</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h3 style="color:var(--orange);margin-bottom:10px">WIMSE Distributed Key Approach</h3>
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>No shared secrets — workload generates its own EC P-256 key</li>
+            <li>Private key never leaves the workload's process</li>
+            <li>No bootstrap problem: SPIRE SVIDs or cloud metadata → WIT</li>
+            <li>Compromise is scoped to one workload instance</li>
+          </ul>
+        </div>
+        <div class="cons" style="margin-top:10px">
+          <h4>Cons</h4>
+          <ul>
+            <li>Application secrets (DB passwords, API keys) still need Vault</li>
+            <li>Key rotation requires workload restart or SVID renewal</li>
+            <li>No central store → harder to audit key creation events</li>
+            <li>Relies on workload runtime integrity (container/VM isolation)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Recommended pattern: WIMSE + Vault together</div>
+    <div class="vault-row">
+      <div class="vault-box">
+        <div class="vault-icon">🔑</div>
+        <strong>Workload Identity Key</strong>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">EC P-256 key pair generated at startup. Private key in memory only. Public key in WIT <code>cnf.jwk</code>. WIMSE handles this.</p>
+      </div>
+      <div class="vault-box">
+        <div class="vault-icon">🗃️</div>
+        <strong>Application Secrets</strong>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">DB credentials, API keys, TLS certs — retrieved from Vault at startup using the WIMSE WIT as the Vault auth credential. Vault issues dynamic secrets.</p>
+      </div>
+      <div class="vault-box">
+        <div class="vault-icon">📜</div>
+        <strong>mTLS Certificates</strong>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">Short-lived X.509 certs with SPIFFE URI SANs issued by Vault PKI. Renewed every 1–8 hours by SPIRE or Vault Agent. Tied to the workload identity key.</p>
+      </div>
+    </div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div><strong>Bootstrap</strong><p>Cloud-native credential (IRSA/WIF/GKE WIP) → WIMSE IdP → WIT. No manually managed secrets needed for this step.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div><strong>Authenticate to Vault</strong><p>Present WIT to Vault's JWT auth endpoint. Vault validates WIT via the WIMSE IdP's JWKS. Returns a Vault token scoped to the workload's policy.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div><strong>Retrieve application secrets</strong><p>Use the Vault token to fetch dynamic DB credentials, encrypt API keys, or generate mTLS certs from Vault PKI. All accesses are in Vault's audit log.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div><strong>Service-to-service calls</strong><p>Use WIMSE WIT + per-request WPT for all inter-service communication. No long-lived shared secrets involved.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>The net result:</strong> Vault audits <em>what secrets were used</em>. WIMSE audits <em>who made each service call</em>. Together they give you the complete picture that neither can provide alone.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Scene 7 — Adoption Roadmap
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-roadmap">
+  <div class="scene-num">Scenario 7</div>
+  <h1 class="scene-title">Enterprise Adoption Roadmap</h1>
+  <p class="scene-lead">Moving from cloud-native IAM silos to a WIMSE-based identity fabric is a phased journey. Each phase delivers immediate value and reduces risk, making the next phase easier.</p>
+
+  <div class="card">
+    <div class="card-title">Phased rollout</div>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div>
+          <strong>Phase 1 — Inventory and SPIFFE naming (weeks 1–4)</strong>
+          <p>Assign <code>spiffe://corp.example/svc/&lt;name&gt;</code> URIs to all workloads. No code changes yet — this is purely a naming exercise. Build the inventory that will drive policy later.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div>
+          <strong>Phase 2 — WIMSE IdP deployment (weeks 4–8)</strong>
+          <p>Deploy a central WIMSE IdP (Keycloak or Vault) in a pilot cloud. Workloads in the pilot exchange cloud-native credentials for WITs. mTLS certs from Vault PKI for transport security.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div>
+          <strong>Phase 3 — WIT + WPT on service-to-service calls (weeks 8–16)</strong>
+          <p>Instrument the 5–10 highest-value service pairs with WIMSE middleware. This immediately eliminates long-lived shared secrets on the busiest call paths and provides per-request audit.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div>
+          <strong>Phase 4 — OID-FED federation (weeks 16–24)</strong>
+          <p>Establish the corporate Trust Anchor. Register existing IdPs (Entra ID, Okta, Keycloak) as subordinates. Cross-cloud service calls can now resolve trust dynamically — no more bilateral key exchange.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">5</div>
+        <div>
+          <strong>Phase 5 — Fine-grained authorization (weeks 24–36)</strong>
+          <p>Deploy an authorization layer (OpenFGA or OPA) behind the WIMSE gateway. Replace overly broad IAM policies with subject × resource × action rules driven by SPIFFE URI patterns.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">6</div>
+        <div>
+          <strong>Phase 6 — Agentic workloads and AI agent fabric (ongoing)</strong>
+          <p>As AI agents proliferate, use the WIMSE Agent Fabric pattern: delegation chains (<code>AT-1~AT-2~AT-N</code>) provide end-to-end auditability for every action taken on behalf of a user or system.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key success metrics</div>
+    <table class="compare-table">
+      <tr><th>Metric</th><th>Before WIMSE</th><th>After WIMSE</th></tr>
+      <tr><td>Credential types per workload</td><td class="cross">3–5 (IAM role, SA, secret, cert, token)</td><td class="check">1 (EC P-256 key pair)</td></tr>
+      <tr><td>Longest-lived credential</td><td class="cross">Often permanent (IAM role, static API key)</td><td class="check">WIT: 1h max; WPT: 5 min</td></tr>
+      <tr><td>Cross-cloud auth mechanism</td><td class="cross">Long-lived shared secret or OIDC trust per pair</td><td class="check">OID-FED — dynamic, anchor-governed</td></tr>
+      <tr><td>Identity audit trail</td><td class="cross">Per-cloud, not unified</td><td class="check">Single SPIFFE URI in every access log</td></tr>
+      <tr><td>Time to add new trusted IdP</td><td class="cross">Days (bilateral key exchange)</td><td class="check">Minutes (Trust Anchor + SS)</td></tr>
+      <tr><td>M&amp;A identity integration</td><td class="cross">Weeks of IAM configuration</td><td class="check">Register new IdP with Trust Anchor</td></tr>
+    </table>
+  </div>
+
+  <div class="callout ok">
+    <strong>Try the technical PoC:</strong> The <a href="index.html" style="color:var(--blue)">Standard PoC demo</a> lets you run all cryptographic operations live in your browser via WebAssembly — WIT issuance, mTLS, WPT proof-of-possession, SD-JWT, token exchange, OID-FED trust chains, and replay attack defence. No server, no installation required.
+  </div>
+</div>
+
+<script>
+function showScene(name) {
+  document.querySelectorAll('.snav-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('scene-' + name).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

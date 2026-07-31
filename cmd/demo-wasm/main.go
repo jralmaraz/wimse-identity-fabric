@@ -6,6 +6,8 @@
 package main
 
 import (
+	"context"
+	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -14,6 +16,7 @@ import (
 	"syscall/js"
 	"time"
 
+	"github.com/example/wimse-identity-fabric/pkg/federation"
 	"github.com/example/wimse-identity-fabric/pkg/keys"
 	"github.com/example/wimse-identity-fabric/pkg/sdwit"
 	"github.com/example/wimse-identity-fabric/pkg/wit"
@@ -34,6 +37,14 @@ var (
 	sdToken    string
 
 	usedJTIs = map[string]bool{}
+
+	// Federation state (Chapter 10).
+	fedAnchorKP  *keys.ECKeyPair // Trust Anchor key pair
+	fedIdpBKP    *keys.ECKeyPair // Cloud-B IdP key pair
+	fedIdpBIssuer *wit.Issuer
+	fedChainEC   string // Entity Configuration JWT for IdP-B
+	fedChainSS   string // Subordinate Statement JWT from anchor about IdP-B
+	fedResolver  *federation.InMemoryResolver
 )
 
 const (
@@ -506,6 +517,206 @@ func generateMTLSCert(_ js.Value, _ []js.Value) interface{} {
 	})
 }
 
+// ---------- federation functions (Chapter 10) ----------
+
+const (
+	fedAnchorIDConst = "https://trust-anchor.corporate.example"
+	fedIdpBIDConst   = "https://idp.cloud-b.example"
+	fedSubjectB      = "spiffe://cloud-b.example/workload-b"
+)
+
+// buildFederationChain creates a complete OID-FED trust chain in memory:
+//   Trust Anchor → (Subordinate Statement) → IdP-B
+//   IdP-B → (Entity Configuration, authority_hints=[anchor]) → publicly served
+// This simulates the OID-FED discovery flow without HTTP.
+func buildFederationChain(_ js.Value, _ []js.Value) interface{} {
+	var err error
+
+	fedAnchorKP, err = keys.GenerateECKeyPair()
+	if err != nil {
+		return fail("generate anchor key: " + err.Error())
+	}
+	fedIdpBKP, err = keys.GenerateECKeyPair()
+	if err != nil {
+		return fail("generate IdP-B key: " + err.Error())
+	}
+
+	fedChainEC, err = federation.BuildEntityConfiguration(
+		fedIdpBIDConst, fedIdpBKP.Private, "idpb-key",
+		"Acme Corp Cloud B",
+		[]string{fedAnchorIDConst},
+		24*time.Hour,
+	)
+	if err != nil {
+		return fail("build entity configuration: " + err.Error())
+	}
+
+	fedChainSS, err = federation.BuildSubordinateStatement(
+		fedAnchorIDConst, fedIdpBIDConst,
+		fedIdpBKP.Public, "idpb-key",
+		fedAnchorKP.Private, "anchor-key",
+		24*time.Hour,
+	)
+	if err != nil {
+		return fail("build subordinate statement: " + err.Error())
+	}
+
+	fedIdpBIssuer = wit.NewIssuer(fedIdpBIDConst, fedIdpBKP.Private, time.Hour)
+
+	ec, err := federation.ParseEntityConfiguration(fedChainEC)
+	if err != nil {
+		return fail("parse EC: " + err.Error())
+	}
+	ss, err := federation.ParseSubordinateStatement(fedChainSS)
+	if err != nil {
+		return fail("parse SS: " + err.Error())
+	}
+
+	anchorJWK, _ := keys.PublicKeyToJWK(fedAnchorKP.Public, "anchor-key")
+	idpBJWK, _ := keys.PublicKeyToJWK(fedIdpBKP.Public, "idpb-key")
+
+	return ok(map[string]interface{}{
+		"trustAnchorID": fedAnchorIDConst,
+		"idpBID":        fedIdpBIDConst,
+		"anchorJWK":     anchorJWK,
+		"idpBJWK":       idpBJWK,
+		"entityConfig": map[string]interface{}{
+			"jwt":            fedChainEC,
+			"iss":            ec.Issuer,
+			"sub":            ec.Subject,
+			"jwks":           ec.JWKS,
+			"authorityHints": ec.AuthorityHints,
+		},
+		"subordinateStatement": map[string]interface{}{
+			"jwt":  fedChainSS,
+			"iss":  ss.Issuer,
+			"sub":  ss.Subject,
+			"jwks": ss.JWKS,
+		},
+		"explanation": "The Trust Anchor certifies IdP-B's keys via a Subordinate Statement. IdP-B publishes its own Entity Configuration with an authority_hint pointing to the anchor. Together these form the verifiable OID-FED trust chain.",
+	})
+}
+
+// verifyTrustChain verifies the OID-FED trust chain step-by-step.
+// Simulates what the exchange server's Resolver does at runtime.
+func verifyTrustChain(_ js.Value, _ []js.Value) interface{} {
+	if fedChainEC == "" || fedChainSS == "" {
+		return fail("call buildFederationChain() first")
+	}
+
+	// Step 1: parse EC without verification (peek authority_hints).
+	ec, err := federation.ParseEntityConfiguration(fedChainEC)
+	if err != nil {
+		return fail("parse entity configuration: " + err.Error())
+	}
+
+	// Step 2: verify SS with the Trust Anchor key.
+	ss, err := federation.VerifySubordinateStatement(fedChainSS, fedAnchorKP.Public)
+	if err != nil {
+		return fail("verify subordinate statement: " + err.Error())
+	}
+
+	// Step 3: extract leaf key from SS, verify EC signature.
+	if len(ss.JWKS.Keys) == 0 {
+		return fail("subordinate statement has no JWKS")
+	}
+	leafPub, err := keys.JWKToPublicKey(&ss.JWKS.Keys[0])
+	if err != nil {
+		return fail("parse leaf key from SS: " + err.Error())
+	}
+	verifiedEC, err := federation.VerifyEntityConfiguration(fedChainEC, leafPub)
+	if err != nil {
+		return fail("verify entity configuration with SS-certified key: " + err.Error())
+	}
+
+	return ok(map[string]interface{}{
+		"steps": []string{
+			"Parse Entity Configuration JWT (unverified — peek authority_hints)",
+			"Found authority hint: " + fedAnchorIDConst,
+			"Fetch Subordinate Statement from Trust Anchor /federation/fetch",
+			"Verify SS signature with Trust Anchor public key ✓",
+			"Extract IdP-B public key from SS.JWKS",
+			"Verify Entity Configuration signature with SS-certified key ✓",
+			"Trust chain complete — IdP-B is governed by the corporate anchor",
+		},
+		"trustAnchorID":     fedAnchorIDConst,
+		"certifiedEntity":   verifiedEC.Issuer,
+		"certifiedByAnchor": ss.Issuer,
+		"resolvedJWKS":      verifiedEC.JWKS,
+		"ecAuthorityHints":  ec.AuthorityHints,
+		"explanation":       "The exchange server resolves IdP-B's key dynamically. Only the Trust Anchor URL and public key need to be pre-configured.",
+	})
+}
+
+// federatedExchange performs token exchange using OID-FED-resolved trust.
+// Cloud-A's exchange server accepts a WIT targeting Cloud-B's domain without
+// a static AllowedIssuers entry — the trust chain is resolved dynamically.
+func federatedExchange(_ js.Value, _ []js.Value) interface{} {
+	if fedChainEC == "" || fedChainSS == "" {
+		return fail("call buildFederationChain() first")
+	}
+	if witToken == "" {
+		return fail("call issueWIT() first (Cloud-A WIT needed as source token)")
+	}
+
+	// Build in-memory resolver (simulates exchange server's HTTPResolver).
+	resolver := federation.NewInMemoryResolver(map[string]*ecdsa.PublicKey{
+		fedAnchorIDConst: fedAnchorKP.Public,
+	})
+	resolver.RegisterEntityConfig(fedIdpBIDConst, fedChainEC)
+	resolver.RegisterSubordinateStatement(fedIdpBIDConst, fedChainSS)
+
+	// Resolve IdP-B's key via the trust chain.
+	entity, err := resolver.Resolve(context.Background(), fedIdpBIDConst)
+	if err != nil {
+		return fail("federation resolve IdP-B: " + err.Error())
+	}
+	resolvedPub, err := entity.PublicKey()
+	if err != nil {
+		return fail("extract resolved key: " + err.Error())
+	}
+
+	// Issue WIT-B (simulates what the exchange server does after key resolution).
+	newToken, err := fedIdpBIssuer.Issue(wit.IssueOptions{
+		Subject:     fedSubjectB,
+		TrustDomain: "cloud-b.example",
+		WorkloadKey: workloadKP.Public,
+	})
+	if err != nil {
+		return fail("issue WIT-B: " + err.Error())
+	}
+
+	// Validate WIT-B with the federation-resolved key.
+	validatorB := wit.NewValidator(fedIdpBIDConst, resolvedPub)
+	vr, err := validatorB.Validate(newToken)
+	if err != nil {
+		return fail("validate WIT-B: " + err.Error())
+	}
+
+	return ok(map[string]interface{}{
+		"sourceWIT":        witToken,
+		"sourceIssuer":     issuerID,
+		"exchangedWIT":     newToken,
+		"targetIssuer":     fedIdpBIDConst,
+		"targetSubject":    vr.Claims.Subject,
+		"resolvedViaChain": true,
+		"trustAnchor":      fedAnchorIDConst,
+		"noStaticConfig":   true,
+		"steps": []string{
+			"Receive source WIT (iss=" + issuerID + ")",
+			"Peek target domain: " + fedIdpBIDConst,
+			"Fetch Entity Configuration from " + fedIdpBIDConst + "/.well-known/openid-federation",
+			"Walk authority_hints → Trust Anchor: " + fedAnchorIDConst,
+			"Fetch Subordinate Statement for " + fedIdpBIDConst,
+			"Verify trust chain ✓ — IdP-B key resolved via anchor",
+			"Issue new WIT-B signed by IdP-B",
+			"Validate WIT-B with resolved key ✓",
+			"Return WIT-B — no AllowedIssuers entry was needed",
+		},
+		"explanation": "OID-FED replaces static key registrations. New trust domains join by registering with the shared Trust Anchor — zero reconfiguration of the exchange server.",
+	})
+}
+
 // ---------- internal helpers ----------
 
 func splitSDJWT(s string) []string {
@@ -551,6 +762,10 @@ func main() {
 		"validateSDWIT":       js.FuncOf(validateSDWIT),
 		"checkAuthorization":  js.FuncOf(checkAuthorization),
 		"generateMTLSCert":    js.FuncOf(generateMTLSCert),
+		// Chapter 10 — OpenID Federation 1.0
+		"buildFederationChain": js.FuncOf(buildFederationChain),
+		"verifyTrustChain":     js.FuncOf(verifyTrustChain),
+		"federatedExchange":    js.FuncOf(federatedExchange),
 	}))
 
 	// Block forever — WASM modules must not exit.

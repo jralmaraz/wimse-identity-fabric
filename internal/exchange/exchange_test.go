@@ -13,6 +13,7 @@ import (
 
 	"github.com/example/wimse-identity-fabric/internal/exchange"
 	"github.com/example/wimse-identity-fabric/internal/workload"
+	"github.com/example/wimse-identity-fabric/pkg/federation"
 	"github.com/example/wimse-identity-fabric/pkg/keys"
 	"github.com/example/wimse-identity-fabric/pkg/wit"
 	"github.com/example/wimse-identity-fabric/pkg/wpt"
@@ -217,6 +218,70 @@ func TestExchange_SubjectNotAllowed(t *testing.T) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusForbidden {
 		t.Fatalf("expected 403, got %d", resp.StatusCode)
+	}
+}
+
+// TestExchange_FederationTrust verifies that the exchange server accepts tokens
+// from issuers not in AllowedIssuers when they are resolvable via OID-FED.
+func TestExchange_FederationTrust(t *testing.T) {
+	e := setup(t)
+
+	// Trust Anchor key pair.
+	anchorKP, _ := keys.GenerateECKeyPair()
+	anchorID := "https://trust-anchor.corporate.example"
+
+	// Build Entity Configuration for IdP-A.
+	ecJWT, err := federation.BuildEntityConfiguration(
+		issuerA, e.idpAKP.Private, "idpa-key", "Acme Cloud A",
+		[]string{anchorID}, time.Hour,
+	)
+	if err != nil {
+		t.Fatalf("BuildEntityConfiguration: %v", err)
+	}
+	// Build Subordinate Statement from anchor about IdP-A.
+	ssJWT, err := federation.BuildSubordinateStatement(
+		anchorID, issuerA,
+		e.idpAKP.Public, "idpa-key",
+		anchorKP.Private, "anchor-key",
+		time.Hour,
+	)
+	if err != nil {
+		t.Fatalf("BuildSubordinateStatement: %v", err)
+	}
+
+	// Exchange policy: no static AllowedIssuers — rely entirely on federation.
+	resolver := federation.NewInMemoryResolver(map[string]*ecdsa.PublicKey{anchorID: anchorKP.Public})
+	resolver.RegisterEntityConfig(issuerA, ecJWT)
+	resolver.RegisterSubordinateStatement(issuerA, ssJWT)
+
+	policy := &exchange.TrustPolicy{
+		AllowedIssuers: map[string]*ecdsa.PublicKey{}, // empty — federation only
+		Resolver:       resolver,
+	}
+	cfg := &exchange.ExchangeConfig{
+		Policy:       policy,
+		TargetIssuer: e.issB,
+		TokenTTL:     time.Hour,
+	}
+	srv := newSrv(t, cfg)
+
+	resp := postExchange(t, srv, e.witA)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	token, _ := result["token"].(string)
+	if token == "" {
+		t.Fatal("expected non-empty exchanged token")
+	}
+
+	// Token must validate against IdP-B.
+	validatorB := wit.NewValidator(issuerB, e.idpBKP.Public)
+	if _, err := validatorB.Validate(token); err != nil {
+		t.Fatalf("validate federated WIT-B: %v", err)
 	}
 }
 
