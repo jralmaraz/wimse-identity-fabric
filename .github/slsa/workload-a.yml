@@ -6,10 +6,7 @@ flags:
 ldflags:
   - -s
   - -w
-goos:
-  - linux
-goarch:
-  - amd64
-  - arm64
+goos: linux
+goarch: amd64
 binary: wimse-workload-a
 main: ./cmd/workload-a
