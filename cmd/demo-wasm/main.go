@@ -655,8 +655,16 @@ func federatedExchange(_ js.Value, _ []js.Value) interface{} {
 	if fedChainEC == "" || fedChainSS == "" {
 		return fail("call buildFederationChain() first")
 	}
-	if witToken == "" {
-		return fail("call issueWIT() first (Cloud-A WIT needed as source token)")
+
+	// Generate a fresh workload key pair for the target workload if setup() was
+	// not called (Chapter 10 is self-contained; it does not depend on Chapter 2).
+	targetKP := workloadKP
+	if targetKP == nil {
+		var err error
+		targetKP, err = keys.GenerateECKeyPair()
+		if err != nil {
+			return fail("generate workload key: " + err.Error())
+		}
 	}
 
 	// Build in-memory resolver (simulates exchange server's HTTPResolver).
@@ -680,7 +688,7 @@ func federatedExchange(_ js.Value, _ []js.Value) interface{} {
 	newToken, err := fedIdpBIssuer.Issue(wit.IssueOptions{
 		Subject:     fedSubjectB,
 		TrustDomain: "cloud-b.example",
-		WorkloadKey: workloadKP.Public,
+		WorkloadKey: targetKP.Public,
 	})
 	if err != nil {
 		return fail("issue WIT-B: " + err.Error())
