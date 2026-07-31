@@ -4,6 +4,7 @@
 set -euo pipefail
 
 GOVULNCHECK_VERSION="v1.6.0"
+export PATH="$(go env GOPATH)/bin:$PATH"
 
 echo "==> [pre-push] go mod verify"
 go mod verify
