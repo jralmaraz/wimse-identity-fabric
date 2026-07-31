@@ -1,6 +1,6 @@
 module github.com/example/wimse-identity-fabric
 
-go 1.25.7
+go 1.26.5
 
 require (
 	github.com/gin-gonic/gin v1.12.0
