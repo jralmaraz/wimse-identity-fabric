@@ -21,9 +21,9 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -53,9 +53,9 @@ jobs:
       contents: read
       security-events: write  # upload SARIF
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -72,7 +72,7 @@ jobs:
           artifact-name: sbom.spdx.json
 
       - name: Scan for vulnerabilities (Grype)
-        uses: anchore/scan-action@v0
+        uses: anchore/scan-action@v7
         id: grype
         with:
           sbom: sbom.spdx.json
@@ -82,7 +82,7 @@ jobs:
           output-file: grype.sarif
 
       - name: Upload Grype SARIF to Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4.37.3
         with:
           sarif_file: grype.sarif
           category: grype
@@ -96,9 +96,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -116,12 +116,12 @@ jobs:
             cp "$GOROOT/misc/wasm/wasm_exec.js" demo/wasm_exec.js
           fi
 
-      - uses: actions/configure-pages@v4
+      - uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: demo/
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
