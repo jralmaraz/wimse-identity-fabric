@@ -1,0 +1,92 @@
+name: Release (SLSA L3)
+
+# Triggered by annotated version tags: git tag -s v1.0.0 && git push --tags
+on:
+  push:
+    tags:
+      - 'v[0-9]*'
+
+# These permissions are required by the SLSA Go builder and Sigstore keyless signing.
+permissions: read-all
+
+jobs:
+  # ── Build + SLSA L3 provenance: IdP ───────────────────────────────────────────
+  build-idp:
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
+    permissions:
+      id-token: write    # for Sigstore OIDC signing
+      contents: write    # to upload release assets
+      actions: read      # to read the builder workflow
+    with:
+      go-version-file: go.mod
+      config-file: .github/slsa/idp.yml
+      upload-assets: true
+
+  # ── Build + SLSA L3 provenance: Workload A ───────────────────────────────────
+  build-workload-a:
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
+    permissions:
+      id-token: write
+      contents: write
+      actions: read
+    with:
+      go-version-file: go.mod
+      config-file: .github/slsa/workload-a.yml
+      upload-assets: true
+
+  # ── Build + SLSA L3 provenance: Workload B ───────────────────────────────────
+  build-workload-b:
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
+    permissions:
+      id-token: write
+      contents: write
+      actions: read
+    with:
+      go-version-file: go.mod
+      config-file: .github/slsa/workload-b.yml
+      upload-assets: true
+
+  # ── Build + SLSA L3 provenance: Token Exchange ────────────────────────────────
+  build-token-exchange:
+    uses: slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@v2.1.0
+    permissions:
+      id-token: write
+      contents: write
+      actions: read
+    with:
+      go-version-file: go.mod
+      config-file: .github/slsa/token-exchange.yml
+      upload-assets: true
+
+  # ── Verify provenance with slsa-verifier ──────────────────────────────────────
+  # Demonstrates how a downstream consumer would verify the build provenance.
+  verify:
+    needs:
+      - build-idp
+      - build-workload-a
+      - build-workload-b
+      - build-token-exchange
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install slsa-verifier
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.0
+
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release download "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern "wimse-idp-linux-amd64" \
+            --pattern "wimse-idp-linux-amd64.intoto.jsonl"
+
+      - name: Verify SLSA provenance
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          slsa-verifier verify-artifact \
+            wimse-idp-linux-amd64 \
+            --provenance-path wimse-idp-linux-amd64.intoto.jsonl \
+            --source-uri "github.com/$GITHUB_REPOSITORY" \
+            --source-tag "$TAG"

@@ -1,0 +1,15 @@
+version: 2
+env:
+  - CGO_ENABLED=0
+flags:
+  - -trimpath
+ldflags:
+  - -s
+  - -w
+goos:
+  - linux
+goarch:
+  - amd64
+  - arm64
+binary: wimse-token-exchange
+main: ./cmd/token-exchange

@@ -1,0 +1,47 @@
+name: OpenSSF Scorecard
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Run every Monday at 06:15 UTC.
+    - cron: '15 6 * * 1'
+
+# Declare required permissions as read-all and selectively add write where needed.
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write   # upload SARIF to GitHub Security tab
+      id-token: write          # for keyless publishing of results
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard
+        uses: ossf/scorecard-action@v2.4.4
+        with:
+          results_file: scorecard.sarif
+          results_format: sarif
+          # Publish results publicly so the Scorecard badge works.
+          publish_results: true
+
+      - name: Upload SARIF results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorecard-sarif
+          path: scorecard.sarif
+          retention-days: 5
+
+      - name: Upload to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: scorecard.sarif
