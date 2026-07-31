@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install slsa-verifier
-        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.0
+        uses: slsa-framework/slsa-verifier/actions/installer@v2.7.1
 
       - name: Download release assets
         env:
