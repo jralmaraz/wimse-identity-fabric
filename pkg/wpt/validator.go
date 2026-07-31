@@ -4,8 +4,6 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"sync"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -19,24 +17,26 @@ type ValidateOptions struct {
 	CheckReplay       bool
 }
 
-// Validator validates WPTs and optionally tracks JTIs for replay protection.
+// Validator validates WPTs and optionally tracks JTIs for replay protection
+// via a pluggable JTIStore.
 //
-// The replay store maps each JTI to the token's expiry time. On every replay
-// check, entries whose expiry has passed are swept out first. This bounds
-// memory to the set of JTIs that are still within their validity window —
-// typically a few minutes' worth at the configured WPT TTL.
-//
-// Safety: a replayed-but-expired token is always rejected by the expiry check
-// before reaching the replay check, so evicting a JTI once its exp has passed
-// cannot open a replay window.
+// The default store (InMemoryJTIStore) is suitable for single-process
+// deployments. Swap it for a distributed store (etcd, Redis, CockroachDB)
+// to share replay state across replicas — the plug-in point for
+// multi-cloud / multi-replica deployments.
 type Validator struct {
-	mu   sync.Mutex
-	seen map[string]time.Time // jti → expiry
+	store JTIStore
 }
 
-// NewValidator creates a new WPT validator.
+// NewValidator creates a Validator backed by an InMemoryJTIStore.
 func NewValidator() *Validator {
-	return &Validator{seen: make(map[string]time.Time)}
+	return &Validator{store: NewInMemoryJTIStore()}
+}
+
+// NewValidatorWithStore creates a Validator backed by the provided JTIStore.
+// Use this to inject a distributed store in multi-replica deployments.
+func NewValidatorWithStore(s JTIStore) *Validator {
+	return &Validator{store: s}
 }
 
 // Validate checks the WPT signature, expiry, audience, wth binding, and optionally jti replay.
@@ -84,32 +84,14 @@ func (v *Validator) Validate(opts ValidateOptions) (*Claims, error) {
 		return nil, errors.New("WPT wth does not match WIT hash")
 	}
 
-	// Replay protection: record the JTI and reject any second use.
+	// Replay protection: delegate to the JTIStore.
 	if opts.CheckReplay {
 		jti := claims.ID
 		if jti == "" {
 			return nil, errors.New("WPT missing jti for replay check")
 		}
-		exp := claims.ExpiresAt.Time
-		now := time.Now()
-
-		v.mu.Lock()
-		// Sweep out entries that have already expired. Expired tokens are
-		// rejected by the parser before reaching this point, so removing
-		// them cannot create a replay window.
-		for id, expiry := range v.seen {
-			if now.After(expiry) {
-				delete(v.seen, id)
-			}
-		}
-		_, replayed := v.seen[jti]
-		if !replayed {
-			v.seen[jti] = exp
-		}
-		v.mu.Unlock()
-
-		if replayed {
-			return nil, errors.New("WPT jti already seen (replay attack)")
+		if err := v.store.Record(jti, claims.ExpiresAt.Time); err != nil {
+			return nil, fmt.Errorf("WPT replay check: %w", err)
 		}
 	}
 
