@@ -147,6 +147,54 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .int-step{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px}
 .int-step::before{counter-increment:istep;content:counter(istep);width:22px;height:22px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted)}
 code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px;color:var(--blue)}
+
+/* ── Animated product flow ── */
+.flow-anim-panel{border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:18px;background:var(--surface)}
+.flow-anim-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px}
+.product-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.ptab{padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);font-size:12px;cursor:pointer;transition:all .15s;font-weight:600;color:var(--muted)}
+.ptab:hover{border-color:var(--blue);color:var(--text)}
+.ptab.active{background:var(--orange);border-color:var(--orange);color:#0d1117}
+.play-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 18px;border-radius:6px;background:var(--orange);color:#0d1117;font-weight:700;font-size:12px;border:none;cursor:pointer;transition:opacity .15s;margin-bottom:14px}
+.play-btn:disabled{opacity:.5;cursor:not-allowed}
+.play-btn:hover:not(:disabled){opacity:.85}
+.anim-flow-svg{background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:100%;height:auto;display:block;margin-bottom:10px}
+.anim-steps{display:flex;flex-direction:column;gap:5px}
+.anim-step{padding:8px 14px;border-left:3px solid var(--border);background:var(--surface2);border-radius:0 6px 6px 0;font-size:12px;opacity:.35;transition:opacity .3s,border-color .3s,background .3s}
+.anim-step.active{opacity:1;border-color:var(--orange);background:rgba(255,166,87,.05)}
+.anim-step.done{opacity:.7;border-color:var(--green)}
+.anim-step .as-label{font-weight:700;margin-bottom:2px}
+.anim-step .as-desc{color:var(--muted);font-size:11px}
+
+/* ── Comparison animation (Scenario 5) ── */
+.comp-anim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+@media(max-width:620px){.comp-anim-wrap{grid-template-columns:1fr}}
+.comp-panel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.comp-panel h4{font-size:13px;font-weight:700;margin-bottom:10px}
+.comp-svg{width:100%;height:auto;display:block}
+.play-sm-btn{padding:5px 14px;border-radius:6px;background:var(--blue);color:#0d1117;font-weight:700;font-size:12px;border:none;cursor:pointer;margin-top:10px;transition:opacity .15s}
+.play-sm-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── Paxos node ── */
+.paxos-svg{width:100%;height:auto;display:block;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:14px}
+.paxos-msg{font-size:10px;fill:var(--muted);font-family:monospace}
+
+/* ── PQ section ── */
+.pq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:680px){.pq-grid{grid-template-columns:1fr}}
+.pq-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px}
+.pq-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.pq-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;margin-bottom:8px}
+.pq-sig{background:rgba(88,166,255,.15);color:var(--blue)}
+.pq-kem{background:rgba(63,185,80,.15);color:var(--green)}
+.pq-hash{background:rgba(188,140,255,.15);color:var(--purple)}
+.timeline-bar{display:flex;align-items:stretch;gap:0;margin-bottom:16px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.tl-seg{flex:1;padding:12px;font-size:12px;text-align:center}
+.tl-now{background:rgba(63,185,80,.1);border-right:1px solid var(--border)}
+.tl-near{background:rgba(255,166,87,.1);border-right:1px solid var(--border)}
+.tl-q{background:rgba(248,81,73,.08)}
+.tl-seg strong{display:block;font-size:14px;margin-bottom:4px}
+.tl-seg span{color:var(--muted);font-size:11px}
 </style>
 </head>
 <body>
@@ -167,6 +215,8 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
   <div class="snav-item" onclick="showScene('central-vs-dist')">5 · Centralised vs Distributed</div>
   <div class="snav-item" onclick="showScene('secrets')">6 · Secrets Management</div>
   <div class="snav-item" onclick="showScene('roadmap')">7 · Adoption Roadmap</div>
+  <div class="snav-item" onclick="showScene('postquantum')">8 · Post-Quantum Safety</div>
+  <div class="snav-item" onclick="showScene('paxos')">9 · Paxos Consensus</div>
 </nav>
 
 <!-- ═══════════════════════════════════════════
@@ -511,6 +561,45 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
   <div class="callout ok">
     <strong>Recommendation:</strong> Most enterprises use a combination. Vault for secrets + PKI; Keycloak or Okta as the WIMSE IdP; Entra ID for Azure-native workloads. WIMSE's OID-FED layer lets all three coexist under a single corporate trust anchor.
   </div>
+
+  <!-- Animated unified flow -->
+  <div class="flow-anim-panel">
+    <div class="flow-anim-title">Interactive — Token Acquisition Flow by Product</div>
+    <div class="product-tabs">
+      <div class="ptab active" onclick="selectProduct('okta',this)">Okta / Auth0</div>
+      <div class="ptab" onclick="selectProduct('entra',this)">Entra ID</div>
+      <div class="ptab" onclick="selectProduct('keycloak',this)">Keycloak</div>
+      <div class="ptab" onclick="selectProduct('vault',this)">Vault</div>
+    </div>
+    <button class="play-btn" id="flow-play-btn" onclick="playProductFlow()">&#9654; Play Flow</button>
+    <svg class="anim-flow-svg" viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- Actor boxes -->
+      <rect x="10" y="28" width="110" height="44" rx="6" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text id="fa0" x="65" y="48" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="11" font-weight="700">Workload</text>
+      <text id="fa0s" x="65" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">spiffe://corp.example/…</text>
+      <rect x="190" y="28" width="110" height="44" rx="6" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text id="fa1" x="245" y="48" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="11" font-weight="700">Cloud Auth</text>
+      <text id="fa1s" x="245" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">IRSA / WIF / WIP</text>
+      <rect x="370" y="28" width="110" height="44" rx="6" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+      <text id="fa2" x="425" y="48" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="700">IdP</text>
+      <text id="fa2s" x="425" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">Okta / Auth0</text>
+      <rect x="550" y="28" width="140" height="44" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+      <text id="fa3" x="620" y="48" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="11" font-weight="700">Target Service</text>
+      <text id="fa3s" x="620" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">WIT + WPT auth</text>
+      <!-- Connecting lines -->
+      <line x1="120" y1="50" x2="190" y2="50" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <line x1="300" y1="50" x2="370" y2="50" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <line x1="480" y1="50" x2="550" y2="50" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <!-- Packet -->
+      <circle id="flow-pkt" cx="65" cy="50" r="7" fill="#ffa657" visibility="hidden"/>
+    </svg>
+    <div class="anim-steps" id="flow-steps">
+      <div class="anim-step" id="fls1"><div class="as-label" id="fls1-label">Step 1</div><div class="as-desc" id="fls1-desc">—</div></div>
+      <div class="anim-step" id="fls2"><div class="as-label" id="fls2-label">Step 2</div><div class="as-desc" id="fls2-desc">—</div></div>
+      <div class="anim-step" id="fls3"><div class="as-label" id="fls3-label">Step 3</div><div class="as-desc" id="fls3-desc">—</div></div>
+      <div class="anim-step" id="fls4"><div class="as-label" id="fls4-label">Step 4</div><div class="as-desc" id="fls4-desc">—</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -703,6 +792,77 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
       <div class="matrix-cell">Each tenant's workloads get their own IdP (or realm). Trust Anchor governs cross-tenant access with explicit policy.</div>
     </div>
   </div>
+
+  <div class="card">
+    <div class="card-title">Animated comparison — token flow patterns</div>
+    <div class="comp-anim-wrap">
+      <div class="comp-panel">
+        <h4 style="color:var(--blue)">Centralised IdP — single bottleneck</h4>
+        <svg class="comp-svg" viewBox="0 0 260 180" xmlns="http://www.w3.org/2000/svg">
+          <!-- Central IdP -->
+          <rect x="90" y="10" width="80" height="36" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+          <text x="130" y="25" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="10" font-weight="700">Central IdP</text>
+          <text x="130" y="39" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">Okta / Keycloak</text>
+          <!-- Workloads -->
+          <rect x="10" y="120" width="60" height="28" rx="4" fill="#21262d" stroke="#30363d"/>
+          <text x="40" y="137" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="9">billing-svc</text>
+          <rect x="100" y="120" width="60" height="28" rx="4" fill="#21262d" stroke="#30363d"/>
+          <text x="130" y="137" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="9">payment-svc</text>
+          <rect x="190" y="120" width="60" height="28" rx="4" fill="#21262d" stroke="#30363d"/>
+          <text x="220" y="137" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="9">audit-svc</text>
+          <!-- Lines -->
+          <line x1="130" y1="46" x2="40" y2="120" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="130" y1="46" x2="130" y2="120" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="130" y1="46" x2="220" y2="120" stroke="#30363d" stroke-width="1.5"/>
+          <!-- Animated packets -->
+          <circle id="cp1" cx="130" cy="46" r="5" fill="#58a6ff" visibility="hidden"/>
+          <circle id="cp2" cx="130" cy="46" r="5" fill="#58a6ff" visibility="hidden"/>
+          <circle id="cp3" cx="130" cy="46" r="5" fill="#58a6ff" visibility="hidden"/>
+          <!-- Warning: single point of failure -->
+          <text x="130" y="170" text-anchor="middle" fill="#f85149" font-family="sans-serif" font-size="9" font-weight="700">Single point of failure</text>
+        </svg>
+        <button class="play-sm-btn" id="cent-btn" onclick="playCentralised()">&#9654; Animate</button>
+      </div>
+      <div class="comp-panel">
+        <h4 style="color:var(--green)">Distributed IdPs — federated via OID-FED</h4>
+        <svg class="comp-svg" viewBox="0 0 260 180" xmlns="http://www.w3.org/2000/svg">
+          <!-- Trust Anchor -->
+          <rect x="90" y="5" width="80" height="28" rx="6" fill="#161b22" stroke="#ffa657" stroke-width="2"/>
+          <text x="130" y="17" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="9" font-weight="700">Trust Anchor</text>
+          <text x="130" y="28" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">corp.example</text>
+          <!-- IdPs -->
+          <rect x="10" y="65" width="80" height="28" rx="4" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="50" y="77" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="9" font-weight="700">IdP AWS</text>
+          <text x="50" y="88" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">Okta</text>
+          <rect x="170" y="65" width="80" height="28" rx="4" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+          <text x="210" y="77" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="9" font-weight="700">IdP GCP</text>
+          <text x="210" y="88" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">Keycloak</text>
+          <!-- Lines anchor→IdP -->
+          <line x1="130" y1="33" x2="50" y2="65" stroke="#ffa657" stroke-dasharray="3,2" stroke-width="1.5"/>
+          <line x1="130" y1="33" x2="210" y2="65" stroke="#ffa657" stroke-dasharray="3,2" stroke-width="1.5"/>
+          <!-- Workloads -->
+          <rect x="5" y="130" width="50" height="24" rx="4" fill="#21262d" stroke="#30363d"/>
+          <text x="30" y="143" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="8">billing</text>
+          <rect x="65" y="130" width="50" height="24" rx="4" fill="#21262d" stroke="#30363d"/>
+          <text x="90" y="143" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="8">payment</text>
+          <rect x="145" y="130" width="50" height="24" rx="4" fill="#21262d" stroke="#30363d"/>
+          <text x="170" y="143" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="8">audit</text>
+          <rect x="205" y="130" width="50" height="24" rx="4" fill="#21262d" stroke="#30363d"/>
+          <text x="230" y="143" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="8">analytics</text>
+          <!-- Lines IdP→workload -->
+          <line x1="50" y1="93" x2="30" y2="130" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="50" y1="93" x2="90" y2="130" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="210" y1="93" x2="170" y2="130" stroke="#30363d" stroke-width="1.5"/>
+          <line x1="210" y1="93" x2="230" y2="130" stroke="#30363d" stroke-width="1.5"/>
+          <!-- Animated packets -->
+          <circle id="dp1" cx="50" cy="93" r="5" fill="#3fb950" visibility="hidden"/>
+          <circle id="dp2" cx="210" cy="93" r="5" fill="#3fb950" visibility="hidden"/>
+          <text x="130" y="170" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="9" font-weight="700">Local issuance — no cross-cloud dependency</text>
+        </svg>
+        <button class="play-sm-btn" id="dist-btn" onclick="playDistributed()">&#9654; Animate</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -803,6 +963,35 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
   <div class="callout ok">
     <strong>The net result:</strong> Vault audits <em>what secrets were used</em>. WIMSE audits <em>who made each service call</em>. Together they give you the complete picture that neither can provide alone.
   </div>
+
+  <div class="flow-anim-panel">
+    <div class="flow-anim-title">Animated — Combined pattern: Bootstrap → Vault → Service calls</div>
+    <button class="play-btn" id="secrets-play-btn" onclick="playSecretsFlow()">&#9654; Play Flow</button>
+    <svg class="anim-flow-svg" viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg">
+      <rect x="10" y="28" width="110" height="44" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="65" y="48" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="11" font-weight="700">Workload</text>
+      <text x="65" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">startup</text>
+      <rect x="190" y="28" width="110" height="44" rx="6" fill="#21262d" stroke="#ffa657" stroke-width="1.5"/>
+      <text x="245" y="48" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="11" font-weight="700">WIMSE IdP</text>
+      <text x="245" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">issues WIT</text>
+      <rect x="370" y="28" width="110" height="44" rx="6" fill="#21262d" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="425" y="48" text-anchor="middle" fill="#bc8cff" font-family="sans-serif" font-size="11" font-weight="700">Vault</text>
+      <text x="425" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">dynamic secrets</text>
+      <rect x="550" y="28" width="140" height="44" rx="6" fill="#21262d" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="620" y="48" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="700">Target Service</text>
+      <text x="620" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9">WIT+WPT auth</text>
+      <line x1="120" y1="50" x2="190" y2="50" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <line x1="300" y1="50" x2="370" y2="50" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <line x1="480" y1="50" x2="550" y2="50" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <circle id="sec-pkt" cx="65" cy="50" r="7" fill="#ffa657" visibility="hidden"/>
+    </svg>
+    <div class="anim-steps">
+      <div class="anim-step" id="ss1"><div class="as-label">Bootstrap</div><div class="as-desc">Cloud-native credential (IRSA/WIF) → WIMSE IdP → WIT issued. No manually-managed secrets.</div></div>
+      <div class="anim-step" id="ss2"><div class="as-label">Authenticate to Vault</div><div class="as-desc">Present WIT to Vault JWT auth endpoint. Vault validates via WIMSE IdP JWKS → Vault token.</div></div>
+      <div class="anim-step" id="ss3"><div class="as-label">Retrieve Application Secrets</div><div class="as-desc">Use Vault token to fetch dynamic DB credentials, mTLS certs (PKI), and API keys. All in Vault audit log.</div></div>
+      <div class="anim-step" id="ss4"><div class="as-label">Service-to-Service Calls</div><div class="as-desc">Use WIMSE WIT + per-request WPT for all inter-service calls. No long-lived shared secrets.</div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -879,6 +1068,240 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════
+     Scene 8 — Post-Quantum Safety
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-postquantum">
+  <div class="scene-num">Scenario 8</div>
+  <h1 class="scene-title">Post-Quantum Safety for WIMSE</h1>
+  <p class="scene-lead">WIMSE currently relies on EC P-256 (ECDSA) for all token signatures and mTLS certificates. Shor's algorithm running on a cryptographically relevant quantum computer (CRQC) can break elliptic curve discrete logarithm in polynomial time — rendering every WIT, WPT, and mTLS cert forgeable.</p>
+
+  <div class="callout danger">
+    <strong>Harvest Now, Decrypt Later (HNDL):</strong> Adversaries are already capturing encrypted WIMSE traffic and storing it. When a CRQC becomes available (~2030–2035 by most estimates), they can retroactively forge tokens, decrypt sessions, and impersonate any workload whose identity material was observed in transit.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Threat timeline</div>
+    <div class="timeline-bar">
+      <div class="tl-seg tl-now">
+        <strong style="color:var(--green)">Now (2025–2028)</strong>
+        <span>EC P-256 secure. Harvest attacks begin. Prepare now.</span>
+      </div>
+      <div class="tl-seg tl-near">
+        <strong style="color:var(--orange)">Transition (2028–2032)</strong>
+        <span>Hybrid EC + ML-DSA dual-sign. Both signature types accepted.</span>
+      </div>
+      <div class="tl-seg tl-q">
+        <strong style="color:var(--red)">Quantum Era (2032+)</strong>
+        <span>EC-only issuers rejected. Pure ML-DSA or SLH-DSA required.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">NIST PQC standards (2024 finalists)</div>
+    <div class="pq-grid">
+      <div class="pq-card">
+        <span class="pq-badge pq-sig">Signature</span>
+        <h4>ML-DSA</h4>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:8px">CRYSTALS-Dilithium. Lattice-based. Primary NIST recommendation for digital signatures.</p>
+        <table class="compare-table" style="font-size:11px">
+          <tr><td>Public key</td><td><strong>1312 B</strong> (vs 64 B for EC)</td></tr>
+          <tr><td>Signature</td><td><strong>2420 B</strong> (vs 64 B for EC)</td></tr>
+          <tr><td>Security</td><td>128-bit PQ equivalent</td></tr>
+          <tr><td>WIMSE use</td><td>WIT signing, WPT signing</td></tr>
+        </table>
+      </div>
+      <div class="pq-card">
+        <span class="pq-badge pq-kem">Key Exchange</span>
+        <h4>ML-KEM</h4>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:8px">CRYSTALS-Kyber. Lattice-based key encapsulation. Replaces ECDH in TLS 1.3 key exchange.</p>
+        <table class="compare-table" style="font-size:11px">
+          <tr><td>Public key</td><td><strong>1184 B</strong> (vs 32 B for ECDH)</td></tr>
+          <tr><td>Ciphertext</td><td><strong>1088 B</strong> (vs 32 B)</td></tr>
+          <tr><td>Security</td><td>128-bit PQ equivalent</td></tr>
+          <tr><td>WIMSE use</td><td>mTLS key exchange in TLS 1.3</td></tr>
+        </table>
+      </div>
+      <div class="pq-card">
+        <span class="pq-badge pq-hash">Hash-Based</span>
+        <h4>SLH-DSA</h4>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:8px">SPHINCS+. Stateless hash-based signatures. Conservative option; much larger signatures but only relies on hash security.</p>
+        <table class="compare-table" style="font-size:11px">
+          <tr><td>Public key</td><td><strong>32 B</strong> (small!)</td></tr>
+          <tr><td>Signature</td><td><strong>8 KB – 50 KB</strong></td></tr>
+          <tr><td>Security</td><td>256-bit PQ equivalent</td></tr>
+          <tr><td>WIMSE use</td><td>Trust Anchor signing (long-lived keys)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">WIMSE component impact — what needs to change?</div>
+    <table class="compare-table">
+      <tr><th>WIMSE Component</th><th>Current (EC P-256)</th><th>PQ-Safe</th><th>Migration Path</th></tr>
+      <tr>
+        <td><strong>WIT signing</strong></td>
+        <td class="cross">ES256 (ECDSA)</td>
+        <td class="check">ML-DSA (alg=ML-DSA-44)</td>
+        <td>Hybrid: both alg in header during transition</td>
+      </tr>
+      <tr>
+        <td><strong>WPT signing</strong></td>
+        <td class="cross">ES256 (ECDSA)</td>
+        <td class="check">ML-DSA or SLH-DSA</td>
+        <td>Same hybrid approach; WPT key confirmed in WIT cnf.jwk</td>
+      </tr>
+      <tr>
+        <td><strong>mTLS certificates</strong></td>
+        <td class="cross">EC P-256 X.509</td>
+        <td class="check">ML-DSA + ML-KEM in TLS 1.3</td>
+        <td>Dual-cert: server presents both EC and PQ cert</td>
+      </tr>
+      <tr>
+        <td><strong>cnf.jwk key type</strong></td>
+        <td class="cross">EC {kty:"EC", crv:"P-256"}</td>
+        <td class="check">OKP {kty:"OKP", crv:"ML-DSA-44"}</td>
+        <td>New JWK key type. WIT parser must handle both.</td>
+      </tr>
+      <tr>
+        <td><strong>OID-FED entity config</strong></td>
+        <td class="cross">EC key in JWKS</td>
+        <td class="check">ML-DSA key in JWKS</td>
+        <td>Publish both EC and ML-DSA keys during transition</td>
+      </tr>
+      <tr>
+        <td><strong>Trust Anchor signing</strong></td>
+        <td class="cross">EC P-256</td>
+        <td class="check">SLH-DSA (conservative, high-assurance)</td>
+        <td>Trust Anchors have long-lived keys → prioritise PQ-migration</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Hybrid signature approach — transition period</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">During the EC → PQ transition, WIMSE tokens carry <em>both</em> an EC and a PQ signature. Validators that understand PQ verify the PQ signature; legacy validators fall back to EC. Once PQ is universal, the EC signature is dropped.</p>
+    <div class="vault-row">
+      <div class="vault-box">
+        <div class="vault-icon">📝</div>
+        <strong>Phase 1 — Hybrid Issuance</strong>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">WIT header: <code>alg:["ES256","ML-DSA-44"]</code>. Token carries both signatures. Works with EC-only and PQ-capable validators.</p>
+      </div>
+      <div class="vault-box">
+        <div class="vault-icon">🔄</div>
+        <strong>Phase 2 — Dual Accept</strong>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">All validators updated to accept ML-DSA. Issuers prefer ML-DSA but still include EC sig. JWKS exposes both key types.</p>
+      </div>
+      <div class="vault-box">
+        <div class="vault-icon">🔒</div>
+        <strong>Phase 3 — PQ Only</strong>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px">EC-only tokens rejected. <code>alg:ML-DSA-44</code> mandatory. mTLS requires ML-KEM. Trust Anchor uses SLH-DSA. Migration complete.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>WIMSE's modular design helps:</strong> Because WIMSE separates token issuance (IdP), key confirmation (<code>cnf.jwk</code>), and validation (middleware), each component can be upgraded independently. The SPIFFE URI identity (<code>sub</code>) remains unchanged — only the cryptographic algorithm changes.
+  </div>
+
+  <div class="callout">
+    <strong>Action now:</strong> (1) Inventory all trust material (WIT signing keys, mTLS CA, OID-FED Trust Anchor). (2) Prioritise Trust Anchor PQ migration — it's the highest-impact long-lived key. (3) Deploy hybrid-capable validators before the quantum deadline. (4) Monitor NIST and IETF (e.g. <code>draft-ietf-jose-pqc</code>) for finalised JOSE PQ algorithm identifiers.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Scene 9 — Paxos Consensus
+═══════════════════════════════════════════ -->
+<div class="scene" id="scene-paxos">
+  <div class="scene-num">Scenario 9</div>
+  <h1 class="scene-title">Paxos Consensus for Distributed WIMSE</h1>
+  <p class="scene-lead">A high-availability WIMSE deployment runs multiple IdP replicas. Without consensus, two replicas might issue conflicting tokens, or a JTI replay might succeed by hitting a replica that hasn't seen the first request. Paxos provides the agreement primitive that makes distributed WIMSE correct.</p>
+
+  <div class="card">
+    <div class="card-title">Why consensus matters — WIMSE pain points</div>
+    <table class="compare-table">
+      <tr><th>Problem</th><th>Without consensus</th><th>With Paxos</th></tr>
+      <tr><td><strong>Token issuance in HA cluster</strong></td><td class="cross">Two primaries race → duplicate JTIs, split claims</td><td class="check">Only one leader issues; majority agrees before commit</td></tr>
+      <tr><td><strong>JTI replay detection</strong></td><td class="cross">Replay succeeds by hitting a replica that hasn't seen the JTI</td><td class="check">JTI store is replicated via Raft/Paxos; replay rejected cluster-wide</td></tr>
+      <tr><td><strong>Trust Anchor key rotation</strong></td><td class="cross">Replicas briefly serve old and new keys — validation fails</td><td class="check">Key rotation committed atomically; all replicas switch simultaneously</td></tr>
+      <tr><td><strong>Token revocation propagation</strong></td><td class="cross">Revocation reaches some replicas later — revoked tokens still accepted</td><td class="check">Revocation log replicated; all replicas reject revoked token immediately</td></tr>
+      <tr><td><strong>OID-FED SS cache invalidation</strong></td><td class="cross">Stale Subordinate Statements used after expiry</td><td class="check">Cache expiry events propagated consistently to all gateway nodes</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Paxos protocol — animated 3-node token issuance</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Proposal value = <code>{sub, cnf.jwk, jti, exp}</code>. The proposer (IdP primary) must obtain a quorum (2 of 3) before issuing the token.</p>
+    <button class="play-btn" id="paxos-btn" onclick="playPaxos()">&#9654; Run Paxos Round</button>
+    <svg id="paxos-svg" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" class="paxos-svg">
+      <!-- Nodes -->
+      <rect id="pn0" x="10" y="70" width="130" height="60" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text x="75" y="97" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="11" font-weight="700">Proposer (Primary)</text>
+      <text x="75" y="113" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">idp-0.corp.example</text>
+      <rect id="pn1" x="275" y="70" width="130" height="60" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text x="340" y="97" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="700">Acceptor</text>
+      <text x="340" y="113" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">idp-1.corp.example</text>
+      <rect id="pn2" x="540" y="70" width="130" height="60" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text x="605" y="97" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="700">Acceptor</text>
+      <text x="605" y="113" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">idp-2.corp.example</text>
+      <!-- Lines -->
+      <line x1="140" y1="100" x2="275" y2="100" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <line x1="405" y1="100" x2="540" y2="100" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <!-- Packets -->
+      <circle id="ppkt1" cx="75" cy="100" r="7" fill="#ffa657" visibility="hidden"/>
+      <circle id="ppkt2" cx="75" cy="100" r="7" fill="#58a6ff" visibility="hidden"/>
+      <!-- Message labels -->
+      <text id="pmsg1" x="207" y="88" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9" visibility="hidden">Prepare(n=1)</text>
+      <text id="pmsg2" x="207" y="120" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9" visibility="hidden">Promise(n=1)</text>
+      <text id="pmsg3" x="472" y="88" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9" visibility="hidden">Prepare(n=1)</text>
+      <text id="pmsg4" x="472" y="120" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="9" visibility="hidden">Promise(n=1)</text>
+      <text id="pmsg5" x="207" y="88" text-anchor="middle" fill="#3fb950" font-family="monospace" font-size="9" visibility="hidden">Accept(n=1,v)</text>
+      <text id="pmsg6" x="472" y="88" text-anchor="middle" fill="#3fb950" font-family="monospace" font-size="9" visibility="hidden">Accept(n=1,v)</text>
+      <!-- Status -->
+      <text id="paxos-status" x="340" y="180" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="12" font-weight="700">Click ▶ Run Paxos Round to begin</text>
+    </svg>
+    <div class="anim-steps">
+      <div class="anim-step" id="pxs1"><div class="as-label">Phase 1a — Prepare(n)</div><div class="as-desc">Proposer broadcasts Prepare(ballot=1) to all acceptors. "I want to propose something with ballot number 1."</div></div>
+      <div class="anim-step" id="pxs2"><div class="as-label">Phase 1b — Promise(n)</div><div class="as-desc">Acceptors respond with Promise: "I won't accept any proposal with ballot &lt; 1. Here's the last value I accepted (if any)."</div></div>
+      <div class="anim-step" id="pxs3"><div class="as-label">Phase 2a — Accept(n, v)</div><div class="as-desc">Proposer has a quorum. Broadcasts Accept(ballot=1, value={sub, cnf.jwk, jti, exp}). "Please accept this token payload."</div></div>
+      <div class="anim-step" id="pxs4"><div class="as-label">Phase 2b — Accepted + Token Issued</div><div class="as-desc">Acceptors commit. Quorum reached. Token is issued. All replicas have the same JTI in their replay store.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Practical deployment — Raft over classic Paxos</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Most WIMSE deployments use <strong>Raft</strong> (Multi-Paxos equivalent with simpler leader election) rather than classic Paxos. etcd and CockroachDB both use Raft. A WIMSE HA cluster with Raft looks like:</p>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div><strong>3 or 5 IdP replicas</strong><p>Odd quorum. Leader elected by Raft. Leader handles all token issuance writes. Followers serve reads (JWKS, health).</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div><strong>Replicated JTI store</strong><p>Every JTI is written to the Raft log before the token is issued. All replicas see the same JTI history → replay detection works across nodes.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div><strong>Key rotation via Raft commit</strong><p>New signing key committed as a Raft entry with a future activation timestamp. All replicas switch at the same logical time → no split-brain key state.</p></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div><strong>Revocation log</strong><p>Revoked JTIs written as Raft entries. Gateways subscribe to the revocation feed via SSE or gRPC stream from the leader.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout ok">
+    <strong>Quorum sizing rule:</strong> For a WIMSE IdP cluster with N nodes, you need ⌊N/2⌋+1 nodes to form a quorum. 3-node cluster: 2 nodes needed. 5-node cluster: 3 nodes needed. With 3 nodes, you can tolerate 1 failure; with 5 nodes, you can tolerate 2 — which covers a rolling deploy of a multi-zone cluster.
+  </div>
+
+  <div class="callout">
+    <strong>Consistency vs latency tradeoff:</strong> Synchronous Raft commit adds ~1–5ms latency per token issuance (one RTT to quorum). For most WIMSE deployments this is acceptable since tokens are cached and reused for their TTL (typically 1h). For ultra-low-latency cases, use async replication with leader-only issuance and accept a small window of split-brain risk.
+  </div>
+</div>
+
 <script>
 function showScene(name) {
   document.querySelectorAll('.snav-item').forEach(t => t.classList.remove('active'));
@@ -886,6 +1309,272 @@ function showScene(name) {
   event.target.classList.add('active');
   document.getElementById('scene-' + name).classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Animation utilities ──────────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function animPkt(pktId, x1, y1, x2, y2, dur, color) {
+  const pkt = document.getElementById(pktId);
+  if (!pkt) return;
+  pkt.setAttribute('fill', color);
+  pkt.setAttribute('cx', x1); pkt.setAttribute('cy', y1);
+  pkt.setAttribute('visibility', 'visible');
+  const t0 = performance.now();
+  await new Promise(res => {
+    function f(ts) {
+      const p = Math.min((ts - t0) / dur, 1);
+      const e = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
+      pkt.setAttribute('cx', x1 + (x2-x1)*e);
+      pkt.setAttribute('cy', y1 + (y2-y1)*e);
+      if (p < 1) requestAnimationFrame(f);
+      else { pkt.setAttribute('visibility','hidden'); res(); }
+    }
+    requestAnimationFrame(f);
+  });
+}
+
+function setAStep(id, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  ['active','done'].forEach(c => el.classList.remove(c));
+  if (cls) el.classList.add(cls);
+}
+
+// ── Product flow (Scenario 3) ────────────────────────────────────────────────
+const PRODUCTS = {
+  okta: {
+    actors: ['Workload','Cloud Auth','Okta / Auth0','Target Svc'],
+    subs:   ['spiffe://corp…','IRSA / WIF','OAuth + WIT','WIT + WPT'],
+    steps: [
+      { label:'Get cloud credential', desc:'Workload calls cloud metadata service to obtain IRSA / WIF / Workload Identity Pool token.', x1:65, x2:245, col:'#ffa657' },
+      { label:'Exchange at Okta',      desc:'Cloud credential presented to Okta. Okta validates and issues an OAuth access token with custom workload claims.', x1:245, x2:425, col:'#58a6ff' },
+      { label:'WIMSE sidecar issues WIT', desc:'Okta token exchanged at WIMSE IdP sidecar. WIT issued with cnf.jwk set to workload EC P-256 public key.', x1:425, x2:65, col:'#3fb950' },
+      { label:'Call target with WIT + WPT', desc:'Workload calls target service attaching Workload-Identity-Token and per-request Workload-Proof-Token headers.', x1:65, x2:620, col:'#3fb950' },
+    ],
+  },
+  entra: {
+    actors: ['Workload','Azure MI','Entra ID','Target Svc'],
+    subs:   ['spiffe://corp…','Managed Identity','WIF + OIDC','WIT + WPT'],
+    steps: [
+      { label:'Azure Managed Identity assertion', desc:'Workload obtains OIDC assertion from Azure IMDS endpoint using Managed Identity or federated credential.', x1:65, x2:245, col:'#ffa657' },
+      { label:'Entra ID validates + issues token', desc:'Entra ID validates assertion. Workload Identity Federation (WIF) maps to Entra app registration. Entra token issued.', x1:245, x2:425, col:'#58a6ff' },
+      { label:'WIMSE IdP issues WIT', desc:'WIMSE IdP (Keycloak or Vault) validates Entra token via OIDC, issues WIT with sub=spiffe://corp.example/svc/billing.', x1:425, x2:65, col:'#3fb950' },
+      { label:'Call target with WIT + WPT', desc:'WIT cached for its TTL (1h). Per-request WPT generated for each call. Entra Conditional Access governs exchanges.', x1:65, x2:620, col:'#3fb950' },
+    ],
+  },
+  keycloak: {
+    actors: ['Workload','Cloud Cred','Keycloak','Target Svc'],
+    subs:   ['spiffe://corp…','IRSA / WIP','custom mapper','WIT + WPT'],
+    steps: [
+      { label:'Cloud metadata credential', desc:'Workload obtains cloud-native credential from instance metadata (IRSA, GKE WIP, Azure IMDS, or mTLS cert from SPIRE).', x1:65, x2:245, col:'#ffa657' },
+      { label:'Client credentials flow to Keycloak', desc:'Workload authenticates to Keycloak realm using M2M client credentials, presenting EC P-256 public key in the request.', x1:245, x2:425, col:'#58a6ff' },
+      { label:'Keycloak custom mapper issues WIT', desc:'Keycloak protocol mapper adds cnf.jwk claim with workload public key, transforming standard Keycloak JWT into valid WIT.', x1:425, x2:65, col:'#3fb950' },
+      { label:'Call target with WIT + WPT', desc:'WIT used for identity. WPT (signed with workload private key, aud=request URI, wth=hash(WIT)) added per request.', x1:65, x2:620, col:'#3fb950' },
+    ],
+  },
+  vault: {
+    actors: ['Workload','Vault PKI','Vault JWT','Target Svc'],
+    subs:   ['spiffe://corp…','mTLS + SPIFFE','→ WIT sidecar','mTLS + WIT'],
+    steps: [
+      { label:'Request mTLS cert from Vault PKI', desc:'Workload calls Vault PKI secrets engine. Receives short-lived X.509 cert with SPIFFE URI SAN. Used for transport authentication.', x1:65, x2:245, col:'#bc8cff' },
+      { label:'Vault JWT auth: cert → Vault token', desc:'Workload authenticates to Vault JWT/TLS auth method using the mTLS cert identity. Vault issues a scoped Vault token.', x1:245, x2:425, col:'#bc8cff' },
+      { label:'WIMSE sidecar: Vault token → WIT', desc:'Vault Agent or WIMSE sidecar exchanges Vault token for WIT at WIMSE IdP endpoint. cnf.jwk embeds workload public key.', x1:425, x2:65, col:'#3fb950' },
+      { label:'mTLS + WIT + WPT to target', desc:'Full stack: mTLS for transport, WIT for identity, WPT for per-request proof. Vault audit log captures every secret access.', x1:65, x2:620, col:'#3fb950' },
+    ],
+  },
+};
+
+let currentProduct = 'okta';
+let flowRunning = false;
+
+function selectProduct(name, el) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentProduct = name;
+  const p = PRODUCTS[name];
+  // Update actor labels
+  const ids = ['fa0','fa1','fa2','fa3'], sids = ['fa0s','fa1s','fa2s','fa3s'];
+  p.actors.forEach((a,i) => { const el2=document.getElementById(ids[i]); if(el2) el2.textContent=a; });
+  p.subs.forEach((s,i)   => { const el2=document.getElementById(sids[i]); if(el2) el2.textContent=s; });
+  // Reset steps
+  ['fls1','fls2','fls3','fls4'].forEach(id => setAStep(id,''));
+  p.steps.forEach((s,i) => {
+    const n=i+1;
+    const lb=document.getElementById('fls'+n+'-label'), db=document.getElementById('fls'+n+'-desc');
+    if(lb) lb.textContent=s.label;
+    if(db) db.textContent=s.desc;
+  });
+  const btn=document.getElementById('flow-play-btn');
+  if(btn) { btn.disabled=false; btn.textContent='▶ Play Flow'; }
+}
+
+// Initialise labels immediately (script is at end of body, DOM is ready)
+selectProduct('okta', document.querySelector('.ptab'));
+
+async function playProductFlow() {
+  if (flowRunning) return;
+  flowRunning = true;
+  const btn = document.getElementById('flow-play-btn');
+  btn.disabled = true;
+  const p = PRODUCTS[currentProduct];
+  ['fls1','fls2','fls3','fls4'].forEach(id => setAStep(id,''));
+
+  for (let i = 0; i < p.steps.length; i++) {
+    const s = p.steps[i], id = 'fls' + (i+1);
+    if (i > 0) setAStep('fls'+i, 'done');
+    setAStep(id, 'active');
+    await animPkt('flow-pkt', s.x1, 50, s.x2, 50, 900, s.col);
+    await sleep(120);
+  }
+  setAStep('fls4', 'done');
+  btn.disabled = false; btn.textContent = '↺ Replay';
+  flowRunning = false;
+}
+
+// ── Centralised vs Distributed animation (Scenario 5) ───────────────────────
+let centRunning = false, distRunning = false;
+
+async function playCentralised() {
+  if (centRunning) return;
+  centRunning = true;
+  const btn = document.getElementById('cent-btn');
+  btn.disabled = true;
+
+  const targets = [{id:'cp1',x2:40,y2:120},{id:'cp2',x2:130,y2:120},{id:'cp3',x2:220,y2:120}];
+  for (let i = 0; i < 3; i++) {
+    const t = targets[i];
+    await animPkt(t.id, 130, 46, t.x2, t.y2, 700, '#58a6ff');
+    await sleep(100);
+  }
+  btn.disabled = false; btn.textContent = '↺ Animate';
+  centRunning = false;
+}
+
+async function playDistributed() {
+  if (distRunning) return;
+  distRunning = true;
+  const btn = document.getElementById('dist-btn');
+  btn.disabled = true;
+
+  // IdP-A issues to workloads 1+2
+  const p1 = animPkt('dp1', 50, 93, 30, 130, 600, '#3fb950');
+  const p2 = animPkt('dp2', 210, 93, 230, 130, 600, '#3fb950');
+  await Promise.all([p1, p2]);
+  await sleep(150);
+  // IdP-A issues to workload 2, IdP-B issues to workload 3
+  await animPkt('dp1', 50, 93, 90, 130, 600, '#3fb950');
+  await animPkt('dp2', 210, 93, 170, 130, 600, '#3fb950');
+
+  btn.disabled = false; btn.textContent = '↺ Animate';
+  distRunning = false;
+}
+
+// ── Secrets flow (Scenario 6) ────────────────────────────────────────────────
+let secRunning = false;
+
+async function playSecretsFlow() {
+  if (secRunning) return;
+  secRunning = true;
+  const btn = document.getElementById('secrets-play-btn');
+  btn.disabled = true;
+  ['ss1','ss2','ss3','ss4'].forEach(id => setAStep(id,''));
+
+  const steps = [
+    { id:'ss1', x1:65,  x2:245, col:'#ffa657' },  // Workload → WIMSE IdP
+    { id:'ss2', x1:245, x2:425, col:'#bc8cff' },  // WIMSE IdP → Vault
+    { id:'ss3', x1:425, x2:65,  col:'#bc8cff' },  // Vault → Workload (secrets)
+    { id:'ss4', x1:65,  x2:620, col:'#3fb950' },  // Workload → Target
+  ];
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    if (i > 0) setAStep(steps[i-1].id, 'done');
+    setAStep(s.id, 'active');
+    await animPkt('sec-pkt', s.x1, 50, s.x2, 50, 900, s.col);
+    await sleep(150);
+  }
+  setAStep('ss4', 'done');
+  btn.disabled = false; btn.textContent = '↺ Replay';
+  secRunning = false;
+}
+
+// ── Paxos animation (Scenario 9) ─────────────────────────────────────────────
+let paxosRunning = false;
+
+function paxosStatus(msg) {
+  const el = document.getElementById('paxos-status');
+  if (el) el.textContent = msg;
+}
+function showPMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.setAttribute('visibility','visible');
+}
+function hidePMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.setAttribute('visibility','hidden');
+}
+function nodeHi(id, col) {
+  const el = document.getElementById(id);
+  if (el) { el.setAttribute('stroke', col); el.setAttribute('stroke-width','2.5'); }
+}
+function nodeReset(id) {
+  const el = document.getElementById(id);
+  if (el) { el.setAttribute('stroke','#30363d'); el.setAttribute('stroke-width','1.5'); }
+}
+
+async function playPaxos() {
+  if (paxosRunning) return;
+  paxosRunning = true;
+  const btn = document.getElementById('paxos-btn');
+  btn.disabled = true;
+
+  // Reset
+  ['pn0','pn1','pn2'].forEach(nodeReset);
+  ['pmsg1','pmsg2','pmsg3','pmsg4','pmsg5','pmsg6'].forEach(hidePMsg);
+  ['pxs1','pxs2','pxs3','pxs4'].forEach(id => setAStep(id,''));
+
+  // Phase 1a: Prepare
+  setAStep('pxs1','active');
+  paxosStatus('Phase 1a — Proposer broadcasts Prepare(n=1)…');
+  nodeHi('pn0','#ffa657');
+  showPMsg('pmsg1'); showPMsg('pmsg3');
+  const p1a = animPkt('ppkt1', 75, 100, 340, 100, 700, '#ffa657');
+  const p1b = animPkt('ppkt2', 75, 100, 605, 100, 900, '#ffa657');
+  await Promise.all([p1a, p1b]);
+  await sleep(300);
+
+  // Phase 1b: Promise
+  setAStep('pxs1','done'); setAStep('pxs2','active');
+  paxosStatus('Phase 1b — Acceptors respond with Promise(n=1)…');
+  nodeHi('pn1','#58a6ff'); nodeHi('pn2','#58a6ff');
+  hidePMsg('pmsg1'); hidePMsg('pmsg3');
+  showPMsg('pmsg2'); showPMsg('pmsg4');
+  const p2a = animPkt('ppkt1', 340, 100, 75, 100, 700, '#58a6ff');
+  const p2b = animPkt('ppkt2', 605, 100, 75, 100, 900, '#58a6ff');
+  await Promise.all([p2a, p2b]);
+  await sleep(300);
+
+  // Phase 2a: Accept
+  setAStep('pxs2','done'); setAStep('pxs3','active');
+  paxosStatus('Phase 2a — Proposer has quorum, broadcasts Accept(n=1, v={token})…');
+  hidePMsg('pmsg2'); hidePMsg('pmsg4');
+  showPMsg('pmsg5'); showPMsg('pmsg6');
+  const p3a = animPkt('ppkt1', 75, 100, 340, 100, 700, '#3fb950');
+  const p3b = animPkt('ppkt2', 75, 100, 605, 100, 900, '#3fb950');
+  await Promise.all([p3a, p3b]);
+  await sleep(300);
+
+  // Phase 2b: Accepted — token issued
+  setAStep('pxs3','done'); setAStep('pxs4','active');
+  paxosStatus('Phase 2b — Quorum accepted. Token committed and issued. JTI recorded in all replicas.');
+  hidePMsg('pmsg5'); hidePMsg('pmsg6');
+  nodeHi('pn0','#3fb950'); nodeHi('pn1','#3fb950'); nodeHi('pn2','#3fb950');
+  await sleep(800);
+  setAStep('pxs4','done');
+  paxosStatus('✓ Consensus reached — WIT issued atomically across 3 replicas');
+
+  btn.disabled = false; btn.textContent = '↺ Run Again';
+  paxosRunning = false;
 }
 </script>
 </body>
