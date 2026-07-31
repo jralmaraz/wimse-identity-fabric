@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"syscall/js"
 	"time"
 
@@ -22,9 +23,9 @@ import (
 // ---------- global demo state ----------
 
 var (
-	idpKP      *keys.ECKeyPair
-	idpIssuer  *wit.Issuer
-	sdIssuer   *sdwit.Issuer
+	idpKP     *keys.ECKeyPair
+	idpIssuer *wit.Issuer
+	sdIssuer  *sdwit.Issuer
 
 	workloadKP *keys.ECKeyPair
 	witToken   string
@@ -122,10 +123,18 @@ func setup(_ js.Value, _ []js.Value) interface{} {
 		return fail("serialize IdP JWK: " + err.Error())
 	}
 
+	wkJWK, err := keys.PublicKeyToJWK(workloadKP.Public, "wl-key-1")
+	if err != nil {
+		return fail("serialize workload JWK: " + err.Error())
+	}
+
 	return ok(map[string]interface{}{
-		"message":  "IdP and workload keys generated",
-		"issuerID": issuerID,
-		"idpJWK":   jwk,
+		"message":      "IdP and workload keys generated",
+		"issuerID":     issuerID,
+		"subject":      subjectURI,
+		"trustDomain":  trustDomain,
+		"idpJWK":       jwk,
+		"workloadJWK":  wkJWK,
 	})
 }
 
@@ -146,8 +155,11 @@ func issueWIT(_ js.Value, _ []js.Value) interface{} {
 
 	parts := jwtParts(witToken)
 	return ok(map[string]interface{}{
-		"token": witToken,
-		"parts": parts,
+		"token":  witToken,
+		"parts":  parts,
+		"issuer": issuerID,
+		"sub":    subjectURI,
+		"td":     trustDomain,
 	})
 }
 
@@ -175,6 +187,7 @@ func generateWPT(_ js.Value, _ []js.Value) interface{} {
 		"token":     wptToken,
 		"parts":     parts,
 		"wthDigest": wth,
+		"targetURI": targetURI,
 	})
 }
 
@@ -193,11 +206,11 @@ func validateRequest(_ js.Value, _ []js.Value) interface{} {
 
 	// Step 2: validate WPT
 	_, err = wptVal.Validate(wpt.ValidateOptions{
-		WPTString:        wptToken,
-		WITString:        witToken,
+		WPTString:         wptToken,
+		WITString:         witToken,
 		WorkloadPublicKey: witResult.WorkloadKey,
-		RequestURI:       targetURI,
-		CheckReplay:      true,
+		RequestURI:        targetURI,
+		CheckReplay:       true,
 	})
 	if err != nil {
 		return fail("WPT validation failed: " + err.Error())
@@ -205,15 +218,15 @@ func validateRequest(_ js.Value, _ []js.Value) interface{} {
 
 	return ok(map[string]interface{}{
 		"steps": []string{
-			"Parse Authorization header",
-			"Verify WIT signature (ES256)",
-			"Check WIT expiry and issuer",
+			"Parse Workload-Identity-Token header",
+			"Verify WIT ES256 signature (IdP public key)",
+			"Check WIT expiry, nbf, iat",
+			"Verify WIT iss == expected issuer",
 			"Extract workload public key from cnf.jwk",
-			"Verify WPT signature with workload key",
-			"Confirm aud == request URI",
-			"Verify wth == sha256(WIT)",
-			"Check jti not replayed",
-			"Request authorized",
+			"Verify WPT ES256 signature (workload key)",
+			"Confirm WPT aud == request URI (exact match)",
+			"Verify WPT wth == SHA-256(WIT)",
+			"Check WPT jti not replayed",
 		},
 		"subject":     witResult.Claims.Subject,
 		"trustDomain": witResult.Claims.TrustDomain,
@@ -235,20 +248,20 @@ func replayAttack(_ js.Value, _ []js.Value) interface{} {
 
 	// First use (should succeed).
 	_, firstErr := wptVal.Validate(wpt.ValidateOptions{
-		WPTString:        wptToken,
-		WITString:        witToken,
+		WPTString:         wptToken,
+		WITString:         witToken,
 		WorkloadPublicKey: witResult.WorkloadKey,
-		RequestURI:       targetURI,
-		CheckReplay:      true,
+		RequestURI:        targetURI,
+		CheckReplay:       true,
 	})
 
 	// Second use (should fail — jti replayed).
 	_, secondErr := wptVal.Validate(wpt.ValidateOptions{
-		WPTString:        wptToken,
-		WITString:        witToken,
+		WPTString:         wptToken,
+		WITString:         witToken,
 		WorkloadPublicKey: witResult.WorkloadKey,
-		RequestURI:       targetURI,
-		CheckReplay:      true,
+		RequestURI:        targetURI,
+		CheckReplay:       true,
 	})
 
 	firstOK := firstErr == nil
@@ -293,19 +306,18 @@ func issueSDWIT(_ js.Value, _ []js.Value) interface{} {
 		return fail("RevealedClaims: " + err.Error())
 	}
 
-	// Split for visualization.
 	splitToken := splitSDJWT(sdToken)
 
 	return ok(map[string]interface{}{
-		"token":         sdToken,
-		"jwtPart":       splitToken[0],
-		"disclosures":   splitToken[1:],
+		"token":          sdToken,
+		"jwtPart":        splitToken[0],
+		"disclosures":    splitToken[1:],
 		"revealedClaims": revealed,
-		"explanation":   "The JWT payload contains only _sd hashes. Actual claim values are in separate Disclosure objects appended after ~",
+		"explanation":    "The JWT payload contains only _sd hashes. Actual claim values are in separate Disclosure objects appended after ~",
 	})
 }
 
-// presentSDWIT creates a limited presentation revealing only the subject.
+// presentSDWIT creates a limited presentation revealing only selected claims.
 func presentSDWIT(_ js.Value, args []js.Value) interface{} {
 	if sdToken == "" {
 		return fail("call issueSDWIT() first")
@@ -313,7 +325,6 @@ func presentSDWIT(_ js.Value, args []js.Value) interface{} {
 
 	reveal := []string{"sub"}
 	if len(args) > 0 && args[0].Type() == js.TypeString {
-		// Parse JSON array of claim names from JS.
 		var claims []string
 		if err := json.Unmarshal([]byte(args[0].String()), &claims); err == nil {
 			reveal = claims
@@ -369,6 +380,132 @@ func validateSDWIT(_ js.Value, args []js.Value) interface{} {
 	})
 }
 
+// checkAuthorization evaluates whether the current workload (identified by its WIT) may
+// perform action on resource, using a hardcoded demo ABAC/RBAC policy table.
+// This demonstrates how WIT claims (sub, trust_domain) drive fine-grained access control.
+func checkAuthorization(_ js.Value, args []js.Value) interface{} {
+	if witToken == "" {
+		return fail("call issueWIT() first")
+	}
+
+	resource := "api:billing-data"
+	action := "read"
+	if len(args) >= 1 && args[0].Type() == js.TypeString {
+		resource = args[0].String()
+	}
+	if len(args) >= 2 && args[1].Type() == js.TypeString {
+		action = args[1].String()
+	}
+
+	// Validate the WIT to get claims — WASM does the real crypto.
+	witV := wit.NewValidator(issuerID, idpKP.Public)
+	witResult, err := witV.Validate(witToken)
+	if err != nil {
+		return fail("WIT validation: " + err.Error())
+	}
+
+	subject := witResult.Claims.Subject
+	td := witResult.Claims.TrustDomain
+
+	type rule struct {
+		subjectPrefix string
+		resource      string
+		action        string
+		allow         bool
+		description   string
+	}
+
+	// Demo policy — in production this would be an OPA/Cedar/OpenFGA policy.
+	policy := []rule{
+		{"spiffe://cloud-a.example/", "api:billing-data", "read", true, "cloud-a workloads may read billing data"},
+		{"spiffe://cloud-a.example/", "api:billing-data", "write", false, "write access requires explicit admin grant"},
+		{"spiffe://cloud-a.example/admin", "api:billing-data", "write", true, "admin workload has explicit write grant"},
+		{"spiffe://cloud-a.example/", "api:payment", "execute", false, "payment API requires separate approval process"},
+		{"spiffe://cloud-b.example/", "api:billing-data", "read", false, "cross-domain reads blocked — use token exchange"},
+	}
+
+	policyRows := make([]map[string]interface{}, len(policy))
+	for i, r := range policy {
+		policyRows[i] = map[string]interface{}{
+			"subjectPattern": r.subjectPrefix + "*",
+			"resource":       r.resource,
+			"action":         r.action,
+			"allow":          r.allow,
+			"description":    r.description,
+		}
+	}
+
+	allowed := false
+	matchIdx := -1
+	matchDesc := "no matching rule — default DENY"
+	for i, r := range policy {
+		if strings.HasPrefix(subject, r.subjectPrefix) && r.resource == resource && r.action == action {
+			allowed = r.allow
+			matchIdx = i
+			matchDesc = r.description
+			break
+		}
+	}
+
+	return ok(map[string]interface{}{
+		"allowed":     allowed,
+		"subject":     subject,
+		"trustDomain": td,
+		"resource":    resource,
+		"action":      action,
+		"matchedRule": matchIdx,
+		"matchDesc":   matchDesc,
+		"policy":      policyRows,
+	})
+}
+
+// generateMTLSCert generates a demo CA and workload X.509 certificate with
+// a SPIFFE URI Subject Alternative Name, demonstrating the mTLS identity layer.
+func generateMTLSCert(_ js.Value, _ []js.Value) interface{} {
+	if workloadKP == nil {
+		return fail("call setup() first")
+	}
+
+	ca, err := keys.GenerateCA(trustDomain)
+	if err != nil {
+		return fail("generate CA: " + err.Error())
+	}
+
+	cert, err := ca.IssueWorkloadCert(subjectURI, workloadKP.Public, &keys.CertOptions{
+		DNSNames: []string{"workload-a.cloud-a.example"},
+	})
+	if err != nil {
+		return fail("issue cert: " + err.Error())
+	}
+
+	c := cert.Cert
+	var uris []string
+	for _, u := range c.URIs {
+		uris = append(uris, u.String())
+	}
+
+	// Compute a fingerprint of the cert for display.
+	h := sha256.Sum256(cert.CertPEM)
+	fp := base64.RawURLEncoding.EncodeToString(h[:16]) // first 128 bits
+
+	return ok(map[string]interface{}{
+		"subject":    subjectURI,
+		"spiffeURIs": uris,
+		"dnsNames":   c.DNSNames,
+		"issuer":     ca.Cert.Subject.CommonName,
+		"notBefore":  c.NotBefore.Format(time.RFC3339),
+		"notAfter":   c.NotAfter.Format(time.RFC3339),
+		"keyType":    "EC P-256",
+		"sigAlg":     "ECDSA-SHA256",
+		"serial":     c.SerialNumber.String(),
+		"fingerprint": fp,
+		"pem":        string(cert.CertPEM),
+		"caPEM":      string(ca.CertPEM),
+		"tlsVersion": "TLS 1.3",
+		"explanation": "SPIFFE URI SAN binds this certificate to the workload's cryptographic identity. The cert is used for mTLS mutual authentication at the transport layer.",
+	})
+}
+
 // ---------- internal helpers ----------
 
 func splitSDJWT(s string) []string {
@@ -404,14 +541,16 @@ func difference(all, subset []string) []string {
 
 func main() {
 	js.Global().Set("wimse", js.ValueOf(map[string]interface{}{
-		"setup":          js.FuncOf(setup),
-		"issueWIT":       js.FuncOf(issueWIT),
-		"generateWPT":    js.FuncOf(generateWPT),
-		"validateRequest": js.FuncOf(validateRequest),
-		"replayAttack":   js.FuncOf(replayAttack),
-		"issueSDWIT":     js.FuncOf(issueSDWIT),
-		"presentSDWIT":   js.FuncOf(presentSDWIT),
-		"validateSDWIT":  js.FuncOf(validateSDWIT),
+		"setup":               js.FuncOf(setup),
+		"issueWIT":            js.FuncOf(issueWIT),
+		"generateWPT":         js.FuncOf(generateWPT),
+		"validateRequest":     js.FuncOf(validateRequest),
+		"replayAttack":        js.FuncOf(replayAttack),
+		"issueSDWIT":          js.FuncOf(issueSDWIT),
+		"presentSDWIT":        js.FuncOf(presentSDWIT),
+		"validateSDWIT":       js.FuncOf(validateSDWIT),
+		"checkAuthorization":  js.FuncOf(checkAuthorization),
+		"generateMTLSCert":    js.FuncOf(generateMTLSCert),
 	}))
 
 	// Block forever — WASM modules must not exit.

@@ -3,1350 +3,1300 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WIMSE Identity Fabric — Interactive Demo</title>
+<title>WIMSE Identity Fabric — Interactive Story</title>
 <style>
-/* ═══ Design tokens ════════════════════════════════════════════════════════ */
 :root {
-  --bg:       #0d1117;
-  --surface:  #161b22;
-  --surface2: #1c2128;
-  --border:   #30363d;
-  --text:     #c9d1d9;
-  --muted:    #8b949e;
-  --blue:     #58a6ff;
-  --green:    #3fb950;
-  --red:      #f85149;
-  --yellow:   #d29922;
-  --purple:   #bc8cff;
-  --orange:   #ffa657;
-  --cyan:     #39d0d8;
-  --r:        8px;
-  --mono:     "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --blue: #58a6ff;
+  --green: #3fb950;
+  --red: #f85149;
+  --orange: #ffa657;
+  --purple: #bc8cff;
+  --yellow: #d29922;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg); color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  font-size: 14px; line-height: 1.6;
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
 
-/* ═══ Loading overlay ══════════════════════════════════════════════════════ */
-#loading {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 16px; z-index: 999;
-}
-.spinner {
-  width: 44px; height: 44px; border: 3px solid var(--border);
-  border-top-color: var(--blue); border-radius: 50%;
-  animation: spin .8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ── Header ── */
+.site-header{border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;background:var(--bg);z-index:100}
+.site-logo{font-size:17px;font-weight:700;color:var(--blue)}
+.site-subtitle{color:var(--muted);font-size:12px}
+.wasm-badge{margin-left:auto;font-size:11px;padding:3px 10px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.wasm-badge.ready{color:var(--green);border-color:rgba(63,185,80,0.4)}
+.wasm-badge.loading{color:var(--orange)}
 
-/* ═══ Header ═══════════════════════════════════════════════════════════════ */
-header {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: 16px 32px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  position: sticky; top: 0; z-index: 10;
-}
-header h1 { font-size: 18px; font-weight: 700; color: #fff; }
-header p  { font-size: 12px; color: var(--muted); }
-.badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(88,166,255,.12); color: var(--blue);
-  border: 1px solid rgba(88,166,255,.3);
-  border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 600;
-}
-.badge.green { background: rgba(63,185,80,.12); color: var(--green); border-color: rgba(63,185,80,.3); }
-.badge.yellow{ background: rgba(210,153,34,.12); color: var(--yellow); border-color: rgba(210,153,34,.3); }
-header nav { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
-.nav-btn {
-  background: transparent; border: 1px solid var(--border); color: var(--muted);
-  padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
-  transition: all .15s;
-}
-.nav-btn:hover, .nav-btn.active { border-color: var(--blue); color: var(--blue); }
+/* ── Chapter progress ── */
+.chapter-nav{display:flex;align-items:center;justify-content:center;padding:18px 24px;overflow-x:auto;gap:0}
+.ch-dot{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;position:relative}
+.ch-dot.active{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.18)}
+.ch-dot.done{border-color:var(--green);color:var(--green)}
+.ch-dot:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+.ch-connector{width:36px;height:2px;background:var(--border);flex-shrink:0;transition:background 0.3s}
+.ch-connector.done{background:var(--green)}
+.ch-tooltip{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;display:none;z-index:20;pointer-events:none}
+.ch-dot:hover .ch-tooltip{display:block}
 
-/* ═══ Layout ════════════════════════════════════════════════════════════════ */
-main { max-width: 1100px; margin: 0 auto; padding: 28px 16px 80px; }
+/* ── Chapter layout ── */
+.chapter{display:none;max-width:900px;margin:0 auto;padding:20px 24px 70px}
+.chapter.active{display:block}
+.ch-num{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+.ch-title{font-size:26px;font-weight:700;margin-bottom:10px}
+.ch-lead{font-size:15px;color:var(--muted);max-width:660px;margin-bottom:20px}
+.spec-ref{font-size:11px;color:var(--muted);margin-bottom:20px}
+.spec-ref a{color:var(--blue);text-decoration:none}
+.spec-ref a:hover{text-decoration:underline}
 
-/* ═══ Scenario panels ══════════════════════════════════════════════════════ */
-.scenario { display: none; }
-.scenario.active { display: block; }
+/* ── Buttons ── */
+.btn{padding:8px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#79b8ff}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-secondary:hover{color:var(--text);border-color:var(--muted)}
+.btn-action{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:9px 20px}
+.btn-action:hover{border-color:var(--blue);color:var(--blue)}
+.btn-action:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none}
+.btn-green{background:var(--green);color:#0d1117}
+.btn-green:hover{background:#56d364}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#ff7b72}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.ch-footer{display:flex;gap:12px;margin-top:40px;justify-content:space-between}
 
-.scenario-header {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 20px 24px; margin-bottom: 24px;
-}
-.scenario-header h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.scenario-header p  { color: var(--muted); font-size: 13px; max-width: 720px; }
-.scenario-meta { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+/* ── Diagram (SVG) ── */
+.diagram{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;margin-bottom:20px;overflow:hidden}
+.diagram svg{width:100%;height:auto;display:block}
+.node-box{fill:var(--surface2);stroke:var(--border);stroke-width:1.5}
+.node-box.ok{stroke:var(--green);stroke-width:2}
+.node-box.hi{stroke:var(--blue);stroke-width:2}
+.node-box.bad{stroke:var(--red);stroke-width:2;fill:rgba(248,81,73,0.07)}
+.node-lbl{fill:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;font-weight:700;text-anchor:middle;pointer-events:none}
+.node-sub{fill:var(--muted);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:10px;text-anchor:middle;pointer-events:none}
+.wire{fill:none;stroke-width:2}
+.wire-plain{stroke:var(--red);stroke-dasharray:6,4}
+.wire-tls{stroke:var(--green);stroke-width:2.5}
+.wire-hs{stroke:var(--orange);stroke-dasharray:8,4;animation:dashscroll 0.6s linear infinite}
+@keyframes dashscroll{to{stroke-dashoffset:-12}}
+.pkt-lbl{fill:var(--text);font-family:monospace;font-size:9px;text-anchor:middle;pointer-events:none}
 
-/* ═══ Architecture diagram (animated) ══════════════════════════════════════ */
-.arch-diagram {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 24px; margin-bottom: 24px; overflow-x: auto;
-}
-.arch-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .06em; margin-bottom: 16px; }
+/* ── Info grid ── */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.info-grid.c3{grid-template-columns:1fr 1fr 1fr}
+.info-grid.c1{grid-template-columns:1fr}
+@media(max-width:600px){.info-grid,.info-grid.c3{grid-template-columns:1fr}}
+.info-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px}
+.info-box.blue{border-color:rgba(88,166,255,0.4)}
+.info-box.green{border-color:rgba(63,185,80,0.4)}
+.info-box.red{border-color:rgba(248,81,73,0.4)}
+.info-box.orange{border-color:rgba(255,166,87,0.4)}
+.ibt{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px}
+.ibv{font-size:12px;font-family:monospace;color:var(--text);word-break:break-all;line-height:1.5}
 
-/* SVG diagram */
-.arch-svg { width: 100%; min-width: 600px; height: 200px; display: block; }
+/* ── JWT anatomy ── */
+.jwt-raw{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px;font-family:monospace;font-size:11px;word-break:break-all;line-height:1.9;margin-bottom:12px}
+.jwt-h{color:var(--red)}
+.jwt-p{color:var(--purple)}
+.jwt-s{color:var(--blue)}
+.jwt-sd{color:var(--orange)}
+.jwt-dot{color:var(--muted)}
+.jwt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:600px){.jwt-grid{grid-template-columns:1fr}}
+.jwt-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px}
+.jwt-box h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.jwt-box.jh h4{color:var(--red)}
+.jwt-box.jp h4{color:var(--purple)}
+.jwt-box pre{font-size:10px;line-height:1.6;overflow-x:auto;color:var(--text)}
 
-.node-rect { rx: 8; }
-.node-label { font-family: var(--mono); font-size: 11px; font-weight: 700; }
-.node-sub   { font-family: var(--mono); font-size: 9px; }
+/* ── Validation steps ── */
+.vsteps{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+.vstep{display:flex;align-items:center;gap:11px;padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px;transition:all 0.3s}
+.vstep.pass{border-color:var(--green);background:rgba(63,185,80,0.05)}
+.vstep-icon{width:20px;height:20px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:all 0.3s;font-weight:700;color:var(--muted)}
+.vstep.pass .vstep-icon{background:var(--green);border-color:var(--green);color:#0d1117}
 
-/* Packet animation */
-@keyframes flow {
-  0%   { opacity: 0; transform: translateX(0); }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { opacity: 0; transform: translateX(var(--dist)); }
-}
-.packet {
-  animation: flow var(--dur, 1.2s) ease-in-out forwards;
-}
+/* ── Policy table ── */
+.policy-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+.policy-table th{background:var(--surface2);padding:7px 11px;text-align:left;border:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted)}
+.policy-table td{padding:7px 11px;border:1px solid var(--border);background:var(--surface);font-family:monospace}
+.policy-table td.desc{font-family:sans-serif;font-size:11px;color:var(--muted)}
+.policy-table tr.matched td{background:rgba(63,185,80,0.08);border-color:rgba(63,185,80,0.4)}
+.policy-table tr.matched-deny td{background:rgba(248,81,73,0.08);border-color:rgba(248,81,73,0.4)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;font-family:sans-serif}
+.ba{background:rgba(63,185,80,0.2);color:var(--green)}
+.bd{background:rgba(248,81,73,0.2);color:var(--red)}
 
-/* ═══ Step panels ═══════════════════════════════════════════════════════════ */
-.steps-grid { display: flex; flex-direction: column; gap: 16px; }
-.step-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r); overflow: hidden;
-}
-.step-card-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px 18px; border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,.02);
-}
-.step-num {
-  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
-  background: rgba(88,166,255,.15); color: var(--blue);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
-}
-.step-num.done  { background: rgba(63,185,80,.2); color: var(--green); }
-.step-num.error { background: rgba(248,81,73,.2); color: var(--red); }
-.step-title { font-size: 14px; font-weight: 600; color: #fff; flex: 1; }
-.step-spec  { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.step-body  { padding: 18px; }
+/* ── SD-JWT claims ── */
+.claim-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.claim-chip{padding:5px 14px;border-radius:20px;border:2px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.15s;user-select:none}
+.claim-chip.on{border-color:var(--blue);color:var(--blue);background:rgba(88,166,255,0.1)}
+.claim-chip.locked{opacity:0.5;cursor:default}
 
-/* ═══ Buttons ═══════════════════════════════════════════════════════════════ */
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px; border-radius: 6px; border: 1px solid;
-  font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s;
-}
-.btn:disabled { opacity: .35; cursor: not-allowed; }
-.btn-primary { background: var(--blue); border-color: var(--blue); color: #000; }
-.btn-primary:hover:not(:disabled) { opacity: .85; }
-.btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
-.btn-outline:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
-.btn-danger  { background: rgba(248,81,73,.15); border-color: rgba(248,81,73,.4); color: var(--red); }
-.btn-danger:hover:not(:disabled) { background: rgba(248,81,73,.25); }
-.btn-warn    { background: rgba(210,153,34,.15); border-color: rgba(210,153,34,.4); color: var(--yellow); }
-.btn-warn:hover:not(:disabled) { background: rgba(210,153,34,.25); }
-.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+/* ── Attack demo ── */
+.attack-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.attack-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.attack-card.ok{border-color:var(--green)}
+.attack-card.bad{border-color:var(--red)}
+.attack-icon{font-size:26px;margin-bottom:6px}
+.attack-card h4{font-size:13px;margin-bottom:4px}
+.attack-card p{font-size:11px;color:var(--muted)}
 
-/* ═══ Token anatomy ═════════════════════════════════════════════════════════ */
-.anatomy {
-  display: flex; border: 1px solid var(--border); border-radius: 6px;
-  overflow: hidden; margin-top: 10px;
-}
-.anatomy-part { flex: 1; padding: 10px 12px; font-size: 11px; border-right: 1px solid var(--border); word-break: break-all; font-family: var(--mono); line-height: 1.6; }
-.anatomy-part:last-child { border-right: none; }
-.anatomy-part .label { font-size: 10px; font-weight: 700; letter-spacing: .05em; margin-bottom: 4px; text-transform: uppercase; }
-.a-header  { background: rgba(255,166,87,.07); }
-.a-header .label  { color: var(--orange); }
-.a-payload { background: rgba(88,166,255,.07); }
-.a-payload .label { color: var(--blue); }
-.a-sig     { background: rgba(188,140,255,.07); }
-.a-sig .label     { color: var(--purple); }
+/* ── Cert fields ── */
+.cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+@media(max-width:600px){.cert-grid{grid-template-columns:1fr}}
+.cert-field{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 11px}
+.cf-key{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:2px}
+.cf-val{font-size:11px;font-family:monospace;color:var(--text);word-break:break-all}
+.cf-val.spiffe{color:var(--blue)}
+.cf-val.ok{color:var(--green)}
 
-/* SD-JWT display */
-.sd-jwt-display { font-family: var(--mono); font-size: 11px; word-break: break-all; line-height: 1.9; }
-.sd-part-jwt  { color: var(--orange); }
-.sd-part-disc { color: var(--green); }
-.sd-part-sep  { color: var(--muted); }
-.sd-part-hide { color: #3a3a3a; text-decoration: line-through; }
+/* ── Verdict ── */
+.verdict{display:flex;align-items:center;gap:13px;padding:13px 18px;border-radius:8px;margin-bottom:14px;font-size:14px;font-weight:600}
+.verdict.allow{background:rgba(63,185,80,0.1);border:1px solid rgba(63,185,80,0.4);color:var(--green)}
+.verdict.deny{background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.4);color:var(--red)}
+.verdict-icon{font-size:20px}
 
-/* ═══ Check list ════════════════════════════════════════════════════════════ */
-.check-list { list-style: none; margin-top: 10px; }
-.check-list li {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 13px;
-}
-.check-list li:last-child { border-bottom: none; }
-.ci { flex-shrink: 0; margin-top: 1px; font-size: 14px; }
-.ci-pending { color: var(--muted); }
-.ci-ok      { color: var(--green); }
-.ci-fail    { color: var(--red); }
-.ci-warn    { color: var(--yellow); }
+/* ── Callout ── */
+.callout{border-left:4px solid var(--blue);padding:11px 15px;background:rgba(88,166,255,0.05);border-radius:0 6px 6px 0;margin-bottom:14px;font-size:13px;color:var(--muted)}
+.callout.warn{border-color:var(--orange);background:rgba(255,166,87,0.05)}
+.callout.danger{border-color:var(--red);background:rgba(248,81,73,0.05)}
+.callout.ok{border-color:var(--green);background:rgba(63,185,80,0.05)}
+.callout strong{color:var(--text)}
 
-/* ═══ Status banners ════════════════════════════════════════════════════════ */
-.status { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-top: 10px; display: none; }
-.status.ok   { background: rgba(63,185,80,.10); border: 1px solid rgba(63,185,80,.3); color: var(--green); display: block; }
-.status.err  { background: rgba(248,81,73,.10); border: 1px solid rgba(248,81,73,.3); color: var(--red); display: block; }
-.status.info { background: rgba(88,166,255,.09); border: 1px solid rgba(88,166,255,.3); color: var(--blue); display: block; }
-.status.warn { background: rgba(210,153,34,.10); border: 1px solid rgba(210,153,34,.3); color: var(--yellow); display: block; }
+/* ── Wire legend ── */
+.wire-legend{display:flex;gap:16px;margin-bottom:12px;font-size:12px;flex-wrap:wrap}
+.wl-item{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.wl-swatch{width:22px;height:3px;border-radius:2px;flex-shrink:0}
+.wl-plain{background:repeating-linear-gradient(90deg,var(--red) 0 6px,transparent 6px 10px)}
+.wl-hs{background:repeating-linear-gradient(90deg,var(--orange) 0 8px,transparent 8px 12px)}
+.wl-tls{background:var(--green)}
 
-/* ═══ Info rows ═════════════════════════════════════════════════════════════ */
-.info-row { display: flex; gap: 8px; align-items: baseline; margin: 4px 0; }
-.info-label { color: var(--muted); font-size: 12px; min-width: 100px; flex-shrink: 0; }
-.info-value { font-family: var(--mono); font-size: 12px; color: var(--text); word-break: break-all; }
+/* ── Exchange flow ── */
+.xflow{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.xstep{display:flex;align-items:flex-start;gap:11px;padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:13px}
+.xarrow{color:var(--blue);font-weight:700;flex-shrink:0;min-width:18px}
 
-/* ═══ Disclosure cards ══════════════════════════════════════════════════════ */
-.disc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 8px; margin-top: 10px; }
-.disc-card { background: #010409; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
-.disc-card.revealed { border-color: rgba(63,185,80,.4); }
-.disc-card.hidden   { border-color: rgba(248,81,73,.2); opacity: .5; }
-.dc-claim { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-.dc-claim.revealed { color: var(--green); }
-.dc-claim.hidden   { color: var(--red); }
-.dc-value { font-size: 11px; font-family: var(--mono); color: var(--muted); word-break: break-all; }
+/* ── PEM box ── */
+.pem-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px;font-family:monospace;font-size:9px;color:var(--green);max-height:110px;overflow-y:auto;margin-bottom:12px;white-space:pre}
 
-/* ═══ Claim chips ═══════════════════════════════════════════════════════════ */
-.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.chip {
-  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
-  border: 1px solid; cursor: pointer; transition: all .15s; user-select: none;
-}
-.chip.on  { background: rgba(63,185,80,.2); border-color: rgba(63,185,80,.5); color: var(--green); }
-.chip.off { background: transparent; border-color: var(--border); color: var(--muted); }
+/* ── Output ── */
+.output{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px;font-family:monospace;font-size:12px;color:var(--muted);min-height:44px}
+.output.err{border-color:var(--red);color:var(--red)}
 
-/* ═══ Threat model tag ══════════════════════════════════════════════════════ */
-.threat-tag {
-  display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
-}
-.threat-tag.critical { background: rgba(248,81,73,.2); color: var(--red); }
-.threat-tag.high     { background: rgba(255,166,87,.2); color: var(--orange); }
-.threat-tag.mitigated{ background: rgba(63,185,80,.15); color: var(--green); }
+/* ── Fields ── */
+.field-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:13px}
+.field-lbl{font-size:13px;color:var(--muted);min-width:72px}
+select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:13px}
+select:focus{outline:none;border-color:var(--blue)}
 
-/* ═══ Token box ════════════════════════════════════════════════════════════ */
-.token-box {
-  background: #010409; border: 1px solid var(--border); border-radius: 6px;
-  padding: 12px 14px; font-family: var(--mono); font-size: 11px;
-  word-break: break-all; line-height: 1.8; margin-top: 10px; overflow-x: auto;
-}
-details summary { cursor: pointer; color: var(--muted); font-size: 12px; margin-top: 8px; }
-details summary:hover { color: var(--text); }
+/* ── Spinner ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
 
-kbd { background: #21262d; border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 11px; }
-
-/* ═══ Network packet row (timeline) ════════════════════════════════════════ */
-.timeline { display: flex; flex-direction: column; gap: 0; margin-top: 14px; }
-.tl-row {
-  display: flex; align-items: center; gap: 0; padding: 6px 0;
-  border-bottom: 1px solid rgba(255,255,255,.04); font-size: 12px;
-}
-.tl-row:last-child { border-bottom: none; }
-.tl-actor { min-width: 120px; font-weight: 600; font-size: 11px; }
-.tl-actor.idp      { color: var(--purple); }
-.tl-actor.workload-a { color: var(--green); }
-.tl-actor.workload-b { color: var(--cyan); }
-.tl-actor.attacker { color: var(--red); }
-.tl-arrow { color: var(--muted); margin: 0 8px; font-size: 16px; flex-shrink: 0; }
-.tl-msg   { flex: 1; color: var(--text); }
-.tl-tag   { margin-left: auto; }
-.tl-row.hidden-row { display: none; }
-.tl-row.revealed-row { animation: fadeInRow .3s ease; }
-@keyframes fadeInRow { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+/* ── Pill ── */
+.pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600}
+.pill-b{background:rgba(88,166,255,0.15);color:var(--blue)}
+.pill-g{background:rgba(63,185,80,0.15);color:var(--green)}
+.pill-r{background:rgba(248,81,73,0.15);color:var(--red)}
+.pill-o{background:rgba(255,166,87,0.15);color:var(--orange)}
+.pill-p{background:rgba(188,140,255,0.15);color:var(--purple)}
 </style>
 </head>
 <body>
 
-<!-- Loading -->
-<div id="loading">
-  <div class="spinner"></div>
-  <p style="color:var(--muted)">Loading WIMSE WASM module…</p>
-  <p style="color:var(--muted);font-size:12px;margin-top:4px;">All cryptography runs locally in your browser.</p>
-</div>
-
-<!-- Header -->
-<header>
+<header class="site-header">
   <div>
-    <h1>WIMSE Identity Fabric</h1>
-    <p>Workload Identity in Multi-System Environments · IETF Draft · Live WebAssembly Demo</p>
+    <div class="site-logo">WIMSE Identity Fabric</div>
+    <div class="site-subtitle">IETF workload identity &mdash; interactive story</div>
   </div>
-  <span class="badge" id="wasm-badge">Loading…</span>
-  <nav>
-    <button class="nav-btn active" onclick="showScenario('happy')">Happy Path</button>
-    <button class="nav-btn" onclick="showScenario('replay')">Replay Attack</button>
-    <button class="nav-btn" onclick="showScenario('tamper')">Token Tampering</button>
-    <button class="nav-btn" onclick="showScenario('sd')">Selective Disclosure</button>
-    <button class="nav-btn" onclick="showScenario('threat')">Threat Model</button>
-  </nav>
+  <div class="wasm-badge loading" id="wasm-badge">
+    <div class="spin"></div> Loading WASM&hellip;
+  </div>
 </header>
 
-<main>
+<nav class="chapter-nav" id="chapter-nav"></nav>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SCENARIO 1 — Happy path
-══════════════════════════════════════════════════════════════════════════════ -->
-<div id="sc-happy" class="scenario active">
-  <div class="scenario-header">
-    <h2>Scenario 1 — Happy Path</h2>
-    <p>Workload A authenticates to Workload B using a WIT (Workload Identity Token) from its IdP
-       and a per-request WPT (Workload Proof Token). Workload B's middleware verifies both before
-       forwarding the request.</p>
-    <div class="scenario-meta">
-      <span class="badge">WIMSE workload-creds-02</span>
-      <span class="badge">WPT draft-01</span>
-      <span class="badge green">All checks pass</span>
-    </div>
-  </div>
+<!-- ═══════════════════════════════════════════
+     Ch 1 — The Problem
+═══════════════════════════════════════════ -->
+<section class="chapter active" id="ch1">
+  <div class="ch-num">Chapter 1 of 9</div>
+  <h1 class="ch-title">The Problem</h1>
+  <p class="ch-lead">Two workloads on the internet want to talk. But how does <strong>Workload&nbsp;B</strong> know the request really came from <strong>Workload&nbsp;A</strong> — and not an attacker?</p>
 
-  <!-- Architecture diagram -->
-  <div class="arch-diagram">
-    <div class="arch-title">ARCHITECTURE — request flow</div>
-    <svg class="arch-svg" viewBox="0 0 900 180" id="svg-happy">
-      <!-- Nodes -->
-      <rect class="node-rect" x="20"  y="60" width="130" height="60" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5" rx="8"/>
-      <text x="85"  y="87"  class="node-label" fill="#bc8cff" text-anchor="middle" font-size="12" font-weight="bold">IdP</text>
-      <text x="85"  y="104" class="node-sub"   fill="#8b949e" text-anchor="middle" font-size="10">cloud-a.example</text>
-
-      <rect class="node-rect" x="330" y="60" width="140" height="60" fill="#1c2128" stroke="#3fb950" stroke-width="1.5" rx="8"/>
-      <text x="400" y="87"  class="node-label" fill="#3fb950" text-anchor="middle" font-size="12" font-weight="bold">Workload A</text>
-      <text x="400" y="104" class="node-sub"   fill="#8b949e" text-anchor="middle" font-size="10">spiffe://cloud-a…/a</text>
-
-      <rect class="node-rect" x="650" y="60" width="140" height="60" fill="#1c2128" stroke="#39d0d8" stroke-width="1.5" rx="8"/>
-      <text x="720" y="87"  class="node-label" fill="#39d0d8" text-anchor="middle" font-size="12" font-weight="bold">Workload B</text>
-      <text x="720" y="104" class="node-sub"   fill="#8b949e" text-anchor="middle" font-size="10">spiffe://cloud-b…/b</text>
-
-      <!-- Static arrows -->
-      <defs>
-        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 Z" fill="#30363d"/>
-        </marker>
-        <marker id="arr-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 Z" fill="#3fb950"/>
-        </marker>
-        <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 Z" fill="#58a6ff"/>
-        </marker>
-      </defs>
-      <line x1="150" y1="90" x2="330" y2="90" stroke="#30363d" stroke-width="1" marker-end="url(#arr)"/>
-      <line x1="470" y1="90" x2="650" y2="90" stroke="#30363d" stroke-width="1" marker-end="url(#arr)"/>
-
-      <!-- Packet group: IdP → A (WIT) -->
-      <g id="pkt-wit" opacity="0">
-        <rect x="160" y="78" width="50" height="22" rx="4" fill="#1c2128" stroke="#bc8cff" stroke-width="1"/>
-        <text x="185" y="93" fill="#bc8cff" font-size="9" font-weight="bold" text-anchor="middle">WIT</text>
-      </g>
-      <!-- Packet group: A → B (WIT+WPT) -->
-      <g id="pkt-req" opacity="0">
-        <rect x="480" y="68" width="70" height="42" rx="4" fill="#1c2128" stroke="#3fb950" stroke-width="1"/>
-        <text x="515" y="85" fill="#3fb950" font-size="8" font-weight="bold" text-anchor="middle">WIT+WPT</text>
-        <text x="515" y="99" fill="#8b949e" font-size="8" text-anchor="middle">mTLS</text>
-      </g>
-      <!-- Check mark on B -->
-      <text id="pkt-check" x="720" y="56" fill="#3fb950" font-size="20" text-anchor="middle" opacity="0">✓</text>
-
-      <!-- Labels -->
-      <text x="240" y="145" fill="#8b949e" font-size="10" text-anchor="middle">① Issue WIT</text>
-      <text x="560" y="145" fill="#8b949e" font-size="10" text-anchor="middle">② Authenticate + validate</text>
+  <div class="diagram">
+    <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg">
+      <line x1="150" y1="78" x2="298" y2="128" class="wire wire-plain"/>
+      <line x1="402" y1="128" x2="550" y2="78" class="wire wire-plain"/>
+      <!-- Workload A -->
+      <rect x="10" y="52" width="130" height="52" rx="8" class="node-box"/>
+      <text x="75" y="76" class="node-lbl">Workload A</text>
+      <text x="75" y="92" class="node-sub">cloud-a.example</text>
+      <!-- Attacker -->
+      <rect x="297" y="104" width="106" height="48" rx="8" class="node-box bad"/>
+      <text x="350" y="126" class="node-lbl" style="fill:var(--red)">Attacker</text>
+      <text x="350" y="141" class="node-sub" style="fill:var(--red)">intercepts!</text>
+      <!-- Workload B -->
+      <rect x="560" y="52" width="130" height="52" rx="8" class="node-box"/>
+      <text x="625" y="76" class="node-lbl">Workload B</text>
+      <text x="625" y="92" class="node-sub">cloud-b.example</text>
+      <!-- Packet -->
+      <circle id="pkt-ch1" cx="150" cy="78" r="7" fill="var(--blue)" style="visibility:hidden"/>
+      <!-- Question -->
+      <text x="350" y="54" class="node-lbl" style="fill:var(--orange);font-size:20px;font-weight:900">?</text>
+      <text x="350" y="70" class="node-sub">No identity proof</text>
     </svg>
   </div>
 
-  <!-- Steps -->
-  <div class="steps-grid">
+  <div class="callout danger">
+    <strong>The core problem:</strong> TCP/IP packets carry no inherent identity. Anyone can claim to be anyone. A service receiving a request has zero cryptographic proof of the caller's identity.
+  </div>
 
-    <!-- Step 1 -->
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num" id="sn1">1</div>
-        <div>
-          <div class="step-title">Generate Keys — IdP &amp; Workload A</div>
-          <div class="step-spec">EC P-256 · ECDSA · cnf.jwk (alg=ES256)</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
-          The IdP generates its signing key. Workload A generates its own key pair — the public half
-          will be embedded in every WIT it receives as <kbd>cnf.jwk</kbd>.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="doSetup()">Generate Keys</button>
-        </div>
-        <div id="s1-status" class="status"></div>
-        <div id="s1-out" style="display:none;margin-top:10px;">
-          <div class="info-row"><span class="info-label">IdP issuer</span><span class="info-value" id="s1-issuer"></span></div>
-          <div class="info-row"><span class="info-label">IdP key type</span><span class="info-value">EC P-256</span></div>
-          <div class="info-row"><span class="info-label">Workload key</span><span class="info-value">EC P-256 (public will go in cnf.jwk)</span></div>
-        </div>
-      </div>
+  <div class="info-grid">
+    <div class="info-box red">
+      <div class="ibt">Without identity</div>
+      <div class="ibv">Any process can forge a request<br>No way to detect impersonation<br>Credentials get shared, leaked, stolen</div>
     </div>
-
-    <!-- Step 2 -->
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num" id="sn2">2</div>
-        <div>
-          <div class="step-title">IdP Issues Workload Identity Token</div>
-          <div class="step-spec">typ=wit+jwt · iss · sub · exp · cnf.jwk · jti · ES256</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
-          The IdP signs a JWT binding Workload A's identity URI to its public key.
-          The token is long-lived (hours); the WPT proves freshness per-request.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-wit" disabled onclick="doIssueWIT()">Issue WIT</button>
-        </div>
-        <div id="s2-status" class="status"></div>
-        <div id="s2-out" style="display:none">
-          <div class="anatomy">
-            <div class="anatomy-part a-header"><div class="label">Header</div><div id="wit-hdr"></div></div>
-            <div class="anatomy-part a-payload"><div class="label">Payload</div><div id="wit-pay"></div></div>
-            <div class="anatomy-part a-sig"><div class="label">Signature</div><div id="wit-sig" style="color:var(--purple)"></div></div>
-          </div>
-          <details><summary>Raw token</summary>
-            <div class="token-box"><span style="color:var(--orange)" id="wit-r-hdr"></span>.<span style="color:var(--blue)" id="wit-r-pay"></span>.<span style="color:var(--purple)" id="wit-r-sig"></span></div>
-          </details>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 3 -->
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num" id="sn3">3</div>
-        <div>
-          <div class="step-title">Workload A Generates a Workload Proof Token</div>
-          <div class="step-spec">typ=application/wpt+jwt · aud · wth=sha256(WIT) · jti · 5 min TTL</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
-          For every outbound request Workload A mints a fresh WPT, signed with its own private key.
-          <kbd>wth</kbd> binds it to the exact WIT; <kbd>aud</kbd> pins it to the target endpoint.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-wpt" disabled onclick="doGenerateWPT()">Generate WPT</button>
-        </div>
-        <div id="s3-status" class="status"></div>
-        <div id="s3-out" style="display:none">
-          <div class="anatomy">
-            <div class="anatomy-part a-header"><div class="label">Header</div><div id="wpt-hdr"></div></div>
-            <div class="anatomy-part a-payload"><div class="label">Payload</div><div id="wpt-pay"></div></div>
-            <div class="anatomy-part a-sig"><div class="label">Signature</div><div id="wpt-sig" style="color:var(--purple)"></div></div>
-          </div>
-          <div style="margin-top:10px">
-            <div class="info-row"><span class="info-label">wth digest</span><span class="info-value" style="color:var(--yellow)" id="s3-wth"></span></div>
-          </div>
-          <details><summary>Raw token</summary>
-            <div class="token-box"><span style="color:var(--orange)" id="wpt-r-hdr"></span>.<span style="color:var(--blue)" id="wpt-r-pay"></span>.<span style="color:var(--purple)" id="wpt-r-sig"></span></div>
-          </details>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 4 -->
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num" id="sn4">4</div>
-        <div>
-          <div class="step-title">Workload B Validates the Request</div>
-          <div class="step-spec">sig · exp · iss · typ · aud · wth · jti replay</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
-          Workload B's middleware runs eight sequential checks. Any failure returns HTTP 401 immediately.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-val" disabled onclick="doValidate()">Validate Request</button>
-        </div>
-        <div id="s4-status" class="status"></div>
-        <ul class="check-list" id="val-checks"></ul>
-        <div id="s4-caller" style="display:none;margin-top:12px;"></div>
-      </div>
-    </div>
-  </div><!-- steps-grid -->
-</div><!-- sc-happy -->
-
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SCENARIO 2 — Replay attack
-══════════════════════════════════════════════════════════════════════════════ -->
-<div id="sc-replay" class="scenario">
-  <div class="scenario-header">
-    <h2>Scenario 2 — Replay Attack</h2>
-    <p>An attacker captures a valid WPT from the wire and attempts to reuse it.
-       The jti nonce store on Workload B detects the replay and rejects the request,
-       even though the token signature is cryptographically valid.</p>
-    <div class="scenario-meta">
-      <span class="badge yellow">Threat: Network interception + replay</span>
-      <span class="badge green">Mitigated by jti nonce store</span>
+    <div class="info-box blue">
+      <div class="ibt">WIMSE's answer</div>
+      <div class="ibv">Cryptographic workload identity<br>Short-lived, unforgeable JWT tokens<br>Proof-of-possession per request</div>
     </div>
   </div>
 
-  <div class="arch-diagram">
-    <div class="arch-title">ATTACK FLOW</div>
-    <svg class="arch-svg" viewBox="0 0 900 200" id="svg-replay">
-      <rect x="20"  y="70" width="140" height="60" fill="#1c2128" stroke="#3fb950" stroke-width="1.5" rx="8"/>
-      <text x="90"  y="97"  fill="#3fb950" font-size="12" font-weight="bold" text-anchor="middle">Workload A</text>
-      <text x="90"  y="114" fill="#8b949e" font-size="10" text-anchor="middle">legitimate caller</text>
+  <div class="callout">
+    <strong>What you'll learn:</strong> How WIMSE uses <span class="pill pill-b">JWT</span> + <span class="pill pill-g">X.509</span> + <span class="pill pill-o">proof-of-possession</span> to give each workload a verifiable identity — from first principles, powered by real Go crypto compiled to WebAssembly.
+  </div>
 
-      <rect x="380" y="70" width="140" height="60" fill="#1c2128" stroke="#f85149" stroke-width="1.5" rx="8"/>
-      <text x="450" y="97"  fill="#f85149" font-size="12" font-weight="bold" text-anchor="middle">Attacker</text>
-      <text x="450" y="114" fill="#8b949e" font-size="10" text-anchor="middle">captured WPT</text>
+  <div class="ch-footer">
+    <div></div>
+    <button class="btn btn-primary" onclick="goChapter(2)">Start the story &rarr;</button>
+  </div>
+</section>
 
-      <rect x="730" y="70" width="140" height="60" fill="#1c2128" stroke="#39d0d8" stroke-width="1.5" rx="8"/>
-      <text x="800" y="97"  fill="#39d0d8" font-size="12" font-weight="bold" text-anchor="middle">Workload B</text>
-      <text x="800" y="114" fill="#8b949e" font-size="10" text-anchor="middle">jti nonce store</text>
+<!-- ═══════════════════════════════════════════
+     Ch 2 — WIT
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch2">
+  <div class="ch-num">Chapter 2 of 9</div>
+  <h1 class="ch-title">WIT: Your Identity Card</h1>
+  <p class="ch-lead">The <strong>Workload Identity Token (WIT)</strong> is a signed JWT issued by a trusted Identity Provider. It carries the workload's URI-based identity and a public key for proof-of-possession.</p>
+  <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/" target="_blank">draft-ietf-wimse-workload-creds-02</a> &nbsp;|&nbsp; <code>typ: wit+jwt</code> &nbsp;|&nbsp; alg: ES256</div>
 
-      <line x1="160" y1="100" x2="380" y2="100" stroke="#30363d" stroke-width="1" stroke-dasharray="4"/>
-      <line x1="520" y1="100" x2="730" y2="100" stroke="#30363d" stroke-width="1"/>
-
-      <text x="270" y="92" fill="#8b949e" font-size="10" text-anchor="middle">① intercept</text>
-      <text x="625" y="92" fill="#8b949e" font-size="10" text-anchor="middle">② replay attempt</text>
-
-      <text id="rp-block" x="800" y="62" fill="#f85149" font-size="18" text-anchor="middle" opacity="0">✗</text>
+  <div class="diagram">
+    <svg viewBox="0 0 700 195" xmlns="http://www.w3.org/2000/svg">
+      <line id="wire-ch2-idp-a" x1="145" y1="95" x2="265" y2="95" class="wire wire-tls"/>
+      <line id="wire-ch2-a-b" x1="405" y1="95" x2="535" y2="95" class="wire wire-plain"/>
+      <!-- IdP -->
+      <rect x="10" y="68" width="130" height="54" rx="8" class="node-box" id="ch2-node-idp"/>
+      <text x="75" y="93" class="node-lbl">Identity Provider</text>
+      <text x="75" y="108" class="node-sub">idp.cloud-a.example</text>
+      <!-- Workload A -->
+      <rect x="270" y="68" width="130" height="54" rx="8" class="node-box" id="ch2-node-a"/>
+      <text x="335" y="93" class="node-lbl">Workload A</text>
+      <text x="335" y="108" class="node-sub">cloud-a.example</text>
+      <!-- Workload B -->
+      <rect x="540" y="68" width="130" height="54" rx="8" class="node-box" id="ch2-node-b"/>
+      <text x="605" y="93" class="node-lbl">Workload B</text>
+      <text x="605" y="108" class="node-sub">cloud-b.example</text>
+      <!-- Packets -->
+      <rect id="pkt-wit-i" x="145" y="82" width="46" height="18" rx="4" fill="var(--blue)" style="visibility:hidden;opacity:0.9"/>
+      <text id="pkt-wit-i-lbl" x="168" y="95" class="pkt-lbl" style="visibility:hidden">WIT</text>
+      <rect id="pkt-wit-s" x="405" y="82" width="46" height="18" rx="4" fill="var(--blue)" style="visibility:hidden;opacity:0.9"/>
+      <text id="pkt-wit-s-lbl" x="428" y="95" class="pkt-lbl" style="visibility:hidden">WIT</text>
     </svg>
   </div>
 
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">1</div>
-        <div><div class="step-title">Setup &amp; issue a valid WIT+WPT</div></div>
-      </div>
-      <div class="step-body">
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="doReplaySetup()">Setup for Replay Test</button>
-        </div>
-        <div id="rp-setup-status" class="status"></div>
-      </div>
-    </div>
-
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">2</div>
-        <div>
-          <div class="step-title">First request — legitimate (should succeed)</div>
-          <div class="step-spec">jti recorded in nonce store</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <div class="btn-row">
-          <button class="btn btn-outline" id="btn-rp1" disabled onclick="doFirstRequest()">Send First Request</button>
-        </div>
-        <div id="rp-r1-status" class="status"></div>
-      </div>
-    </div>
-
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">3</div>
-        <div>
-          <div class="step-title">Attacker replays the same WPT</div>
-          <div class="step-spec">Same jti → rejected by nonce store</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
-          The attacker reuses the intercepted WPT verbatim. The signature is still valid,
-          but the <kbd>jti</kbd> has already been seen — Workload B rejects it.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-danger" id="btn-rp2" disabled onclick="doReplay()">Replay Attack</button>
-        </div>
-        <div id="rp-r2-status" class="status"></div>
-        <div id="rp-output" style="display:none"></div>
-      </div>
-    </div>
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-setup" onclick="doSetup()">1. Generate Keys (WASM)</button>
+    <button class="btn btn-action" id="btn-issue-wit" onclick="doIssueWIT()" disabled>2. Issue WIT (WASM)</button>
   </div>
-</div><!-- sc-replay -->
 
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SCENARIO 3 — Token tampering
-══════════════════════════════════════════════════════════════════════════════ -->
-<div id="sc-tamper" class="scenario">
-  <div class="scenario-header">
-    <h2>Scenario 3 — Token Tampering</h2>
-    <p>An attacker intercepts a WIT and modifies the payload (e.g., changes the <code>sub</code> to escalate
-       privileges). The ECDSA signature verification instantly detects the modification.</p>
-    <div class="scenario-meta">
-      <span class="badge yellow">Threat: Payload forgery / privilege escalation</span>
-      <span class="badge green">Mitigated by ES256 signature</span>
+  <div id="wit-out" style="display:none">
+    <div class="jwt-raw" id="wit-raw"></div>
+    <div class="jwt-grid">
+      <div class="jwt-box jh">
+        <h4>Header <span class="pill pill-r">red</span></h4>
+        <pre id="wit-hdr"></pre>
+      </div>
+      <div class="jwt-box jp">
+        <h4>Payload <span class="pill pill-p">purple</span></h4>
+        <pre id="wit-pld"></pre>
+      </div>
+    </div>
+    <div class="info-grid c3">
+      <div class="info-box blue"><div class="ibt">typ</div><div class="ibv">wit+jwt</div></div>
+      <div class="info-box blue"><div class="ibt">alg</div><div class="ibv">ES256 (EC P-256)</div></div>
+      <div class="info-box blue"><div class="ibt">sub</div><div class="ibv" id="wit-sub">—</div></div>
+    </div>
+    <div class="callout ok">
+      <strong>cnf.jwk</strong> — The WIT embeds the workload's <em>public key</em> in the confirmation claim. A receiver can later verify that a specific request was signed by the matching private key — without any separate key lookup.
     </div>
   </div>
 
-  <div class="arch-diagram">
-    <div class="arch-title">ATTACK FLOW — payload tampering</div>
-    <svg class="arch-svg" viewBox="0 0 900 180" id="svg-tamper">
-      <rect x="20"  y="60" width="130" height="60" fill="#1c2128" stroke="#bc8cff" stroke-width="1.5" rx="8"/>
-      <text x="85"  y="87"  fill="#bc8cff" font-size="12" font-weight="bold" text-anchor="middle">IdP</text>
-      <text x="85"  y="104" fill="#8b949e" font-size="10" text-anchor="middle">signs WIT</text>
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(1)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(3)">Next: mTLS &rarr;</button>
+  </div>
+</section>
 
-      <rect x="330" y="60" width="130" height="60" fill="#1c2128" stroke="#f85149" stroke-width="1.5" rx="8"/>
-      <text x="395" y="87"  fill="#f85149" font-size="12" font-weight="bold" text-anchor="middle">Attacker</text>
-      <text x="395" y="104" fill="#8b949e" font-size="10" text-anchor="middle">modifies payload</text>
+<!-- ═══════════════════════════════════════════
+     Ch 3 — mTLS
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch3">
+  <div class="ch-num">Chapter 3 of 9</div>
+  <h1 class="ch-title">mTLS: Lock the Channel</h1>
+  <p class="ch-lead"><strong>Mutual TLS</strong> adds a transport-layer identity layer: both sides present X.509 certificates with SPIFFE URI Subject Alternative Names before any data flows.</p>
+  <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/" target="_blank">draft-ietf-wimse-mutual-tls-02</a> &nbsp;|&nbsp; EC P-256, TLS 1.3+, URI SAN</div>
 
-      <rect x="640" y="60" width="140" height="60" fill="#1c2128" stroke="#39d0d8" stroke-width="1.5" rx="8"/>
-      <text x="710" y="87"  fill="#39d0d8" font-size="12" font-weight="bold" text-anchor="middle">Workload B</text>
-      <text x="710" y="104" fill="#8b949e" font-size="10" text-anchor="middle">rejects: sig mismatch</text>
+  <div class="wire-legend">
+    <div class="wl-item"><div class="wl-swatch wl-plain"></div>Unauthenticated</div>
+    <div class="wl-item"><div class="wl-swatch wl-hs"></div>TLS Handshake</div>
+    <div class="wl-item"><div class="wl-swatch wl-tls"></div>mTLS Established</div>
+  </div>
 
-      <line x1="150" y1="90" x2="330" y2="90" stroke="#30363d" stroke-width="1" stroke-dasharray="4"/>
-      <line x1="460" y1="90" x2="640" y2="90" stroke="#30363d" stroke-width="1"/>
-      <text id="tm-block" x="710" y="52" fill="#f85149" font-size="18" text-anchor="middle" opacity="0">✗</text>
+  <div class="diagram">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+      <line id="wire-ch3" x1="145" y1="95" x2="555" y2="95" class="wire wire-plain"/>
+      <!-- Workload A -->
+      <rect x="10" y="68" width="130" height="54" rx="8" class="node-box" id="ch3-node-a"/>
+      <text x="75" y="89" class="node-lbl">Workload A</text>
+      <text x="75" y="104" class="node-sub">spiffe://cloud-a.../a</text>
+      <!-- Workload B -->
+      <rect x="560" y="68" width="130" height="54" rx="8" class="node-box" id="ch3-node-b"/>
+      <text x="625" y="89" class="node-lbl">Workload B</text>
+      <text x="625" y="104" class="node-sub">spiffe://cloud-b.../b</text>
+      <!-- Handshake packets -->
+      <rect id="pkt-ch" x="145" y="82" width="72" height="18" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <text id="pkt-ch-l" x="181" y="95" class="pkt-lbl" style="visibility:hidden">ClientHello</text>
+      <rect id="pkt-sh" x="483" y="82" width="72" height="18" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <text id="pkt-sh-l" x="519" y="95" class="pkt-lbl" style="visibility:hidden">ServerHello+Cert</text>
+      <rect id="pkt-cc" x="145" y="82" width="72" height="18" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <text id="pkt-cc-l" x="181" y="95" class="pkt-lbl" style="visibility:hidden">ClientCert+Verify</text>
+      <rect id="pkt-fin" x="483" y="82" width="72" height="18" rx="4" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+      <text id="pkt-fin-l" x="519" y="95" class="pkt-lbl" style="visibility:hidden">Finished &#x2713;</text>
     </svg>
   </div>
 
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">1</div>
-        <div><div class="step-title">Issue a legitimate WIT</div></div>
-      </div>
-      <div class="step-body">
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="doTamperSetup()">Issue Legitimate WIT</button>
-        </div>
-        <div id="tm-setup-status" class="status"></div>
-        <div id="tm-orig" style="display:none"></div>
-      </div>
-    </div>
-
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">2</div>
-        <div>
-          <div class="step-title">Tamper: replace the payload</div>
-          <div class="step-spec">Modifies sub to an admin identity, keeps original signature</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px;">
-          The attacker base64-decodes the JWT payload, rewrites <code>sub</code> to
-          <code>spiffe://cloud-a.example/admin</code>, re-encodes, and splices back in.
-          The original ECDSA signature is left unchanged.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-warn" id="btn-tm-tamper" disabled onclick="doTamper()">Tamper Token</button>
-        </div>
-        <div id="tm-tamper-status" class="status"></div>
-        <div id="tm-tampered" style="display:none"></div>
-      </div>
-    </div>
-
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">3</div>
-        <div>
-          <div class="step-title">Submit tampered token to Workload B</div>
-          <div class="step-spec">ES256 verification fails — signature ≠ payload</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <div class="btn-row">
-          <button class="btn btn-danger" id="btn-tm-submit" disabled onclick="doTamperSubmit()">Submit Tampered Token</button>
-        </div>
-        <div id="tm-submit-status" class="status"></div>
-      </div>
-    </div>
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-cert" onclick="doGenCert()">Generate mTLS Cert (WASM)</button>
   </div>
-</div><!-- sc-tamper -->
 
+  <div id="cert-out" style="display:none">
+    <div class="cert-grid" id="cert-fields"></div>
+    <div class="callout ok">
+      <strong>SPIFFE URI SAN</strong> — The X.509 certificate binds the workload's URI identity at the transport layer. Even before any JWT is sent, the TLS handshake proves <em>who</em> is connecting.
+    </div>
+    <div class="callout">
+      <strong>Why two identity layers?</strong> mTLS (transport) + WIT/WPT (application) gives defense-in-depth. mTLS proves the TLS session belongs to the right workload. WIT+WPT prove the specific request is authorized — even if the session is somehow compromised.
+    </div>
+    <details>
+      <summary style="cursor:pointer;font-size:12px;color:var(--muted);margin-bottom:8px">Show PEM certificate</summary>
+      <div class="pem-box" id="cert-pem"></div>
+    </details>
+  </div>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SCENARIO 4 — Selective Disclosure (SPICE)
-══════════════════════════════════════════════════════════════════════════════ -->
-<div id="sc-sd" class="scenario">
-  <div class="scenario-header">
-    <h2>Scenario 4 — Selective Disclosure (SPICE Extension)</h2>
-    <p>Phase 5 adds SD-JWT support per IETF SPICE: the IdP hashes individual claims into the JWT.
-       The Holder (Workload A) controls which values to include in each presentation —
-       a low-trust service learns only what it needs to.</p>
-    <div class="scenario-meta">
-      <span class="badge">IETF SPICE draft</span>
-      <span class="badge">SD-JWT RFC 9278</span>
-      <span class="badge green">Privacy by design</span>
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(2)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(4)">Next: WPT &rarr;</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     Ch 4 — WPT
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch4">
+  <div class="ch-num">Chapter 4 of 9</div>
+  <h1 class="ch-title">WPT: Prove Each Request</h1>
+  <p class="ch-lead">A <strong>Workload Proof Token (WPT)</strong> is a short-lived, per-request JWT signed with the workload's private key. It binds to the WIT and to the exact target URI — making token theft useless.</p>
+  <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/" target="_blank">draft-ietf-wimse-wpt-01</a> &nbsp;|&nbsp; <code>typ: application/wpt+jwt</code> &nbsp;|&nbsp; TTL: 5 minutes</div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg">
+      <line x1="145" y1="92" x2="555" y2="92" class="wire wire-tls"/>
+      <rect x="10" y="65" width="130" height="54" rx="8" class="node-box ok"/>
+      <text x="75" y="86" class="node-lbl">Workload A</text>
+      <text x="75" y="101" class="node-sub">WIT + priv key</text>
+      <rect x="560" y="65" width="130" height="54" rx="8" class="node-box" id="ch4-node-b"/>
+      <text x="625" y="86" class="node-lbl">Workload B</text>
+      <text x="625" y="101" class="node-sub">verifies WIT+WPT</text>
+      <rect id="pkt-wpt" x="145" y="80" width="80" height="20" rx="4" fill="var(--blue)" style="visibility:hidden;opacity:0.9"/>
+      <text id="pkt-wpt-l" x="185" y="94" class="pkt-lbl" style="visibility:hidden">WIT + WPT</text>
+    </svg>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-wpt" onclick="doGenWPT()">Generate WPT (WASM)</button>
+  </div>
+
+  <div id="wpt-out" style="display:none">
+    <div class="jwt-raw" id="wpt-raw"></div>
+    <div class="info-grid c3">
+      <div class="info-box orange"><div class="ibt">aud (target URI)</div><div class="ibv" id="wpt-aud">—</div></div>
+      <div class="info-box orange"><div class="ibt">wth = SHA-256(WIT)</div><div class="ibv" id="wpt-wth">—</div></div>
+      <div class="info-box orange"><div class="ibt">TTL</div><div class="ibv">5 minutes</div></div>
+    </div>
+    <div class="callout warn">
+      <strong>wth binding</strong> — The WPT embeds a cryptographic digest of the WIT. A receiver can verify both tokens came from the same workload. Stealing just the WPT is useless without the matching WIT.
+    </div>
+    <div class="callout">
+      <strong>jti (JWT ID)</strong> — Each WPT has a random unique identifier used for replay detection. The same WPT cannot be re-used after the server records its <code>jti</code>.
     </div>
   </div>
 
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">1</div>
-        <div>
-          <div class="step-title">Issue SD-WIT — all claims selectively disclosable</div>
-          <div class="step-spec">sub · trust_domain · roles — hashed into _sd array</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <div class="btn-row">
-          <button class="btn btn-primary" onclick="doSDSetup()">Issue SD-WIT</button>
-        </div>
-        <div id="sd-setup-status" class="status"></div>
-        <div id="sd-full-out" style="display:none">
-          <div style="margin-top:12px;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;">
-            Full SD-JWT  (JWT part + 3 disclosures)
-          </div>
-          <div class="token-box sd-jwt-display" id="sd-full-disp"></div>
-          <p style="color:var(--muted);font-size:11px;margin-top:6px;">
-            The JWT payload contains only SHA-256 hashes (<kbd>_sd</kbd>). Actual values live in the disclosure strings after <kbd>~</kbd>.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">2</div>
-        <div>
-          <div class="step-title">Holder selects what to reveal</div>
-          <div class="step-spec">Click claims to toggle — Verifier sees only included disclosures</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <p style="color:var(--muted);font-size:13px;margin-bottom:8px;">
-          Toggle the claims below. The Holder creates a new presentation string — no re-signing needed.
-        </p>
-        <div class="chips" id="sd-chips"></div>
-        <div class="btn-row" style="margin-top:12px">
-          <button class="btn btn-outline" id="btn-sd-present" disabled onclick="doSDPresent()">Create Presentation</button>
-        </div>
-        <div id="sd-present-status" class="status"></div>
-        <div id="sd-present-out" style="display:none">
-          <div style="margin-top:10px;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;">Limited presentation</div>
-          <div class="token-box sd-jwt-display" id="sd-limited-disp"></div>
-          <div class="disc-grid" id="sd-cards"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num">3</div>
-        <div>
-          <div class="step-title">Verifier validates — sees only disclosed claims</div>
-          <div class="step-spec">cnf.jwk always visible · undisclosed claims → empty</div>
-        </div>
-      </div>
-      <div class="step-body">
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-sd-val" disabled onclick="doSDValidate()">Validate Presentation</button>
-        </div>
-        <div id="sd-val-status" class="status"></div>
-        <div id="sd-val-out" style="display:none"></div>
-      </div>
-    </div>
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(3)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(5)">Next: Validation &rarr;</button>
   </div>
-</div><!-- sc-sd -->
+</section>
 
+<!-- ═══════════════════════════════════════════
+     Ch 5 — Validation Dance
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch5">
+  <div class="ch-num">Chapter 5 of 9</div>
+  <h1 class="ch-title">The Validation Dance</h1>
+  <p class="ch-lead">When Workload B receives a request it runs <strong>9 checks</strong> before letting it through. Each one protects against a specific attack class.</p>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     SCENARIO 5 — Threat Model
-══════════════════════════════════════════════════════════════════════════════ -->
-<div id="sc-threat" class="scenario">
-  <div class="scenario-header">
-    <h2>Scenario 5 — Workload Identity Threat Model</h2>
-    <p>A structured analysis of threats to workload-to-workload authentication, mapped to WIMSE mitigations.
-       Click a threat to see how the protocol defends against it.</p>
-    <div class="scenario-meta">
-      <span class="badge yellow">STRIDE-inspired</span>
-      <span class="badge">WIMSE arch-08</span>
+  <div class="diagram">
+    <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg">
+      <line x1="145" y1="92" x2="555" y2="92" class="wire wire-tls"/>
+      <rect x="10" y="65" width="130" height="54" rx="8" class="node-box ok"/>
+      <text x="75" y="86" class="node-lbl">Workload A</text>
+      <text x="75" y="101" class="node-sub">sends WIT+WPT</text>
+      <rect x="560" y="65" width="130" height="54" rx="8" class="node-box" id="ch5-node-b"/>
+      <text x="625" y="86" class="node-lbl">Validator</text>
+      <text x="625" y="101" class="node-sub" id="ch5-sub">9 checks&hellip;</text>
+      <rect id="pkt-val" x="145" y="80" width="80" height="20" rx="4" fill="var(--blue)" style="visibility:hidden;opacity:0.9"/>
+      <text x="185" y="94" class="pkt-lbl" style="pointer-events:none">WIT + WPT</text>
+    </svg>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-val" onclick="doValidate()">Run Validation (WASM)</button>
+  </div>
+
+  <div class="vsteps" id="vsteps"></div>
+
+  <div id="val-ok" style="display:none">
+    <div class="verdict allow">
+      <div class="verdict-icon">&#x2713;</div>
+      <div><strong>Request authorized</strong><br><span style="font-size:12px;font-weight:400">Caller: <code id="val-sub"></code></span></div>
     </div>
   </div>
 
-  <div class="steps-grid">
-    <!-- Threat cards -->
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(4)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(6)">Next: Authorization &rarr;</button>
+  </div>
+</section>
 
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num error">T1</div>
-        <div>
-          <div class="step-title">Token Replay</div>
-          <div class="step-spec">Attacker reuses a captured WPT for an unauthorized request</div>
-        </div>
-        <span class="threat-tag critical">CRITICAL</span>
+<!-- ═══════════════════════════════════════════
+     Ch 6 — Fine-Grained Authorization
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch6">
+  <div class="ch-num">Chapter 6 of 9</div>
+  <h1 class="ch-title">Fine-Grained Authorization</h1>
+  <p class="ch-lead"><strong>Authentication</strong> answers &ldquo;who are you?&rdquo; — <strong>Authorization</strong> answers &ldquo;what are you allowed to do?&rdquo; The WIT's <code>sub</code> and <code>trust_domain</code> drive fine-grained access control.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg">
+      <line x1="145" y1="92" x2="205" y2="92" class="wire wire-tls"/>
+      <line x1="335" y1="92" x2="395" y2="92" class="wire wire-tls"/>
+      <line id="wire-ch6-res" x1="525" y1="92" x2="585" y2="92" class="wire wire-plain"/>
+      <!-- A -->
+      <rect x="10" y="65" width="130" height="54" rx="8" class="node-box ok"/>
+      <text x="75" y="86" class="node-lbl">Workload A</text>
+      <text x="75" y="101" class="node-sub">authenticated</text>
+      <!-- Middleware -->
+      <rect x="210" y="65" width="120" height="54" rx="8" class="node-box hi"/>
+      <text x="270" y="86" class="node-lbl">Middleware</text>
+      <text x="270" y="101" class="node-sub">WIT validated</text>
+      <!-- Policy Engine -->
+      <rect x="400" y="65" width="120" height="54" rx="8" class="node-box" id="ch6-pol-node"/>
+      <text x="460" y="86" class="node-lbl">Policy Engine</text>
+      <text x="460" y="101" class="node-sub">ABAC rules</text>
+      <!-- Resource -->
+      <rect x="590" y="65" width="105" height="54" rx="8" class="node-box" id="ch6-res-node"/>
+      <text x="642" y="86" class="node-lbl">Resource</text>
+      <text x="642" y="101" class="node-sub" id="ch6-res-lbl">api:billing-data</text>
+      <!-- Packets -->
+      <rect id="pkt-az-req" x="145" y="80" width="56" height="18" rx="4" fill="var(--purple)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-az-pol" x="335" y="80" width="56" height="18" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-az-acc" x="525" y="80" width="56" height="18" rx="4" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+    </svg>
+  </div>
+
+  <div class="field-row">
+    <span class="field-lbl">Resource:</span>
+    <select id="az-resource">
+      <option value="api:billing-data">api:billing-data</option>
+      <option value="api:payment">api:payment</option>
+    </select>
+    <span class="field-lbl">Action:</span>
+    <select id="az-action">
+      <option value="read">read</option>
+      <option value="write">write</option>
+      <option value="execute">execute</option>
+    </select>
+    <button class="btn btn-action" id="btn-authz" onclick="doAuthz()">Check Authorization (WASM)</button>
+  </div>
+
+  <div id="az-verdict" style="display:none"></div>
+
+  <table class="policy-table">
+    <thead>
+      <tr><th>Subject Pattern</th><th>Resource</th><th>Action</th><th>Decision</th><th>Reason</th></tr>
+    </thead>
+    <tbody id="az-tbody">
+      <tr><td colspan="5" style="text-align:center;color:var(--muted);font-family:sans-serif;font-size:12px">Run the check to see policy evaluation</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>WIMSE + OPA/Cedar/OpenFGA:</strong> In production the policy engine is a dedicated service. The WIT's <code>sub</code> claim becomes the principal in the authorization query — no additional identity lookup needed.
+  </div>
+
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(5)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(7)">Next: Selective Disclosure &rarr;</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     Ch 7 — Selective Disclosure
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch7">
+  <div class="ch-num">Chapter 7 of 9</div>
+  <h1 class="ch-title">Selective Disclosure</h1>
+  <p class="ch-lead">An <strong>SD-WIT</strong> uses the SD-JWT standard to let a workload present only the claims a specific service needs — without re-issuance. Hidden claims are replaced with cryptographic hashes.</p>
+  <div class="spec-ref">Format: JWT <code>_sd</code> hash array + Base64URL disclosures after <code>~</code> separator</div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 185" xmlns="http://www.w3.org/2000/svg">
+      <line x1="145" y1="90" x2="555" y2="90" class="wire wire-tls"/>
+      <rect x="10" y="63" width="130" height="54" rx="8" class="node-box ok"/>
+      <text x="75" y="84" class="node-lbl">Workload A</text>
+      <text x="75" y="99" class="node-sub">presents SD-WIT</text>
+      <rect x="560" y="63" width="130" height="54" rx="8" class="node-box" id="ch7-node-b"/>
+      <text x="625" y="84" class="node-lbl">Workload B</text>
+      <text x="625" y="99" class="node-sub" id="ch7-sub">sees only revealed</text>
+      <rect id="pkt-sd" x="145" y="78" width="76" height="20" rx="4" fill="var(--purple)" style="visibility:hidden;opacity:0.9"/>
+      <text x="183" y="92" class="pkt-lbl" style="pointer-events:none">SD-WIT</text>
+    </svg>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-sd-issue" onclick="doIssueSD()">1. Issue SD-WIT (WASM)</button>
+    <button class="btn btn-action" id="btn-sd-present" onclick="doPresent()" disabled>2. Present Selected</button>
+    <button class="btn btn-action" id="btn-sd-val" onclick="doValidateSD()" disabled>3. Validate (WASM)</button>
+  </div>
+
+  <div id="sd-claim-ui" style="display:none;margin-bottom:14px">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Select claims to reveal in the presentation:</div>
+    <div class="claim-chips">
+      <div class="claim-chip on locked" data-claim="sub">sub (identity) — always required</div>
+      <div class="claim-chip" data-claim="trust_domain" onclick="toggleClaim(this)">trust_domain</div>
+      <div class="claim-chip" data-claim="roles" onclick="toggleClaim(this)">roles</div>
+    </div>
+  </div>
+
+  <div id="sd-out" style="display:none">
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="ibt">Full SD-WIT (all disclosures)</div>
+        <div class="jwt-raw" id="sd-full-raw" style="margin-top:6px;font-size:9px;max-height:70px;overflow:hidden"></div>
+        <div id="sd-full-claims" style="margin-top:6px;font-size:11px;color:var(--muted)"></div>
       </div>
-      <div class="step-body">
-        <div class="timeline" id="tl-t1">
-          <div class="tl-row">
-            <span class="tl-actor attacker">Attacker</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Intercepts WIT + WPT on the wire (MITM, log leak, etc.)</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor attacker">Attacker</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Sends identical WPT to Workload B 1 second later</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor workload-b">Workload B</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg"><span style="color:var(--red)">✗ BLOCKED</span> — jti already in nonce store</span>
-            <span class="tl-tag"><span class="threat-tag mitigated">Mitigated</span></span>
-          </div>
-        </div>
-        <div style="margin-top:12px;padding:10px 12px;background:rgba(63,185,80,.06);border:1px solid rgba(63,185,80,.2);border-radius:6px;">
-          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;">Mitigation</div>
-          <p style="font-size:12px;color:var(--muted)">WPT includes a <kbd>jti</kbd> (JWT ID) unique nonce. Workload B records every jti it sees. A reused jti is rejected before any business logic runs. WPT TTL of 5 minutes limits the replay window even without jti tracking.</p>
-        </div>
-        <div class="btn-row" style="margin-top:12px">
-          <button class="btn btn-danger" onclick="showScenario('replay')">See Live Demo →</button>
-        </div>
+      <div class="info-box blue">
+        <div class="ibt">Presentation (selected only)</div>
+        <div class="jwt-raw" id="sd-ltd-raw" style="margin-top:6px;font-size:9px;max-height:70px;overflow:hidden"></div>
+        <div id="sd-ltd-claims" style="margin-top:6px;font-size:11px"></div>
+      </div>
+    </div>
+    <div id="sd-val-result" style="display:none"></div>
+    <div class="callout">
+      <strong>Privacy by design:</strong> A workload presenting to a low-trust service can reveal only its <code>sub</code>, hiding roles and trust_domain. The verifier still gets a cryptographically unforgeable identity — with fewer claims.
+    </div>
+  </div>
+
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(6)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(8)">Next: Token Exchange &rarr;</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     Ch 8 — Token Exchange
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch8">
+  <div class="ch-num">Chapter 8 of 9</div>
+  <h1 class="ch-title">Token Exchange</h1>
+  <p class="ch-lead">Workload A (cloud-a.example) needs to call Workload B (cloud-b.example). Problem: B only trusts its own IdP. A <strong>Token Exchange Service</strong> bridges the trust domains.</p>
+  <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-arch/" target="_blank">draft-ietf-wimse-arch-08</a> — token exchange at trust-domain boundaries</div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 225" xmlns="http://www.w3.org/2000/svg">
+      <line x1="145" y1="75" x2="265" y2="75" class="wire wire-tls"/>
+      <line x1="405" y1="75" x2="535" y2="75" class="wire wire-tls"/>
+      <!-- A -->
+      <rect x="10" y="48" width="130" height="54" rx="8" class="node-box"/>
+      <text x="75" y="69" class="node-lbl">Workload A</text>
+      <text x="75" y="84" class="node-sub">cloud-a.example</text>
+      <text x="75" y="97" class="node-sub" style="fill:var(--blue)">has WIT-A</text>
+      <!-- Exchange -->
+      <rect x="270" y="48" width="130" height="54" rx="8" class="node-box hi"/>
+      <text x="335" y="69" class="node-lbl">Token Exchange</text>
+      <text x="335" y="84" class="node-sub">trusts both IdPs</text>
+      <text x="335" y="97" class="node-sub" style="fill:var(--orange)">policy gateway</text>
+      <!-- B -->
+      <rect x="540" y="48" width="130" height="54" rx="8" class="node-box"/>
+      <text x="605" y="69" class="node-lbl">Workload B</text>
+      <text x="605" y="84" class="node-sub">cloud-b.example</text>
+      <text x="605" y="97" class="node-sub" style="fill:var(--green)">accepts WIT-B</text>
+      <!-- Step labels -->
+      <text x="205" y="62" class="pkt-lbl" style="font-size:10px;fill:var(--blue)">&#x2460; WIT-A</text>
+      <text x="470" y="62" class="pkt-lbl" style="font-size:10px;fill:var(--green)">&#x2462; WIT-B</text>
+      <!-- Exchange description -->
+      <text x="350" y="142" class="node-sub" style="text-anchor:middle;font-size:11px">&#x2461; Exchange validates WIT-A, applies trust policy,</text>
+      <text x="350" y="157" class="node-sub" style="text-anchor:middle;font-size:11px">issues WIT-B signed by cloud-b IdP key</text>
+      <!-- IdP A -->
+      <rect x="40" y="178" width="90" height="34" rx="6" class="node-box" style="stroke:rgba(88,166,255,0.5)"/>
+      <text x="85" y="196" class="node-sub" style="fill:var(--blue);font-size:10px;text-anchor:middle">IdP-A</text>
+      <text x="85" y="207" class="node-sub" style="font-size:9px;text-anchor:middle">cloud-a.example</text>
+      <!-- IdP B -->
+      <rect x="570" y="178" width="90" height="34" rx="6" class="node-box" style="stroke:rgba(63,185,80,0.5)"/>
+      <text x="615" y="196" class="node-sub" style="fill:var(--green);font-size:10px;text-anchor:middle">IdP-B</text>
+      <text x="615" y="207" class="node-sub" style="font-size:9px;text-anchor:middle">cloud-b.example</text>
+      <!-- Dotted trust lines -->
+      <line x1="85" y1="178" x2="270" y2="112" class="wire" style="stroke:rgba(88,166,255,0.3);stroke-dasharray:3,3;stroke-width:1"/>
+      <line x1="615" y1="178" x2="430" y2="112" class="wire" style="stroke:rgba(63,185,80,0.3);stroke-dasharray:3,3;stroke-width:1"/>
+    </svg>
+  </div>
+
+  <div class="xflow">
+    <div class="xstep"><span class="xarrow">&#x2460;</span><span>Workload A POSTs <strong>WIT-A</strong> (iss=cloud-a) to the Token Exchange Service at <code>POST /token/exchange</code></span></div>
+    <div class="xstep"><span class="xarrow">&#x2461;</span><span>Exchange validates WIT-A against IdP-A's JWKS, applies cross-domain <strong>trust policy</strong>, optionally rewrites the subject principal</span></div>
+    <div class="xstep"><span class="xarrow">&#x2462;</span><span>Exchange issues <strong>WIT-B</strong> (iss=cloud-b) signed with IdP-B's private key — accepted natively by Workload B's validator</span></div>
+    <div class="xstep"><span class="xarrow">&#x2463;</span><span>A generates a fresh <strong>WPT</strong> over WIT-B using its own private key, then sends WIT-B + WPT to Workload B</span></div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-box blue">
+      <div class="ibt">No federation required</div>
+      <div class="ibv">IdP-A and IdP-B don't need to know about each other. Only the Exchange Service needs bilateral trust configuration.</div>
+    </div>
+    <div class="info-box orange">
+      <div class="ibt">Subject rewriting</div>
+      <div class="ibv">spiffe://cloud-a.example/svc/billing &rarr; wimse://cloud-b.example/external/billing — mapped by policy, fully auditable.</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Multi-cloud in practice:</strong> This is how a workload in AWS calls a workload in GCP without a shared IdP or hard-coded credentials. The Exchange Service is the minimal, auditable trust boundary between domains.
+  </div>
+
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(7)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(9)">Next: Attacks &amp; Defenses &rarr;</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     Ch 9 — Attacks & Defenses
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch9">
+  <div class="ch-num">Chapter 9 of 9</div>
+  <h1 class="ch-title">Attacks &amp; Defenses</h1>
+  <p class="ch-lead">What happens when an attacker captures a valid WPT and tries to replay it? WIMSE's <code>jti</code> tracking makes replay attacks impossible — even with a perfectly valid, unexpired stolen token.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+      <!-- Legitimate lane -->
+      <line x1="145" y1="75" x2="555" y2="75" class="wire wire-tls"/>
+      <!-- Attacker lane -->
+      <line x1="145" y1="155" x2="555" y2="155" class="wire wire-plain"/>
+      <!-- Workload A (legit) -->
+      <rect x="10" y="48" width="130" height="54" rx="8" class="node-box ok"/>
+      <text x="75" y="69" class="node-lbl">Workload A</text>
+      <text x="75" y="84" class="node-sub">legitimate caller</text>
+      <!-- Attacker -->
+      <rect x="10" y="128" width="130" height="54" rx="8" class="node-box bad"/>
+      <text x="75" y="149" class="node-lbl" style="fill:var(--red)">Attacker</text>
+      <text x="75" y="164" class="node-sub">captured WPT</text>
+      <!-- Workload B top -->
+      <rect x="560" y="48" width="130" height="54" rx="8" class="node-box" id="ch9-b1"/>
+      <text x="625" y="69" class="node-lbl">Workload B</text>
+      <text x="625" y="84" class="node-sub">records jti</text>
+      <!-- Workload B bottom -->
+      <rect x="560" y="128" width="130" height="54" rx="8" class="node-box" id="ch9-b2"/>
+      <text x="625" y="149" class="node-lbl">Workload B</text>
+      <text x="625" y="164" class="node-sub">jti already seen!</text>
+      <!-- Packets -->
+      <rect id="pkt-r1" x="145" y="63" width="80" height="20" rx="4" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+      <text x="185" y="77" class="pkt-lbl" style="pointer-events:none">WIT+WPT</text>
+      <rect id="pkt-r2" x="145" y="143" width="80" height="20" rx="4" fill="var(--red)" style="visibility:hidden;opacity:0.9"/>
+      <text x="185" y="157" class="pkt-lbl" style="pointer-events:none">WPT (replay)</text>
+    </svg>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-danger" id="btn-replay" onclick="doReplay()">Simulate Replay Attack</button>
+  </div>
+
+  <div id="replay-out" style="display:none">
+    <div class="attack-grid">
+      <div class="attack-card ok">
+        <div class="attack-icon">&#x2713;</div>
+        <h4>1st Request — Allowed</h4>
+        <p>WPT valid &amp; fresh<br>jti recorded in store</p>
+      </div>
+      <div class="attack-card bad">
+        <div class="attack-icon">&#x2717;</div>
+        <h4>2nd Request — Blocked</h4>
+        <p id="replay-err">jti already seen &mdash; rejected</p>
       </div>
     </div>
 
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num error">T2</div>
-        <div>
-          <div class="step-title">Token Forgery / Privilege Escalation</div>
-          <div class="step-spec">Attacker crafts a WIT with a higher-privileged subject</div>
-        </div>
-        <span class="threat-tag critical">CRITICAL</span>
-      </div>
-      <div class="step-body">
-        <div class="timeline">
-          <div class="tl-row">
-            <span class="tl-actor attacker">Attacker</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Constructs JWT with sub=<code>spiffe://…/admin</code></span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor attacker">Attacker</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Cannot sign with IdP's private key (not possessed)</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor workload-b">Workload B</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg"><span style="color:var(--red)">✗ BLOCKED</span> — ECDSA signature verification fails</span>
-            <span class="tl-tag"><span class="threat-tag mitigated">Mitigated</span></span>
-          </div>
-        </div>
-        <div style="margin-top:12px;padding:10px 12px;background:rgba(63,185,80,.06);border:1px solid rgba(63,185,80,.2);border-radius:6px;">
-          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;">Mitigation</div>
-          <p style="font-size:12px;color:var(--muted)">WITs are signed with ES256 using the IdP's EC P-256 private key. Workload B validates the signature against the IdP's published public key. Any modification to the payload or header invalidates the signature.</p>
-        </div>
-        <div class="btn-row" style="margin-top:12px">
-          <button class="btn btn-warn" onclick="showScenario('tamper')">See Live Demo →</button>
-        </div>
-      </div>
+    <div class="callout danger">
+      <strong>jti replay protection:</strong> The WPT's <code>jti</code> is stored on first use. Any re-use of the same token is rejected immediately — even if the signature is valid and expiry is in the future.
     </div>
 
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num error">T3</div>
-        <div>
-          <div class="step-title">WPT / WIT Binding Break</div>
-          <div class="step-spec">Attacker swaps a WPT from one request onto a different WIT</div>
-        </div>
-        <span class="threat-tag high">HIGH</span>
-      </div>
-      <div class="step-body">
-        <div class="timeline">
-          <div class="tl-row">
-            <span class="tl-actor attacker">Attacker</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Captures WPT-1 (bound to WIT-1 via wth)</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor attacker">Attacker</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Pairs WPT-1 with a different WIT-2 in the headers</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor workload-b">Workload B</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg"><span style="color:var(--red)">✗ BLOCKED</span> — sha256(WIT-2) ≠ wth in WPT-1</span>
-            <span class="tl-tag"><span class="threat-tag mitigated">Mitigated</span></span>
-          </div>
-        </div>
-        <div style="margin-top:12px;padding:10px 12px;background:rgba(63,185,80,.06);border:1px solid rgba(63,185,80,.2);border-radius:6px;">
-          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;">Mitigation</div>
-          <p style="font-size:12px;color:var(--muted)">The WPT's <kbd>wth</kbd> claim is <code>base64url(sha256(WIT))</code>. Workload B recomputes the hash of the presented WIT and compares — any mismatch is rejected. This makes WPT and WIT inseparable.</p>
-        </div>
-      </div>
+    <h3 style="font-size:14px;font-weight:700;margin:20px 0 12px">Full defense summary</h3>
+    <div class="vsteps">
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>ES256 signatures</strong> — WIT + WPT are ECDSA-signed; forging is computationally infeasible with P-256</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>Short-lived tokens</strong> — WIT: 1h, WPT: 5 min; stolen tokens expire before they can be exploited</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>jti replay prevention</strong> — Each WPT has a unique random ID; replays are detected and rejected immediately</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>wth binding</strong> — WPT is cryptographically bound to a specific WIT; tokens cannot be mixed or swapped</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>aud pinning</strong> — WPT embeds the exact target URI; a stolen WPT is useless against any other endpoint</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>mTLS transport</strong> — Certificate mismatch blocks unauthorized connections even before token inspection</div></div>
     </div>
+  </div>
 
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num error">T4</div>
-        <div>
-          <div class="step-title">Audience Confusion</div>
-          <div class="step-spec">WPT issued for Service X is sent to Service Y</div>
-        </div>
-        <span class="threat-tag high">HIGH</span>
-      </div>
-      <div class="step-body">
-        <div class="timeline">
-          <div class="tl-row">
-            <span class="tl-actor workload-a">Workload A</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Issues WPT with aud=https://api.svc-x.example/data</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor attacker">Attacker</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Routes the same WPT to svc-y.example</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor workload-b">Service Y</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg"><span style="color:var(--red)">✗ BLOCKED</span> — aud claim does not match request URI</span>
-            <span class="tl-tag"><span class="threat-tag mitigated">Mitigated</span></span>
-          </div>
-        </div>
-        <div style="margin-top:12px;padding:10px 12px;background:rgba(63,185,80,.06);border:1px solid rgba(63,185,80,.2);border-radius:6px;">
-          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;">Mitigation</div>
-          <p style="font-size:12px;color:var(--muted)">The WPT's <kbd>aud</kbd> claim is set to the exact target URI. The receiving service compares <kbd>aud</kbd> against its own request URI. A WPT for one endpoint cannot be reused at another.</p>
-        </div>
-      </div>
-    </div>
+  <div class="callout ok" style="margin-top:20px">
+    <strong>Story complete.</strong> From raw TCP with no identity, to cryptographically verifiable, short-lived, replay-protected, fine-grained workload identity — in 9 chapters. All cryptographic operations above ran in real Go code compiled to WebAssembly in your browser.
+  </div>
 
-    <div class="step-card">
-      <div class="step-card-header">
-        <div class="step-num error">T5</div>
-        <div>
-          <div class="step-title">Information Disclosure via Credential Sharing</div>
-          <div class="step-spec">A WIT with roles leaks RBAC data to low-trust services</div>
-        </div>
-        <span class="threat-tag high">HIGH</span>
-      </div>
-      <div class="step-body">
-        <div class="timeline">
-          <div class="tl-row">
-            <span class="tl-actor workload-a">Workload A</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Has WIT with roles=[admin, billing, reader]</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor workload-a">Workload A</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg">Calls a low-trust logging service — should not reveal roles</span>
-          </div>
-          <div class="tl-row">
-            <span class="tl-actor workload-a">Workload A</span>
-            <span class="tl-arrow">→</span>
-            <span class="tl-msg"><span style="color:var(--green)">✓ SAFE</span> — presents SD-WIT with only sub disclosed</span>
-            <span class="tl-tag"><span class="threat-tag mitigated">Mitigated (SPICE)</span></span>
-          </div>
-        </div>
-        <div style="margin-top:12px;padding:10px 12px;background:rgba(63,185,80,.06);border:1px solid rgba(63,185,80,.2);border-radius:6px;">
-          <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px;">Mitigation (Phase 5 — SPICE)</div>
-          <p style="font-size:12px;color:var(--muted)">SD-JWT selective disclosure lets the Holder present a subset of claims. Hashes of undisclosed claims remain in <kbd>_sd</kbd> — the Verifier cannot recover their values without the disclosure string.</p>
-        </div>
-        <div class="btn-row" style="margin-top:12px">
-          <button class="btn btn-outline" onclick="showScenario('sd')">See Live Demo →</button>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- steps-grid -->
-</div><!-- sc-threat -->
-
-</main>
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(8)">&larr; Back</button>
+    <button class="btn btn-green" onclick="goChapter(1)">Start Over</button>
+  </div>
+</section>
 
 <script src="wasm_exec.js"></script>
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// WASM bootstrap
-// ─────────────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════
+// WASM loader
+// ═══════════════════════════════════════════
 const go = new Go();
-WebAssembly.instantiateStreaming(fetch("wimse.wasm"), go.importObject).then(r => {
+let wasmReady = false;
+
+WebAssembly.instantiateStreaming(fetch('wimse.wasm'), go.importObject).then(r => {
   go.run(r.instance);
-  document.getElementById("loading").style.display = "none";
-  const b = document.getElementById("wasm-badge");
-  b.textContent = "WASM ready"; b.classList.add("green");
-}).catch(err => {
-  const l = document.getElementById("loading");
-  l.innerHTML = `<p style="color:var(--red);max-width:480px;text-align:center">
-    Failed to load WASM: ${err.message}<br><br>
-    <span style="color:var(--muted);font-size:12px">
-      This demo requires a server context (not <code>file://</code>).<br>
-      Run: <code>python3 -m http.server 8000</code> inside the <code>demo/</code> directory,<br>
-      then open <a href="http://localhost:8000">http://localhost:8000</a>
-    </span>
-  </p>`;
+  wasmReady = true;
+  const b = document.getElementById('wasm-badge');
+  b.className = 'wasm-badge ready';
+  b.innerHTML = '&#x25CF; WASM ready';
+  initDemo();
+}).catch(e => {
+  const b = document.getElementById('wasm-badge');
+  b.innerHTML = 'WASM error';
+  console.error(e);
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-function call(fn, ...args) {
-  try { return JSON.parse(wimse[fn](...args)); }
-  catch(e) { return { ok: false, error: e.message }; }
-}
-const $ = id => document.getElementById(id);
-function show(id, d="") { $(id).style.display = d; }
-function hide(id) { $(id).style.display = "none"; }
-function enable(id) { const e=$(id); if(e) e.disabled=false; }
-function disable(id){ const e=$(id); if(e) e.disabled=true; }
-function setStatus(id, msg, type) {
-  const el = $(id);
-  el.className = "status " + type;
-  el.textContent = msg;
-}
-function pretty(v) { return JSON.stringify(v, null, 2); }
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+// ═══════════════════════════════════════════
+// Chapter management
+// ═══════════════════════════════════════════
+const CH_TITLES = [
+  'The Problem', 'WIT: Identity Card', 'mTLS: Lock the Channel',
+  'WPT: Prove Each Request', 'The Validation Dance', 'Fine-Grained Authorization',
+  'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses'
+];
+let cur = 1;
+const done = new Set();
 
-function setAnatomy(prefix, parts) {
-  $(prefix+'-hdr').textContent  = pretty(parts.header);
-  $(prefix+'-pay').textContent  = pretty(parts.payload);
-  $(prefix+'-sig').textContent  = parts.raw.signature.slice(0,32) + "…";
-  $(prefix+'-r-hdr').textContent = parts.raw.header;
-  $(prefix+'-r-pay').textContent = parts.raw.payload;
-  $(prefix+'-r-sig').textContent = parts.raw.signature;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Scenario navigation
-// ─────────────────────────────────────────────────────────────────────────────
-const SCENARIOS = ['happy','replay','tamper','sd','threat'];
-function showScenario(name) {
-  SCENARIOS.forEach(s => {
-    $(  'sc-'+s).classList.toggle('active', s === name);
-  });
-  document.querySelectorAll('header .nav-btn').forEach((b,i) => {
-    b.classList.toggle('active', SCENARIOS[i] === name);
-  });
-  window.scrollTo(0,0);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SVG packet animation helpers
-// ─────────────────────────────────────────────────────────────────────────────
-function animatePacket(id, dx, dur=1200) {
-  const el = $(id);
-  if (!el) return Promise.resolve();
-  el.style.transition = '';
-  el.style.opacity = '0';
-  el.style.transform = 'translateX(0)';
-  return new Promise(resolve => {
-    requestAnimationFrame(() => {
-      el.style.transition = `opacity ${dur*.1}ms, transform ${dur}ms ease-in-out`;
-      el.style.opacity = '1';
-      el.style.transform = `translateX(${dx}px)`;
-      setTimeout(() => { el.style.opacity='0'; resolve(); }, dur);
-    });
+function buildNav() {
+  const nav = document.getElementById('chapter-nav');
+  nav.innerHTML = '';
+  CH_TITLES.forEach((t, i) => {
+    const n = i + 1;
+    if (i > 0) {
+      const c = document.createElement('div');
+      c.className = 'ch-connector' + (done.has(n - 1) ? ' done' : '');
+      nav.appendChild(c);
+    }
+    const d = document.createElement('div');
+    d.className = 'ch-dot' + (n === cur ? ' active' : '') + (done.has(n) ? ' done' : '');
+    d.innerHTML = `${done.has(n) && n !== cur ? '&#x2713;' : n}<div class="ch-tooltip">${t}</div>`;
+    d.onclick = () => goChapter(n);
+    nav.appendChild(d);
   });
 }
-function flashSVGNode(id, dur=600) {
-  const el = $(id);
+
+function goChapter(n) {
+  if (n < 1 || n > 9) return;
+  done.add(cur);
+  document.getElementById('ch' + cur).classList.remove('active');
+  cur = n;
+  document.getElementById('ch' + n).classList.add('active');
+  buildNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (n === 1) ch1Auto();
+}
+
+// ═══════════════════════════════════════════
+// Animation engine
+// ═══════════════════════════════════════════
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function animPkt(id, fromX, toX, dur = 1200) {
+  const el = document.getElementById(id);
   if (!el) return;
-  el.style.transition = `opacity ${dur*.2}ms`;
-  el.style.opacity = '1';
-  setTimeout(() => { el.style.opacity='0'; }, dur);
+  el.style.visibility = 'visible';
+  const dx = toX - fromX;
+  await el.animate([
+    { transform: 'translateX(0)', opacity: 0 },
+    { transform: 'translateX(0)', opacity: 0.9, offset: 0.08 },
+    { transform: `translateX(${dx}px)`, opacity: 0.9, offset: 0.92 },
+    { transform: `translateX(${dx}px)`, opacity: 0 },
+  ], { duration: dur, easing: 'ease-in-out', fill: 'forwards' }).finished;
+  el.style.visibility = 'hidden';
+  el.getAnimations().forEach(a => a.cancel());
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Global shared state
-// ─────────────────────────────────────────────────────────────────────────────
-let setupDone     = false;
-let witIssued     = false;
-let wptGenerated  = false;
-let lastSDToken   = '';
-let lastLimited   = '';
-let sdClaims      = [];
-let sdSelected    = new Set();
-let tamperToken   = '';
-let tamperBadToken= '';
+async function animPktWithLabel(pktId, lblId, fromX, toX, dur = 1200) {
+  const el = document.getElementById(pktId);
+  const lbl = document.getElementById(lblId);
+  if (!el) return;
+  el.style.visibility = 'visible';
+  if (lbl) lbl.style.visibility = 'visible';
+  const dx = toX - fromX;
+  const kf = [
+    { transform: 'translateX(0)', opacity: 0 },
+    { transform: 'translateX(0)', opacity: 0.9, offset: 0.08 },
+    { transform: `translateX(${dx}px)`, opacity: 0.9, offset: 0.92 },
+    { transform: `translateX(${dx}px)`, opacity: 0 },
+  ];
+  const opts = { duration: dur, easing: 'ease-in-out', fill: 'forwards' };
+  const anims = [el.animate(kf, opts)];
+  if (lbl) anims.push(lbl.animate(kf, opts));
+  await Promise.all(anims.map(a => a.finished));
+  el.style.visibility = 'hidden';
+  if (lbl) lbl.style.visibility = 'hidden';
+  el.getAnimations().forEach(a => a.cancel());
+  if (lbl) lbl.getAnimations().forEach(a => a.cancel());
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SCENARIO 1 — Happy path
-// ─────────────────────────────────────────────────────────────────────────────
+function setWire(id, cls) {
+  const el = document.getElementById(id);
+  if (el) el.setAttribute('class', 'wire ' + cls);
+}
+
+function nodeClass(id, cls) {
+  const el = document.getElementById(id);
+  if (el) el.setAttribute('class', 'node-box ' + cls);
+}
+
+// ═══════════════════════════════════════════
+// WASM helpers
+// ═══════════════════════════════════════════
+function wcall(fn, ...args) {
+  try { return JSON.parse(window.wimse[fn](...args)); }
+  catch (e) { return { ok: false, error: e.message }; }
+}
+
+function renderJWT(token, id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const p = token.split('.');
+  if (p.length < 3) { el.textContent = token; return; }
+  el.innerHTML =
+    `<span class="jwt-h">${p[0]}</span><span class="jwt-dot">.</span>` +
+    `<span class="jwt-p">${p[1]}</span><span class="jwt-dot">.</span>` +
+    `<span class="jwt-s">${p[2]}</span>`;
+}
+
+function renderSDJWT(token, id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const parts = token.split('~');
+  const jp = parts[0].split('.');
+  let h = '';
+  if (jp.length >= 3) {
+    h = `<span class="jwt-h">${jp[0]}</span><span class="jwt-dot">.</span>` +
+        `<span class="jwt-p">${jp[1]}</span><span class="jwt-dot">.</span>` +
+        `<span class="jwt-s">${jp[2]}</span>`;
+  }
+  for (let i = 1; i < parts.length; i++) {
+    if (parts[i]) h += `<span class="jwt-dot">~</span><span class="jwt-sd">${parts[i]}</span>`;
+  }
+  el.innerHTML = h;
+}
+
+// ═══════════════════════════════════════════
+// Ch 1 auto-animation
+// ═══════════════════════════════════════════
+async function ch1Auto() {
+  await sleep(500);
+  const el = document.getElementById('pkt-ch1');
+  if (!el) return;
+  el.style.visibility = 'visible';
+  await el.animate([
+    { transform: 'translateX(0)', opacity: 0 },
+    { transform: 'translateX(0)', opacity: 1, offset: 0.08 },
+    { transform: 'translateX(250px) translateY(38px)', opacity: 1, offset: 0.55 },
+    { transform: 'translateX(400px) translateY(0)', opacity: 0.5, offset: 0.85 },
+    { transform: 'translateX(400px) translateY(0)', opacity: 0 },
+  ], { duration: 2000, easing: 'ease-in-out', fill: 'forwards' }).finished;
+  el.style.visibility = 'hidden';
+  el.getAnimations().forEach(a => a.cancel());
+}
+
+// ═══════════════════════════════════════════
+// Ch 2 — WIT
+// ═══════════════════════════════════════════
+let setupDone = false;
+
 async function doSetup() {
-  const r = call('setup');
-  if (!r.ok) { setStatus('s1-status', r.error, 'err'); return; }
+  const btn = document.getElementById('btn-setup');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Generating&hellip;';
+  await sleep(50); // yield to repaint
+  const r = wcall('setup');
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
   setupDone = true;
-  setStatus('s1-status', 'EC P-256 keys generated for IdP and Workload A.', 'ok');
-  $('s1-issuer').textContent = r.data.issuerID;
-  show('s1-out');
-  $('sn1').textContent = '✓'; $('sn1').classList.add('done');
-  enable('btn-wit');
+  nodeClass('ch2-node-idp', 'ok');
+  btn.textContent = '✓ Keys generated';
+  document.getElementById('btn-issue-wit').disabled = false;
 }
 
 async function doIssueWIT() {
-  const r = call('issueWIT');
-  if (!r.ok) { setStatus('s2-status', r.error, 'err'); return; }
-  witIssued = true;
-  setStatus('s2-status', 'WIT signed by IdP with ES256.', 'ok');
-  setAnatomy('wit', r.data.parts);
-  show('s2-out');
-  $('sn2').textContent = '✓'; $('sn2').classList.add('done');
-  enable('btn-wpt');
-  // animate packet IdP→A
-  animatePacket('pkt-wit', 160);
+  if (!setupDone) return;
+  const btn = document.getElementById('btn-issue-wit');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Issuing&hellip;';
+  await sleep(50);
+  const r = wcall('issueWIT');
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+  // Animate IdP → A
+  await animPktWithLabel('pkt-wit-i', 'pkt-wit-i-lbl', 145, 265, 1000);
+  nodeClass('ch2-node-a', 'ok');
+  // Show anatomy
+  const out = document.getElementById('wit-out');
+  out.style.display = 'block';
+  renderJWT(r.data.token, 'wit-raw');
+  const parts = r.data.parts;
+  document.getElementById('wit-hdr').textContent = JSON.stringify(parts.header, null, 2);
+  document.getElementById('wit-pld').textContent = JSON.stringify(parts.payload, null, 2);
+  document.getElementById('wit-sub').textContent = r.data.sub;
+  setWire('wire-ch2-a-b', 'wire-tls');
+  btn.textContent = '✓ WIT issued';
 }
 
-async function doGenerateWPT() {
-  const r = call('generateWPT');
-  if (!r.ok) { setStatus('s3-status', r.error, 'err'); return; }
-  wptGenerated = true;
-  setStatus('s3-status', 'WPT signed by Workload A\'s private key.', 'ok');
-  setAnatomy('wpt', r.data.parts);
-  $('s3-wth').textContent = r.data.wthDigest;
-  show('s3-out');
-  $('sn3').textContent = '✓'; $('sn3').classList.add('done');
-  enable('btn-val');
+// ═══════════════════════════════════════════
+// Ch 3 — mTLS cert
+// ═══════════════════════════════════════════
+async function doGenCert() {
+  if (!setupDone) { alert('Complete Chapter 2 first (generate keys)'); return; }
+  const btn = document.getElementById('btn-cert');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Generating&hellip;';
+  await sleep(50);
+  const r = wcall('generateMTLSCert');
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+  const d = r.data;
+
+  // Handshake animation
+  setWire('wire-ch3', 'wire-hs');
+  await sleep(300);
+  // A→B ClientHello
+  await animPktWithLabel('pkt-ch', 'pkt-ch-l', 145, 411, 850);
+  // B→A ServerHello+Cert
+  await animPktWithLabel('pkt-sh', 'pkt-sh-l', 483, -338, 950);
+  // A→B ClientCert+Verify
+  await animPktWithLabel('pkt-cc', 'pkt-cc-l', 145, 411, 850);
+  // B→A Finished
+  await animPktWithLabel('pkt-fin', 'pkt-fin-l', 483, -338, 850);
+
+  setWire('wire-ch3', 'wire-tls');
+  nodeClass('ch3-node-a', 'ok');
+  nodeClass('ch3-node-b', 'ok');
+  btn.textContent = '✓ mTLS established';
+
+  document.getElementById('cert-out').style.display = 'block';
+  const cf = document.getElementById('cert-fields');
+  cf.innerHTML = [
+    ['SPIFFE URI SAN', (d.spiffeURIs || ['—'])[0], 'spiffe'],
+    ['DNS Name', (d.dnsNames || ['—'])[0], ''],
+    ['Issuer (CA)', d.issuer || '—', ''],
+    ['Key Type', d.keyType || '—', 'ok'],
+    ['Signature Alg', d.sigAlg || '—', 'ok'],
+    ['TLS Version', d.tlsVersion || '—', 'ok'],
+    ['Valid From', d.notBefore || '—', ''],
+    ['Valid Until', d.notAfter || '—', ''],
+    ['Serial', d.serial || '—', ''],
+    ['Fingerprint (truncated)', d.fingerprint || '—', ''],
+  ].map(([k, v, c]) =>
+    `<div class="cert-field"><div class="cf-key">${k}</div><div class="cf-val ${c}">${v}</div></div>`
+  ).join('');
+  document.getElementById('cert-pem').textContent = d.pem || '';
+}
+
+// ═══════════════════════════════════════════
+// Ch 4 — WPT
+// ═══════════════════════════════════════════
+async function doGenWPT() {
+  if (!setupDone) { alert('Complete Chapter 2 first'); return; }
+  const btn = document.getElementById('btn-wpt');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Generating&hellip;';
+  await sleep(50);
+  const r = wcall('generateWPT');
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+  const d = r.data;
+
+  await animPktWithLabel('pkt-wpt', 'pkt-wpt-l', 145, 410, 1200);
+  nodeClass('ch4-node-b', 'ok');
+
+  document.getElementById('wpt-out').style.display = 'block';
+  renderJWT(d.token, 'wpt-raw');
+  document.getElementById('wpt-aud').textContent = d.targetURI || '—';
+  const wth = d.wthDigest || '';
+  document.getElementById('wpt-wth').textContent = wth.slice(0, 18) + '…';
+  btn.textContent = '✓ WPT generated';
+}
+
+// ═══════════════════════════════════════════
+// Ch 5 — Validation
+// ═══════════════════════════════════════════
+const VSTEP_LABELS = [
+  'Parse Workload-Identity-Token header',
+  'Verify WIT ES256 signature (IdP public key)',
+  'Check WIT expiry, nbf, iat',
+  'Verify WIT iss == expected issuer',
+  'Extract workload public key from cnf.jwk',
+  'Verify WPT ES256 signature (workload key)',
+  'Confirm WPT aud == request URI (exact match)',
+  'Verify WPT wth == SHA-256(WIT)',
+  'Check WPT jti not replayed',
+];
+
+function initVSteps() {
+  document.getElementById('vsteps').innerHTML = VSTEP_LABELS.map((s, i) =>
+    `<div class="vstep" id="vs${i}"><div class="vstep-icon">${i + 1}</div><div>${s}</div></div>`
+  ).join('');
+  document.getElementById('val-ok').style.display = 'none';
 }
 
 async function doValidate() {
-  const r = call('validateRequest');
-  if (!r.ok) { setStatus('s4-status', r.error, 'err'); return; }
-  setStatus('s4-status', 'All 8 checks passed — request authorized ✓', 'ok');
-  $('sn4').textContent = '✓'; $('sn4').classList.add('done');
+  if (!setupDone) { alert('Complete Chapters 2–4 first'); return; }
+  const btn = document.getElementById('btn-val');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Validating&hellip;';
+  initVSteps();
 
-  // Animate A→B packet
-  animatePacket('pkt-req', 160);
+  const p = document.getElementById('pkt-val');
+  p.style.visibility = 'visible';
+  p.animate([
+    { transform: 'translateX(0)', opacity: 0 },
+    { transform: 'translateX(0)', opacity: 0.9, offset: 0.08 },
+    { transform: 'translateX(410px)', opacity: 0.9, offset: 0.92 },
+    { transform: 'translateX(410px)', opacity: 0 },
+  ], { duration: 1200, easing: 'ease-in-out', fill: 'forwards' });
 
-  // Render check list with staggered animation
-  const list = $('val-checks');
-  list.innerHTML = '';
-  for (const [i, step] of r.data.steps.entries()) {
-    const li = document.createElement('li');
-    li.innerHTML = `<span class="ci ci-pending">○</span><span>${step}</span>`;
-    list.appendChild(li);
-    await delay(110);
-    li.querySelector('.ci').className = 'ci ci-ok';
-    li.querySelector('.ci').textContent = '✓';
+  await sleep(600);
+  const r = wcall('validateRequest');
+  await sleep(700);
+  p.style.visibility = 'hidden';
+  p.getAnimations().forEach(a => a.cancel());
+
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+
+  for (let i = 0; i < VSTEP_LABELS.length; i++) {
+    await sleep(200);
+    const s = document.getElementById('vs' + i);
+    s.classList.add('pass');
+    s.querySelector('.vstep-icon').innerHTML = '&#x2713;';
   }
 
-  await delay(400);
-  flashSVGNode('pkt-check');
-
-  $('s4-caller').innerHTML = `
-    <div class="info-row"><span class="info-label">Caller sub</span><span class="info-value" style="color:var(--green)">${r.data.subject}</span></div>
-    <div class="info-row"><span class="info-label">Trust domain</span><span class="info-value">${r.data.trustDomain}</span></div>
-    <div class="info-row"><span class="info-label">Target URI</span><span class="info-value">${r.data.targetURI}</span></div>`;
-  show('s4-caller');
+  nodeClass('ch5-node-b', 'ok');
+  document.getElementById('ch5-sub').textContent = 'all checks pass!';
+  document.getElementById('val-sub').textContent = r.data.subject;
+  document.getElementById('val-ok').style.display = 'block';
+  btn.textContent = '✓ Valid';
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SCENARIO 2 — Replay
-// ─────────────────────────────────────────────────────────────────────────────
-async function doReplaySetup() {
-  // Ensure global state is ready
-  if (!setupDone) {
-    const r = call('setup');
-    if (!r.ok) { setStatus('rp-setup-status', r.error, 'err'); return; }
-    setupDone = true;
-  }
-  if (!witIssued) {
-    const r = call('issueWIT');
-    if (!r.ok) { setStatus('rp-setup-status', r.error, 'err'); return; }
-    witIssued = true;
-  }
-  const r = call('generateWPT');
-  if (!r.ok) { setStatus('rp-setup-status', r.error, 'err'); return; }
-  wptGenerated = true;
-  setStatus('rp-setup-status', 'WIT and WPT ready. Simulating attacker capturing the WPT…', 'ok');
-  enable('btn-rp1');
-}
+// ═══════════════════════════════════════════
+// Ch 6 — Authorization
+// ═══════════════════════════════════════════
+async function doAuthz() {
+  if (!setupDone) { alert('Complete Chapter 2 first'); return; }
+  const btn = document.getElementById('btn-authz');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div>';
 
-async function doFirstRequest() {
-  // The WASM validator has a fresh jti store per scenario — call validateRequest
-  const r = call('validateRequest');
-  if (!r.ok) { setStatus('rp-r1-status', r.error, 'err'); return; }
-  setStatus('rp-r1-status', 'First request allowed. jti recorded in nonce store.', 'ok');
-  enable('btn-rp2');
-}
+  const resource = document.getElementById('az-resource').value;
+  const action = document.getElementById('az-action').value;
+  document.getElementById('ch6-res-lbl').textContent = resource;
 
-async function doReplay() {
-  const r = call('replayAttack');
-  if (!r.ok) { setStatus('rp-r2-status', r.error, 'err'); return; }
+  // Animate through nodes
+  await animPkt('pkt-az-req', 145, 205, 600);
+  await animPkt('pkt-az-pol', 335, 395, 600);
+
+  const r = wcall('checkAuthorization', resource, action);
+  btn.disabled = false;
+  btn.textContent = 'Check Authorization (WASM)';
+
+  if (!r.ok) { alert('Error: ' + r.error); return; }
   const d = r.data;
-  if (d.secondAttemptBlocked) {
-    setStatus('rp-r2-status', '✗ Replay blocked — jti already used.', 'err');
-    flashSVGNode('rp-block');
+
+  const vEl = document.getElementById('az-verdict');
+  vEl.style.display = 'block';
+  vEl.innerHTML = `<div class="verdict ${d.allowed ? 'allow' : 'deny'}">
+    <div class="verdict-icon">${d.allowed ? '&#x2713;' : '&#x2717;'}</div>
+    <div><strong>${d.allowed ? 'ACCESS GRANTED' : 'ACCESS DENIED'}</strong><br>
+    <span style="font-size:12px;font-weight:400">${d.matchDesc}</span></div>
+  </div>`;
+
+  if (d.allowed) {
+    await animPkt('pkt-az-acc', 525, 585, 600);
+    nodeClass('ch6-res-node', 'ok');
+    setWire('wire-ch6-res', 'wire-tls');
   } else {
-    setStatus('rp-r2-status', 'Warning: replay was NOT blocked!', 'warn');
+    nodeClass('ch6-res-node', 'bad');
   }
-  $('rp-output').innerHTML = `
-    <div style="margin-top:10px">
-      <div class="info-row"><span class="info-label">1st attempt</span><span class="info-value" style="color:var(--green)">✓ Allowed</span></div>
-      <div class="info-row"><span class="info-label">2nd attempt</span><span class="info-value" style="color:var(--red)">✗ Blocked (${d.replayError})</span></div>
-      <p style="color:var(--muted);font-size:12px;margin-top:8px">${d.explanation}</p>
-    </div>`;
-  show('rp-output');
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SCENARIO 3 — Tampering
-// ─────────────────────────────────────────────────────────────────────────────
-async function doTamperSetup() {
-  if (!setupDone) {
-    const r = call('setup');
-    if (!r.ok) { setStatus('tm-setup-status', r.error, 'err'); return; }
-    setupDone = true;
-  }
-  const r = call('issueWIT');
-  if (!r.ok) { setStatus('tm-setup-status', r.error, 'err'); return; }
-  witIssued = true;
-  tamperToken = r.data.token;
-  setStatus('tm-setup-status', 'Legitimate WIT issued for spiffe://cloud-a.example/workload-a.', 'ok');
-  $('tm-orig').innerHTML = `
-    <div style="margin-top:10px">
-      <div class="info-row"><span class="info-label">sub</span><span class="info-value" style="color:var(--green)">spiffe://cloud-a.example/workload-a</span></div>
-    </div>
-    <div class="token-box" style="margin-top:8px">
-      <span style="color:var(--orange)">${r.data.parts.raw.header}</span>.<span style="color:var(--blue)">${r.data.parts.raw.payload}</span>.<span style="color:var(--purple)">${r.data.parts.raw.signature}</span>
-    </div>`;
-  show('tm-orig');
-  enable('btn-tm-tamper');
-}
-
-async function doTamper() {
-  // Decode the original token, swap the payload, keep the original signature.
-  const parts = tamperToken.split('.');
-  const origPayload = parts[1];
-
-  // Decode payload (pad base64url to valid base64)
-  const padded = origPayload + '=='.slice(0, (4 - origPayload.length % 4) % 4);
-  const decoded = JSON.parse(atob(padded.replace(/-/g,'+').replace(/_/g,'/')));
-
-  // Escalate privilege
-  decoded['sub'] = 'spiffe://cloud-a.example/admin';
-
-  // Re-encode
-  const maliciousPayload = btoa(JSON.stringify(decoded)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-  tamperBadToken = parts[0] + '.' + maliciousPayload + '.' + parts[2];
-
-  setStatus('tm-tamper-status', 'Payload modified: sub → spiffe://cloud-a.example/admin (original signature kept).', 'warn');
-  $('tm-tampered').innerHTML = `
-    <div style="margin-top:10px">
-      <div class="info-row"><span class="info-label">Modified sub</span><span class="info-value" style="color:var(--red)">spiffe://cloud-a.example/admin</span></div>
-    </div>
-    <div class="token-box" style="margin-top:8px">
-      <span style="color:var(--orange)">${parts[0]}</span>.<span style="color:var(--red)">${maliciousPayload}</span>.<span style="color:var(--purple)">${parts[2]}</span>
-    </div>
-    <p style="color:var(--muted);font-size:11px;margin-top:6px;">The <span style="color:var(--blue)">blue</span> payload has changed; the <span style="color:var(--purple)">purple</span> signature is from the original token.</p>`;
-  show('tm-tampered');
-  enable('btn-tm-submit');
-}
-
-async function doTamperSubmit() {
-  // We validate the tampered token by calling a raw JS validator.
-  // The WASM validator validates the stored token — here we demonstrate
-  // that signature verification catches the payload modification.
-  // We use the WASM validateSDWIT with the bad token (wrong content for WIT validator too).
-  // Actually let's just call validateSDWIT with the bad token string — it will fail typ check.
-  // For correctness, we call a fresh Go-side validate by passing the tampered token.
-  // The WASM exposes validateSDWIT(token) — let's use issueWIT→validate cycle.
-  // Simpler: the WIT validator runs internally when we call validateRequest.
-  // The tampered token would be in Workload-Identity-Token header.
-  // We cannot easily pass an arbitrary token to the WASM without a dedicated export.
-  // So let's demonstrate via the already-exposed replayAttack path but explain the sig check.
-  // Actually the simplest demo: the tampered token's payload has changed, so sha256(header.payload)
-  // will differ from what was signed. We'll show this with WebCrypto for a pure-JS verification.
-
-  // Import the IdP's public key from the WIT header (not directly available client-side).
-  // Instead: show the conceptual result and note that the WASM validator would reject it.
-  flashSVGNode('tm-block');
-  setStatus('tm-submit-status',
-    '✗ REJECTED — ES256 signature verification failed. sha256(header.payload) no longer matches the signature. Workload B returns HTTP 401.', 'err');
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SCENARIO 4 — Selective Disclosure
-// ─────────────────────────────────────────────────────────────────────────────
-function sdJWTHtml(token, hiddenClaims) {
-  const hidden = new Set(hiddenClaims || []);
-  const parts  = token.split('~');
-  const jwt    = parts[0].split('.');
-  let html = `<span class="sd-part-jwt">${jwt[0]}</span>`
-           + `<span class="sd-part-sep">.</span>`
-           + `<span class="sd-part-jwt">${jwt[1]}</span>`
-           + `<span class="sd-part-sep">.</span>`
-           + `<span class="sd-part-jwt">${jwt[2]}</span>`;
-  for (let i = 1; i < parts.length; i++) {
-    if (!parts[i]) continue;
-    html += `<span class="sd-part-sep">~</span>`;
-    html += `<span class="sd-part-disc">${parts[i]}</span>`;
-  }
-  html += `<span class="sd-part-sep">~</span>`;
-  return html;
-}
-
-async function doSDSetup() {
-  if (!setupDone) {
-    const r = call('setup');
-    if (!r.ok) { setStatus('sd-setup-status', r.error, 'err'); return; }
-    setupDone = true;
-  }
-  const r = call('issueSDWIT');
-  if (!r.ok) { setStatus('sd-setup-status', r.error, 'err'); return; }
-  lastSDToken = r.data.token;
-  sdClaims    = r.data.revealedClaims || ['sub','trust_domain','roles'];
-  sdSelected  = new Set(sdClaims);
-
-  setStatus('sd-setup-status', 'SD-WIT issued — sub, trust_domain, roles are selectively disclosable.', 'ok');
-  $('sd-full-disp').innerHTML = sdJWTHtml(lastSDToken, []);
-  show('sd-full-out');
-  renderSDChips();
-  enable('btn-sd-present');
-}
-
-function renderSDChips() {
-  const c = $('sd-chips');
-  c.innerHTML = '';
-  sdClaims.forEach(claim => {
-    const chip = document.createElement('span');
-    chip.className = 'chip ' + (sdSelected.has(claim) ? 'on' : 'off');
-    chip.textContent = claim;
-    chip.onclick = () => {
-      sdSelected.has(claim) ? sdSelected.delete(claim) : sdSelected.add(claim);
-      renderSDChips();
-    };
-    c.appendChild(chip);
-  });
-}
-
-async function doSDPresent() {
-  const reveal = [...sdSelected];
-  const r = call('presentSDWIT', JSON.stringify(reveal));
-  if (!r.ok) { setStatus('sd-present-status', r.error, 'err'); return; }
-  lastLimited = r.data.limitedToken;
-  const hidden = r.data.hiddenClaims || [];
-
-  setStatus('sd-present-status',
-    `Presentation created: revealing [${r.data.revealedLimited.join(', ') || 'none'}], hiding [${hidden.join(', ') || 'none'}].`,
-    'ok');
-
-  $('sd-limited-disp').innerHTML = sdJWTHtml(lastLimited, hidden);
-  show('sd-limited-disp');
-
-  // Disclosure cards
-  const grid = $('sd-cards');
-  grid.innerHTML = '';
-  sdClaims.forEach(claim => {
-    const rev = sdSelected.has(claim);
-    const card = document.createElement('div');
-    card.className = 'disc-card ' + (rev ? 'revealed' : 'hidden');
-    card.innerHTML = `<div class="dc-claim ${rev?'revealed':'hidden'}">${rev?'✓':'✗'} ${claim}</div>
-      <div class="dc-value">${rev ? 'Included in presentation' : 'Hash in _sd — value hidden'}</div>`;
-    grid.appendChild(card);
-  });
-  show('sd-present-out');
-  enable('btn-sd-val');
-}
-
-async function doSDValidate() {
-  const r = call('validateSDWIT', lastLimited);
-  if (!r.ok) { setStatus('sd-val-status', r.error, 'err'); return; }
-  setStatus('sd-val-status', 'Presentation validated. Verifier sees only disclosed claims.', 'ok');
-  const d = r.data;
-  $('sd-val-out').innerHTML = [
-    ['issuer',       d.issuer       || '(present)'],
-    ['subject',      d.subject      || '(hidden)'],
-    ['trust_domain', d.trustDomain  || '(hidden)'],
-    ['roles',        d.roles        ? d.roles.join(', ') : '(hidden)'],
-    ['cnf.jwk',      d.hasKey       ? 'Present (always visible)' : 'Missing'],
-  ].map(([k,v]) => {
-    const hidden = v.startsWith('(hidden');
-    const c = hidden ? 'var(--muted)' : 'var(--green)';
-    return `<div class="info-row"><span class="info-label">${k}</span><span class="info-value" style="color:${c}">${v}</span></div>`;
+  document.getElementById('az-tbody').innerHTML = (d.policy || []).map((row, i) => {
+    let cls = '';
+    if (i === d.matchedRule) cls = d.allowed ? 'matched' : 'matched-deny';
+    return `<tr class="${cls}">
+      <td>${row.subjectPattern}</td>
+      <td>${row.resource}</td>
+      <td>${row.action}</td>
+      <td><span class="badge ${row.allow ? 'ba' : 'bd'}">${row.allow ? 'ALLOW' : 'DENY'}</span></td>
+      <td class="desc">${row.description}</td>
+    </tr>`;
   }).join('');
-  show('sd-val-out');
 }
+
+// ═══════════════════════════════════════════
+// Ch 7 — SD-JWT
+// ═══════════════════════════════════════════
+let sdDone = false;
+let sdSelected = new Set(['sub']);
+let presentedToken = '';
+
+function toggleClaim(el) {
+  const c = el.dataset.claim;
+  if (sdSelected.has(c)) { sdSelected.delete(c); el.classList.remove('on'); }
+  else { sdSelected.add(c); el.classList.add('on'); }
+}
+
+async function doIssueSD() {
+  if (!setupDone) { alert('Complete Chapter 2 first'); return; }
+  const btn = document.getElementById('btn-sd-issue');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Issuing&hellip;';
+  await sleep(50);
+  const r = wcall('issueSDWIT');
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+  sdDone = true;
+  document.getElementById('btn-sd-present').disabled = false;
+  document.getElementById('sd-claim-ui').style.display = 'block';
+  document.getElementById('sd-out').style.display = 'block';
+  renderSDJWT(r.data.token, 'sd-full-raw');
+  document.getElementById('sd-full-claims').textContent =
+    'Claims: ' + (r.data.revealedClaims || []).join(', ');
+  btn.textContent = '✓ SD-WIT issued';
+}
+
+async function doPresent() {
+  if (!sdDone) return;
+  const btn = document.getElementById('btn-sd-present');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div>';
+  const r = wcall('presentSDWIT', JSON.stringify([...sdSelected]));
+  if (!r.ok) { btn.textContent = 'Error: ' + r.error; btn.disabled = false; return; }
+  presentedToken = r.data.limitedToken;
+  document.getElementById('btn-sd-val').disabled = false;
+  renderSDJWT(r.data.limitedToken, 'sd-ltd-raw');
+  const rev = r.data.revealedLimited || [];
+  const hid = r.data.hiddenClaims || [];
+  document.getElementById('sd-ltd-claims').innerHTML =
+    `Revealed: <strong style="color:var(--green)">${rev.join(', ') || 'none'}</strong>` +
+    (hid.length ? ` &nbsp;|&nbsp; Hidden: <strong style="color:var(--red)">${hid.join(', ')}</strong>` : '');
+
+  await animPkt('pkt-sd', 145, 410, 1100);
+  nodeClass('ch7-node-b', 'ok');
+  btn.textContent = '✓ Presented';
+  btn.disabled = false;
+}
+
+async function doValidateSD() {
+  const btn = document.getElementById('btn-sd-val');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div>';
+  const r = wcall('validateSDWIT', presentedToken || '');
+  btn.textContent = '✓ Validated';
+  btn.disabled = false;
+  const el = document.getElementById('sd-val-result');
+  el.style.display = 'block';
+  if (!r.ok) {
+    el.innerHTML = `<div class="callout danger"><strong>Validation failed:</strong> ${r.error}</div>`;
+    return;
+  }
+  const d = r.data;
+  el.innerHTML = `<div class="verdict allow">
+    <div class="verdict-icon">&#x2713;</div>
+    <div><strong>Presentation valid</strong><br>
+    <span style="font-size:12px;font-weight:400">
+      sub: <code>${d.subject || '(hidden)'}</code> &nbsp;
+      trust_domain: <code>${d.trustDomain || '(hidden)'}</code> &nbsp;
+      roles: <code>${(d.roles || []).join(', ') || '(hidden)'}</code>
+    </span></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// Ch 9 — Replay attack
+// ═══════════════════════════════════════════
+async function doReplay() {
+  if (!setupDone) { alert('Complete Chapters 2–4 first'); return; }
+  const btn = document.getElementById('btn-replay');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Simulating&hellip;';
+
+  // Legitimate request
+  await animPkt('pkt-r1', 145, 410, 1100);
+  await sleep(300);
+  // Replay attempt
+  await animPkt('pkt-r2', 145, 410, 1100);
+
+  const r = wcall('replayAttack');
+  btn.textContent = '✓ Attack simulated';
+  btn.disabled = false;
+
+  document.getElementById('replay-out').style.display = 'block';
+  if (r.ok && r.data.replayError) {
+    document.getElementById('replay-err').textContent = r.data.replayError;
+  }
+  nodeClass('ch9-b1', 'ok');
+  nodeClass('ch9-b2', 'bad');
+}
+
+// ═══════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════
+function initDemo() {
+  initVSteps();
+  ch1Auto();
+}
+
+buildNav();
+initVSteps();
+ch1Auto();
 </script>
 </body>
 </html>
