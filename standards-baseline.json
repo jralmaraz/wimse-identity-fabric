@@ -1,6 +1,28 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
-  "last_checked": "2026-08-01",
+  "last_checked": "2026-08-02",
+  "wg_feeds": [
+    {
+      "name": "IETF WIMSE WG",
+      "feed_url": "https://datatracker.ietf.org/group/wimse/documents/feed/",
+      "type": "ietf-wg",
+      "note": "Discovers new WIMSE WG drafts not yet in our baseline"
+    },
+    {
+      "name": "IETF OAuth WG",
+      "feed_url": "https://datatracker.ietf.org/group/oauth/documents/feed/",
+      "type": "ietf-wg",
+      "note": "Discovers new OAuth WG drafts (DPoP updates, Transaction Tokens, etc.)"
+    },
+    {
+      "name": "OpenID Foundation",
+      "feed_url": "https://openid.net/feed/",
+      "type": "rss",
+      "keywords": ["federation", "connect"],
+      "last_guid": null,
+      "note": "Catches OIDF spec publications, errata, and public review periods"
+    }
+  ],
   "standards": [
     {
       "id": "draft-ietf-wimse-workload-creds",
@@ -25,7 +47,7 @@
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-wpt/",
-      "impact": "WPT claims (typ=application/wpt+jwt), aud=request URI, wth=SHA-256(WIT), jti replay protection",
+      "impact": "WPT claims (typ=application/wpt+jwt), aud=request URI, wth=SHA-256(WIT), tth=SHA-256(Txn-Token), jti replay protection",
       "used_in": ["pkg/wpt", "internal/workload"]
     },
     {
@@ -68,15 +90,44 @@
       "used_in": ["internal/exchange"]
     },
     {
+      "id": "draft-ietf-oauth-transaction-tokens",
+      "label": "OAuth 2.0 Transaction Tokens (Txn-Token)",
+      "short": "Txn-Token",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": "11",
+      "implemented_rev": null,
+      "status": "active-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-transaction-tokens/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-transaction-tokens/",
+      "impact": "Txn-Token (txntoken+jwt) for call-chain context propagation; tth claim in WPT binds proof to transaction context; req_wl carries requesting workload SPIFFE ID",
+      "used_in": ["pkg/txntoken (planned)", "internal/exchange"]
+    },
+    {
+      "id": "rfc9449",
+      "label": "OAuth 2.0 DPoP (RFC 9449)",
+      "short": "DPoP",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": "rfc",
+      "implemented_rev": "rfc",
+      "status": "rfc",
+      "datatracker_url": "https://datatracker.ietf.org/doc/rfc9449/",
+      "api_url": null,
+      "impact": "DPoP proof JWT (dpop+jwt), cnf.jkt thumbprint binding",
+      "used_in": ["pkg/wpt"]
+    },
+    {
       "id": "openid-federation-1_0",
       "label": "OpenID Federation 1.0",
       "short": "OID-FED",
       "wg": "OpenID Foundation",
-      "last_known_rev": "1.0-41",
+      "last_known_rev": "1.0",
       "implemented_rev": "1.0-41",
-      "status": "active-draft",
+      "status": "final",
       "datatracker_url": "https://openid.net/specs/openid-federation-1_0.html",
       "api_url": null,
+      "rss_url": "https://openid.net/feed/",
+      "rss_keywords": ["federation"],
+      "last_rss_guid": null,
       "impact": "Entity Configuration JWT, Subordinate Statement, authority_hints, trust chain resolution, min(EC.exp,SS.exp) caching",
       "used_in": ["pkg/federation", "internal/exchange"]
     }
