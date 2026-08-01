@@ -384,6 +384,67 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
       </table>
     </div>
   </div>
+
+  <!-- Multi-cloud workload flow demo -->
+  <div class="flow-anim-panel">
+    <div class="flow-anim-title">Interactive — Multi-Cloud Workload Authentication Flow</div>
+    <div class="product-tabs">
+      <div class="ptab mc-tab active" onclick="selectMCFlow('aws_gcp',this)">AWS &#8594; GCP</div>
+      <div class="ptab mc-tab" onclick="selectMCFlow('azure_aws',this)">Azure &#8594; AWS</div>
+      <div class="ptab mc-tab" onclick="selectMCFlow('gcp_onprem',this)">GCP &#8594; On-Prem</div>
+    </div>
+    <button class="play-btn" id="mc-play-btn" onclick="playMCFlow()">&#9654; Play Flow</button>
+    <svg class="anim-flow-svg" viewBox="0 0 820 110" xmlns="http://www.w3.org/2000/svg">
+      <!-- Source cloud workload -->
+      <rect x="10" y="28" width="165" height="54" rx="6" fill="#161b22" stroke="#ffa657" stroke-width="1.5"/>
+      <text id="mc-a0" x="92" y="50" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="11" font-weight="700">AWS EKS Pod</text>
+      <text id="mc-a0s" x="92" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="8">spiffe://cloud-a.corp/svc/billing</text>
+      <text id="mc-a0b" x="92" y="77" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">bootstrap: IRSA</text>
+      <!-- Corp WIMSE IdP -->
+      <rect x="328" y="28" width="165" height="54" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+      <text id="mc-a1" x="410" y="50" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="11" font-weight="700">Corp WIMSE IdP</text>
+      <text id="mc-a1s" x="410" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="8">Keycloak + SPIRE</text>
+      <text x="410" y="77" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">OID-FED trust anchor</text>
+      <!-- Target cloud workload -->
+      <rect x="648" y="28" width="165" height="54" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+      <text id="mc-a2" x="730" y="50" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="11" font-weight="700">GCP GKE Pod</text>
+      <text id="mc-a2s" x="730" y="64" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="8">spiffe://cloud-b.corp/svc/analytics</text>
+      <text id="mc-a2b" x="730" y="77" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">validate: OID-FED</text>
+      <!-- Connection lines -->
+      <line x1="175" y1="51" x2="328" y2="51" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <line x1="175" y1="65" x2="328" y2="65" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1" opacity=".4"/>
+      <line x1="493" y1="51" x2="648" y2="51" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1"/>
+      <line x1="493" y1="65" x2="648" y2="65" stroke="#30363d" stroke-dasharray="4,3" stroke-width="1" opacity=".4"/>
+      <!-- Wire labels -->
+      <text x="252" y="47" text-anchor="middle" fill="#ffa657" font-family="monospace" font-size="7.5">WIT request &#8594;</text>
+      <text x="252" y="78" text-anchor="middle" fill="#58a6ff" font-family="monospace" font-size="7.5">&#8592; WIT issued</text>
+      <text x="570" y="47" text-anchor="middle" fill="#3fb950" font-family="monospace" font-size="7.5">WIT + WPT &#8594;</text>
+      <text x="570" y="78" text-anchor="middle" fill="#3fb950" font-family="monospace" font-size="7.5">&#8592; 200 OK</text>
+      <!-- Animated packets -->
+      <circle id="mc-pk1" cx="92" cy="51" r="7" fill="#ffa657" visibility="hidden"/>
+      <circle id="mc-pk2" cx="410" cy="65" r="7" fill="#58a6ff" visibility="hidden"/>
+      <circle id="mc-pk3" cx="92" cy="51" r="7" fill="#3fb950" visibility="hidden"/>
+      <circle id="mc-pk4" cx="730" cy="65" r="7" fill="#3fb950" visibility="hidden"/>
+    </svg>
+    <div class="anim-steps">
+      <div class="anim-step" id="mc-step1">
+        <div class="as-label" id="mc-s1-label">Bootstrap</div>
+        <div class="as-desc" id="mc-s1-desc">AWS pod uses IRSA to get initial cloud identity. EC P-256 key pair generated; public key registered with Corp IdP.</div>
+      </div>
+      <div class="anim-step" id="mc-step2">
+        <div class="as-label" id="mc-s2-label">WIT Issued</div>
+        <div class="as-desc" id="mc-s2-desc">Corp IdP validates IRSA token, issues WIT: sub=spiffe://cloud-a.corp/svc/billing, cnf.jwk=&lt;pub-key&gt;, exp=+1h.</div>
+      </div>
+      <div class="anim-step" id="mc-step3">
+        <div class="as-label" id="mc-s3-label">Cross-Cloud Call</div>
+        <div class="as-desc" id="mc-s3-desc">AWS pod generates WPT (aud=https://analytics.gcp.corp/api, wth=hash(WIT)). Calls GCP service with Workload-Identity-Token + Workload-Proof-Token headers.</div>
+      </div>
+      <div class="anim-step" id="mc-step4">
+        <div class="as-label" id="mc-s4-label">OID-FED Validated</div>
+        <div class="as-desc" id="mc-s4-desc">GCP service resolves Corp IdP via OID-FED trust chain. Validates WIT signature + WPT audience binding. Returns 200 OK.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -1080,6 +1141,58 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <strong>Harvest Now, Decrypt Later (HNDL):</strong> Adversaries are already capturing encrypted WIMSE traffic and storing it. When a CRQC becomes available (~2030–2035 by most estimates), they can retroactively forge tokens, decrypt sessions, and impersonate any workload whose identity material was observed in transit.
   </div>
 
+  <!-- Quantum Cracking Animation -->
+  <div class="card">
+    <div class="card-title">Quantum Computer vs. EC P-256 — Attack Simulation</div>
+    <p style="font-size:.875rem;color:var(--muted);margin-bottom:1rem">
+      EC P-256 relies on the <strong style="color:var(--text)">Elliptic Curve Discrete Logarithm Problem</strong>: given public point Q = k·G, finding private key k requires ~2<sup>128</sup> classical operations — computationally infeasible. Shor's algorithm on a CRQC solves ECDLP in <code>O(n³)</code>, extracting k in seconds.
+    </p>
+    <div class="diagram">
+      <svg id="qc-svg" viewBox="0 0 820 145" xmlns="http://www.w3.org/2000/svg">
+        <rect x="5" y="40" width="135" height="65" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="72" y="62" text-anchor="middle" font-size="10" fill="#58a6ff" font-family="sans-serif" font-weight="700">EC P-256 Key</text>
+        <text x="72" y="77" text-anchor="middle" font-size="9" fill="#7d8590" font-family="monospace">Q = k·G</text>
+        <text x="72" y="91" text-anchor="middle" font-size="8" fill="#3fb950" font-family="sans-serif">public: Q known</text>
+        <text x="72" y="103" text-anchor="middle" font-size="8" fill="#f85149" font-family="sans-serif">private: k hidden</text>
+        <line x1="140" y1="60" x2="205" y2="38" stroke="#30363d" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="140" y1="85" x2="400" y2="72" stroke="#30363d" stroke-width="1" stroke-dasharray="4,3"/>
+        <!-- Classical -->
+        <rect x="205" y="8" width="195" height="50" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+        <text x="302" y="28" text-anchor="middle" font-size="10" fill="#7d8590" font-family="sans-serif" font-weight="700">Classical Computer</text>
+        <text x="302" y="42" text-anchor="middle" font-size="8" fill="#7d8590" font-family="sans-serif">Baby-step Giant-step · ~2¹²⁸ ops</text>
+        <text x="302" y="54" text-anchor="middle" font-size="8" fill="#7d8590" font-family="monospace">infeasible</text>
+        <rect x="205" y="64" width="195" height="13" rx="3" fill="#21262d" stroke="#30363d" stroke-width="1"/>
+        <rect id="qc-classic-bar" x="205" y="64" width="0" height="13" rx="3" fill="#58a6ff" opacity=".7"/>
+        <text id="qc-classic-pct" x="302" y="74" text-anchor="middle" font-size="7" fill="#e6edf3" font-family="monospace">0%</text>
+        <text x="302" y="91" text-anchor="middle" font-size="8" fill="#f85149" font-family="sans-serif">→ heat death of universe</text>
+        <!-- Quantum -->
+        <rect x="400" y="45" width="215" height="50" rx="6" fill="#1a0a2e" stroke="#bc8cff" stroke-width="1.5"/>
+        <text x="508" y="65" text-anchor="middle" font-size="10" fill="#bc8cff" font-family="sans-serif" font-weight="700">Quantum CRQC</text>
+        <text x="508" y="79" text-anchor="middle" font-size="8" fill="#7d8590" font-family="sans-serif">Shor's Algorithm · QFT + period finding · O(n³)</text>
+        <text x="508" y="91" text-anchor="middle" font-size="8" fill="#bc8cff" font-family="monospace">polynomial time</text>
+        <rect x="400" y="100" width="215" height="13" rx="3" fill="#21262d" stroke="#bc8cff" stroke-width="1"/>
+        <rect id="qc-quantum-bar" x="400" y="100" width="0" height="13" rx="3" fill="#bc8cff"/>
+        <text id="qc-quantum-pct" x="508" y="110" text-anchor="middle" font-size="7" fill="#e6edf3" font-family="monospace">0%</text>
+        <text x="508" y="128" text-anchor="middle" font-size="8" fill="#bc8cff" font-family="sans-serif">→ seconds on CRQC</text>
+        <!-- Result -->
+        <rect x="685" y="40" width="125" height="65" rx="6" fill="#161b22" stroke="#30363d" stroke-width="1.5" id="qc-result-box"/>
+        <text id="qc-result-txt1" x="748" y="66" text-anchor="middle" font-size="10" fill="#7d8590" font-family="sans-serif" font-weight="700">Result</text>
+        <text id="qc-result-txt2" x="748" y="82" text-anchor="middle" font-size="9" fill="#7d8590" font-family="sans-serif">awaiting</text>
+        <text id="qc-result-txt3" x="748" y="97" text-anchor="middle" font-size="9" fill="#7d8590" font-family="sans-serif">simulation</text>
+        <line id="qc-result-line" x1="615" y1="70" x2="683" y2="70" stroke="#30363d" stroke-width="1.5" stroke-dasharray="5,3"/>
+      </svg>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" id="qc-run-btn" onclick="runQCAttack(this)">&#9654; Simulate CRQC Attack on EC Key</button>
+      <button class="btn" id="qc-reset-btn" onclick="resetQCAttack()" style="display:none">&#8634; Reset</button>
+    </div>
+    <div class="anim-steps">
+      <div class="anim-step" id="qc-s1"><div class="as-label">① Both computers receive EC public key Q=k·G</div><div class="as-desc">Classical and quantum attempt to recover the hidden private key k.</div></div>
+      <div class="anim-step" id="qc-s2"><div class="as-label">② Classical stalls — Baby-step Giant-step requires ~2¹²⁸ steps</div><div class="as-desc">EC P-256 security holds — progress halts well below 1%. Computationally infeasible in any foreseeable classical timeframe.</div></div>
+      <div class="anim-step" id="qc-s3"><div class="as-label">③ CRQC: Shor's Algorithm extracts private key k</div><div class="as-desc">Quantum Fourier Transform finds the discrete logarithm period. Private key k recovered — every past WIT and WPT signature is now forgeable.</div></div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">Threat timeline</div>
     <div class="timeline-bar">
@@ -1133,6 +1246,140 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
           <tr><td>Security</td><td>256-bit PQ equivalent</td></tr>
           <tr><td>WIMSE use</td><td>Trust Anchor signing (long-lived keys)</td></tr>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Three-Era Migration Roadmap — Live Progressive View</div>
+    <p style="font-size:.875rem;color:var(--muted);margin-bottom:1rem">
+      Click each era to explore the token structure, pros, cons, and required migration actions for that phase of the quantum transition.
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+      <button id="era-btn-classical" onclick="showEra('classical')" style="padding:6px 16px;border-radius:6px;border:1px solid #58a6ff;background:rgba(88,166,255,.15);color:#58a6ff;cursor:pointer;font-size:13px;font-weight:600">&#11044; Classical Era<br><span style="font-weight:400;font-size:11px">Now — 2028</span></button>
+      <button id="era-btn-transition" onclick="showEra('transition')" style="padding:6px 16px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#7d8590;cursor:pointer;font-size:13px;font-weight:600">&#11044; Transition Era<br><span style="font-weight:400;font-size:11px">2028 — 2032</span></button>
+      <button id="era-btn-quantum" onclick="showEra('quantum')" style="padding:6px 16px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#7d8590;cursor:pointer;font-size:13px;font-weight:600">&#11044; Quantum Era<br><span style="font-weight:400;font-size:11px">2032+</span></button>
+    </div>
+
+    <!-- Classical Era -->
+    <div id="era-classical" style="display:block">
+      <div style="border:1px solid rgba(88,166,255,.3);border-radius:8px;padding:12px;background:rgba(88,166,255,.05)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <div style="font-size:12px;color:#58a6ff;font-weight:700;margin-bottom:6px">WIT Token Structure</div>
+            <pre style="font-size:10px;background:#161b22;border-radius:6px;padding:10px;color:#3fb950;margin:0;overflow:auto">{
+  "typ": "wit+jwt",
+  "alg": "ES256"
+}.{
+  "sub": "spiffe://cloud-a/svc/billing",
+  "cnf": { "jwk": { "kty":"EC",
+    "crv":"P-256","alg":"ES256" } },
+  "exp": ..., "jti": "..."
+}</pre>
+          </div>
+          <div>
+            <div style="font-size:12px;color:#58a6ff;font-weight:700;margin-bottom:6px">mTLS</div>
+            <pre style="font-size:10px;background:#161b22;border-radius:6px;padding:10px;color:#7d8590;margin:0">TLS 1.3
+ECDHE + ECDSA
+EC P-256 cert
+URI SAN: spiffe://...</pre>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="callout ok" style="margin:0;padding:10px">
+            <strong style="color:#3fb950">Pros</strong><br>
+            <span style="font-size:12px">Small tokens (~64 B sig). Fast ES256 verification. Universal library support. Battle-tested in production environments.</span>
+          </div>
+          <div class="callout danger" style="margin:0;padding:10px">
+            <strong>Cons / Risks</strong><br>
+            <span style="font-size:12px">Vulnerable to Shor's algorithm on CRQC. HNDL: today's WIT traffic is collectible for future decryption. Migration window opens ~2028.</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted)"><strong style="color:var(--text)">Action items now:</strong> Inventory all WIT/WPT signing keys and mTLS CA material. Upgrade validators to be alg-agnostic. Avoid hardcoding "alg":"ES256" — use allow-list validation.</div>
+      </div>
+    </div>
+
+    <!-- Transition Era -->
+    <div id="era-transition" style="display:none">
+      <div style="border:1px solid rgba(255,166,87,.3);border-radius:8px;padding:12px;background:rgba(255,166,87,.05)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <div style="font-size:12px;color:#ffa657;font-weight:700;margin-bottom:6px">Hybrid WIT Structure</div>
+            <pre style="font-size:10px;background:#161b22;border-radius:6px;padding:10px;color:#ffa657;margin:0;overflow:auto">{
+  "typ": "wit+jwt",
+  "alg": "ES256"       &lt;-- primary sig
+}.{
+  "sub": "spiffe://cloud-a/svc/billing",
+  "cnf": {
+    "jwk":    { "kty":"EC","crv":"P-256" },
+    "pq_jwk": { "kty":"OKP",
+                "crv":"ML-DSA-44" }
+  },
+  "pq_sig": "..."      &lt;-- second ML-DSA sig
+}</pre>
+          </div>
+          <div>
+            <div style="font-size:12px;color:#ffa657;font-weight:700;margin-bottom:6px">mTLS (Hybrid)</div>
+            <pre style="font-size:10px;background:#161b22;border-radius:6px;padding:10px;color:#7d8590;margin:0">TLS 1.3
+X25519MLKEM768
+(ECDHE + ML-KEM-768)
+Dual cert: EC + PQ
+Server accepts either</pre>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="callout ok" style="margin:0;padding:10px">
+            <strong style="color:#3fb950">Pros</strong><br>
+            <span style="font-size:12px">Backwards compatible — old validators accept ES256. Forward-secure against HNDL. Gradual rollout: upgrade validators before workloads. No flag day.</span>
+          </div>
+          <div class="callout" style="margin:0;padding:10px;border-color:rgba(255,166,87,.4);background:rgba(255,166,87,.07)">
+            <strong style="color:#ffa657">Trade-offs</strong><br>
+            <span style="font-size:12px">Token size grows: +2420 B ML-DSA sig, +1312 B PQ pub key in cnf.pq_jwk. Verification cost doubles. Dual validators must be maintained concurrently.</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted)"><strong style="color:var(--text)">Action items 2028–2032:</strong> Deploy ML-DSA-44-capable IdP. Update WPT middleware to verify both sigs. Publish dual-alg JWKS. Prioritise Trust Anchor PQ migration first (long-lived keys = highest risk).</div>
+      </div>
+    </div>
+
+    <!-- Quantum Era -->
+    <div id="era-quantum" style="display:none">
+      <div style="border:1px solid rgba(63,185,80,.3);border-radius:8px;padding:12px;background:rgba(63,185,80,.05)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <div style="font-size:12px;color:#3fb950;font-weight:700;margin-bottom:6px">PQ-Only WIT Structure</div>
+            <pre style="font-size:10px;background:#161b22;border-radius:6px;padding:10px;color:#3fb950;margin:0;overflow:auto">{
+  "typ": "wit+jwt",
+  "alg": "ML-DSA-44"   &lt;-- PQ only
+}.{
+  "sub": "spiffe://cloud-a/svc/billing",
+  "cnf": {
+    "pq_jwk": { "kty":"OKP",
+      "crv":"ML-DSA-44",
+      "x":"&lt;1312-byte pub key&gt;" }
+  },
+  "exp": ..., "jti": "..."
+}</pre>
+          </div>
+          <div>
+            <div style="font-size:12px;color:#3fb950;font-weight:700;margin-bottom:6px">mTLS (PQ-Only)</div>
+            <pre style="font-size:10px;background:#161b22;border-radius:6px;padding:10px;color:#7d8590;margin:0">TLS 1.3+
+ML-KEM-768 key exchange
+ML-DSA cert (X.509v3)
+SLH-DSA Trust Anchor
+No EC keys accepted</pre>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="callout ok" style="margin:0;padding:10px">
+            <strong style="color:#3fb950">Pros</strong><br>
+            <span style="font-size:12px">Fully CRQC-resistant. Clean single-algorithm codebase. HNDL threat eliminated — even collected past traffic is secure. No hybrid complexity.</span>
+          </div>
+          <div class="callout" style="margin:0;padding:10px;border-color:rgba(63,185,80,.3);background:rgba(63,185,80,.05)">
+            <strong style="color:#3fb950">Trade-offs</strong><br>
+            <span style="font-size:12px">PQ public keys 20× larger. Signatures 38× larger. JWT payloads may exceed HTTP header limits in some proxies. New cnf.pq_jwk structure required in WIMSE spec.</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted)"><strong style="color:var(--text)">Action items 2032+:</strong> Reject ES256-only WITs at gateway. Remove hybrid code paths. Increase HTTP header size limits (nginx/envoy). Monitor <code>draft-ietf-jose-pqc</code> for finalised JOSE PQ algorithm identifiers.</div>
       </div>
     </div>
   </div>
@@ -1200,6 +1447,55 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
         <p style="font-size:11px;color:var(--muted);margin-top:6px">EC-only tokens rejected. <code>alg:ML-DSA-44</code> mandatory. mTLS requires ML-KEM. Trust Anchor uses SLH-DSA. Migration complete.</p>
       </div>
     </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Quantum Threat Model — Updated</div>
+    <table class="compare-table">
+      <tr><th>Threat</th><th>Vector</th><th>Classical Risk</th><th>Quantum Risk</th><th>Mitigation</th></tr>
+      <tr>
+        <td><strong>T-Q1: CRQC Key Extraction</strong></td>
+        <td>Shor's algorithm extracts EC P-256 private key from public point Q</td>
+        <td class="check">Low — 2¹²⁸ ops</td>
+        <td class="cross">Critical — seconds on CRQC</td>
+        <td>Migrate all WIT/WPT keys to ML-DSA-44; deprecate ES256</td>
+      </tr>
+      <tr>
+        <td><strong>T-Q2: HNDL — WIT/WPT Tokens</strong></td>
+        <td>Collect WITs/WPTs in transit today; recover sig keys post-CRQC; forge workload identity</td>
+        <td class="check">None</td>
+        <td class="cross">High — every workload identity forgeable</td>
+        <td>Deploy hybrid signing from 2028; PQ-only mandatory by 2032</td>
+      </tr>
+      <tr>
+        <td><strong>T-Q3: HNDL — mTLS Sessions</strong></td>
+        <td>Record TLS handshakes; ECDH session secrets recoverable via Shor's once CRQC available</td>
+        <td class="check">None</td>
+        <td class="cross">High — all past mTLS session keys exposed</td>
+        <td>Deploy ML-KEM-768 (X25519MLKEM768) for TLS key exchange</td>
+      </tr>
+      <tr>
+        <td><strong>T-Q4: Trust Anchor Forgery</strong></td>
+        <td>Extract Trust Anchor EC key; issue fake OID-FED entity statements; take over federation</td>
+        <td class="check">Low</td>
+        <td class="cross">Critical — entire federation trust graph collapses</td>
+        <td>SLH-DSA for Trust Anchors (highest priority — long-lived keys)</td>
+      </tr>
+      <tr>
+        <td><strong>T-Q5: JTI Hash Weakening (Grover)</strong></td>
+        <td>Grover's algorithm halves SHA-256 pre-image resistance from 256 to 128 effective bits</td>
+        <td class="check">Negligible</td>
+        <td class="partial">Medium — SHA-256 JTIs weaker but not immediately broken</td>
+        <td>Upgrade JTI generation to SHA-512 or 256-bit cryptographic random</td>
+      </tr>
+      <tr>
+        <td><strong>T-Q6: WPT Proof Token Forgery</strong></td>
+        <td>Recover workload private key via Shor's; generate valid WPT for any target URI</td>
+        <td class="check">Low</td>
+        <td class="cross">Critical — per-request proof protection bypassed for all historical WPTs</td>
+        <td>Migrate WPT cnf.jwk to OKP/ML-DSA; enforce short proof TTL ≤ 5 min</td>
+      </tr>
+    </table>
   </div>
 
   <div class="callout ok">
@@ -1496,6 +1792,223 @@ async function playSecretsFlow() {
   setAStep('ss4', 'done');
   btn.disabled = false; btn.textContent = '↺ Replay';
   secRunning = false;
+}
+
+// ── Multi-cloud flow animation (Scenario 2) ──────────────────────────────────
+
+const MC_FLOWS = {
+  aws_gcp: {
+    a0: ['AWS EKS Pod', 'spiffe://cloud-a.corp/svc/billing', 'bootstrap: IRSA'],
+    a1: ['Corp WIMSE IdP', 'Keycloak + SPIRE'],
+    a2: ['GCP GKE Pod', 'spiffe://cloud-b.corp/svc/analytics', 'validate: OID-FED'],
+    steps: [
+      ['Bootstrap',        'AWS pod uses IRSA to get initial cloud identity. EC P-256 key pair generated; public key registered with Corp IdP.'],
+      ['WIT Issued',       'Corp IdP validates IRSA token, issues WIT: sub=spiffe://cloud-a.corp/svc/billing, cnf.jwk=<pub-key>, exp=+1h.'],
+      ['Cross-Cloud Call', 'AWS pod generates WPT (aud=https://analytics.gcp.corp/api, wth=hash(WIT)). Calls GCP service with WIT+WPT headers.'],
+      ['OID-FED Validated','GCP service resolves Corp IdP via OID-FED trust chain. Validates WIT signature + WPT audience binding. Returns 200 OK.'],
+    ],
+    colors: ['#ffa657', '#58a6ff', '#3fb950'],
+  },
+  azure_aws: {
+    a0: ['Azure AKS Pod', 'spiffe://az-prod.corp/svc/reporting', 'bootstrap: Managed Identity + WIF'],
+    a1: ['Corp WIMSE IdP', 'Keycloak + WIF bridge'],
+    a2: ['AWS Lambda', 'spiffe://aws-prod.corp/svc/storage', 'validate: OID-FED'],
+    steps: [
+      ['WIF Bootstrap',    'Azure AKS pod uses Managed Identity + Workload Identity Federation to bootstrap with Corp IdP.'],
+      ['WIT Issued',       'Corp IdP validates WIF token, issues WIT: sub=spiffe://az-prod.corp/svc/reporting.'],
+      ['Cross-Cloud Call', 'Azure pod generates WPT (aud=https://storage.aws.corp/bucket). Calls AWS Lambda with WIT+WPT.'],
+      ['Validated',        'AWS Lambda resolves Corp IdP via OID-FED. Validates WIT + WPT. Processes request and returns result.'],
+    ],
+    colors: ['#58a6ff', '#58a6ff', '#ffa657'],
+  },
+  gcp_onprem: {
+    a0: ['GCP GKE Pod', 'spiffe://gcp-prod.corp/svc/ml-trainer', 'bootstrap: Workload Identity Pool'],
+    a1: ['Corp WIMSE IdP', 'Vault + SPIRE (on-prem)'],
+    a2: ['On-Prem Data Lake', 'spiffe://onprem.corp/svc/lakehouse', 'validate: cached JWKS'],
+    steps: [
+      ['WIP Bootstrap',    'GCP pod uses Workload Identity Pool to exchange GCP SA token for a Corp IdP credential.'],
+      ['WIT Issued',       'Corp IdP issues WIT: sub=spiffe://gcp-prod.corp/svc/ml-trainer. On-prem firewall trusts Corp IdP JWKS.'],
+      ['Hybrid Call',      'GCP pod generates WPT (aud=https://lakehouse.onprem.corp/v1/data). Calls on-prem service via private link.'],
+      ['Validated',        'On-prem service validates WIT via cached Corp IdP JWKS (no internet required). WPT binding checked. Training data streamed.'],
+    ],
+    colors: ['#3fb950', '#58a6ff', '#7d8590'],
+  },
+};
+
+let mcFlowRunning = false;
+let mcCurrentFlowKey = 'aws_gcp';
+
+function selectMCFlow(key, btn) {
+  mcCurrentFlowKey = key;
+  document.querySelectorAll('.mc-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const f = MC_FLOWS[key];
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('mc-a0',  f.a0[0]); set('mc-a0s', f.a0[1]); set('mc-a0b', f.a0[2]);
+  set('mc-a1',  f.a1[0]); set('mc-a1s', f.a1[1]);
+  set('mc-a2',  f.a2[0]); set('mc-a2s', f.a2[1]); set('mc-a2b', f.a2[2]);
+  f.steps.forEach((s, i) => {
+    set('mc-s' + (i+1) + '-label', s[0]);
+    set('mc-s' + (i+1) + '-desc',  s[1]);
+  });
+  ['mc-step1','mc-step2','mc-step3','mc-step4'].forEach(id => setAStep(id, ''));
+  const pb = document.getElementById('mc-play-btn');
+  if (pb) { pb.disabled = false; pb.textContent = '▶ Play Flow'; }
+  mcFlowRunning = false;
+}
+
+async function playMCFlow() {
+  if (mcFlowRunning) return;
+  mcFlowRunning = true;
+  const btn = document.getElementById('mc-play-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Running…'; }
+  ['mc-step1','mc-step2','mc-step3','mc-step4'].forEach(id => setAStep(id, ''));
+  const f = MC_FLOWS[mcCurrentFlowKey];
+  const [c0, , c2] = f.colors;
+
+  // Step 1: Source → IdP (bootstrap / WIT request)
+  setAStep('mc-step1', 'active');
+  await animPkt('mc-pk1', 92, 51, 410, 51, 900, c0);
+  await sleep(180);
+  setAStep('mc-step1', 'done');
+
+  // Step 2: IdP → Source (WIT return)
+  setAStep('mc-step2', 'active');
+  await animPkt('mc-pk2', 410, 65, 92, 65, 800, '#58a6ff');
+  await sleep(180);
+  setAStep('mc-step2', 'done');
+
+  // Step 3: Source → Target (cross-cloud API call)
+  setAStep('mc-step3', 'active');
+  await animPkt('mc-pk3', 92, 51, 730, 51, 1200, c2);
+  await sleep(180);
+  setAStep('mc-step3', 'done');
+
+  // Step 4: Target → Source (200 OK response)
+  setAStep('mc-step4', 'active');
+  await animPkt('mc-pk4', 730, 65, 92, 65, 1000, c2);
+  await sleep(180);
+  setAStep('mc-step4', 'done');
+
+  if (btn) { btn.disabled = false; btn.textContent = '↺ Run Again'; }
+  mcFlowRunning = false;
+}
+
+// ── Post-Quantum animations (Scenario 8) ─────────────────────────────────────
+
+let qcRunning = false;
+
+function resetQCAttack() {
+  qcRunning = false;
+  const cb = document.getElementById('qc-classic-bar');
+  const qb = document.getElementById('qc-quantum-bar');
+  if (cb) cb.setAttribute('width', '0');
+  if (qb) qb.setAttribute('width', '0');
+  const cp = document.getElementById('qc-classic-pct');
+  const qp = document.getElementById('qc-quantum-pct');
+  if (cp) cp.textContent = '0%';
+  if (qp) qp.textContent = '0%';
+  const rb = document.getElementById('qc-result-box');
+  const rt1 = document.getElementById('qc-result-txt1');
+  const rt2 = document.getElementById('qc-result-txt2');
+  const rt3 = document.getElementById('qc-result-txt3');
+  const rl  = document.getElementById('qc-result-line');
+  if (rb)  rb.setAttribute('stroke', '#30363d');
+  if (rt1) { rt1.textContent = 'Result';     rt1.setAttribute('fill', '#7d8590'); }
+  if (rt2) { rt2.textContent = 'awaiting';   rt2.setAttribute('fill', '#7d8590'); }
+  if (rt3) { rt3.textContent = 'simulation'; rt3.setAttribute('fill', '#7d8590'); }
+  if (rl)  { rl.setAttribute('stroke', '#30363d'); rl.setAttribute('stroke-dasharray', '5,3'); }
+  ['qc-s1','qc-s2','qc-s3'].forEach(id => setAStep(id, ''));
+  const runBtn   = document.getElementById('qc-run-btn');
+  const resetBtn = document.getElementById('qc-reset-btn');
+  if (runBtn)   { runBtn.disabled = false; runBtn.style.display = ''; }
+  if (resetBtn) resetBtn.style.display = 'none';
+}
+
+async function runQCAttack(btn) {
+  if (qcRunning) return;
+  qcRunning = true;
+  if (btn) btn.disabled = true;
+  const resetBtn = document.getElementById('qc-reset-btn');
+  const cb = document.getElementById('qc-classic-bar');
+  const cp = document.getElementById('qc-classic-pct');
+  const qb = document.getElementById('qc-quantum-bar');
+  const qp = document.getElementById('qc-quantum-pct');
+
+  // Step 1: both computers start
+  setAStep('qc-s1', 'active');
+  await sleep(600);
+
+  // Classical crawls to ~2.5% then stalls
+  for (let i = 1; i <= 5; i++) {
+    await sleep(200);
+    const w = Math.round((i / 5) * 195 * 0.025);
+    if (cb) cb.setAttribute('width', String(w));
+    if (cp) cp.textContent = (i * 0.5).toFixed(1) + '%';
+  }
+  setAStep('qc-s1', 'done');
+  await sleep(300);
+
+  // Step 2: classical stalls — flickers
+  setAStep('qc-s2', 'active');
+  for (let i = 0; i < 4; i++) {
+    await sleep(380);
+    if (cp) cp.textContent = i % 2 === 0 ? '~2.5% ⟳' : '~2.5%';
+  }
+  setAStep('qc-s2', 'done');
+  await sleep(300);
+
+  // Step 3: quantum blazes — fills in ~1.4 s
+  setAStep('qc-s3', 'active');
+  const steps = 32;
+  for (let i = 1; i <= steps; i++) {
+    await sleep(44);
+    const w = Math.round((i / steps) * 215);
+    if (qb) qb.setAttribute('width', String(w));
+    if (qp) qp.textContent = Math.round((i / steps) * 100) + '%';
+  }
+
+  // Result: key broken
+  const rb  = document.getElementById('qc-result-box');
+  const rt1 = document.getElementById('qc-result-txt1');
+  const rt2 = document.getElementById('qc-result-txt2');
+  const rt3 = document.getElementById('qc-result-txt3');
+  const rl  = document.getElementById('qc-result-line');
+  if (rb)  rb.setAttribute('stroke', '#f85149');
+  if (rt1) { rt1.textContent = 'KEY BROKEN';    rt1.setAttribute('fill', '#f85149'); }
+  if (rt2) { rt2.textContent = 'k recovered';   rt2.setAttribute('fill', '#f85149'); }
+  if (rt3) { rt3.textContent = '< 60 seconds';  rt3.setAttribute('fill', '#f85149'); }
+  if (rl)  { rl.setAttribute('stroke', '#f85149'); rl.removeAttribute('stroke-dasharray'); }
+  setAStep('qc-s3', 'done');
+
+  if (resetBtn) resetBtn.style.display = '';
+}
+
+// Three-era roadmap tab switching
+function showEra(era) {
+  ['classical','transition','quantum'].forEach(e => {
+    const panel = document.getElementById('era-' + e);
+    const ebtn  = document.getElementById('era-btn-' + e);
+    if (panel) panel.style.display = 'none';
+    if (ebtn) {
+      ebtn.style.background   = '#21262d';
+      ebtn.style.color        = '#7d8590';
+      ebtn.style.borderColor  = '#30363d';
+    }
+  });
+  const activePanel = document.getElementById('era-' + era);
+  const activeBtn   = document.getElementById('era-btn-' + era);
+  if (activePanel) activePanel.style.display = 'block';
+  if (activeBtn) {
+    const palette = {
+      classical:  ['#58a6ff', 'rgba(88,166,255,.15)'],
+      transition: ['#ffa657', 'rgba(255,166,87,.15)'],
+      quantum:    ['#3fb950', 'rgba(63,185,80,.15)'],
+    };
+    activeBtn.style.color       = palette[era][0];
+    activeBtn.style.background  = palette[era][1];
+    activeBtn.style.borderColor = palette[era][0];
+  }
 }
 
 // ── Paxos animation (Scenario 9) ─────────────────────────────────────────────
