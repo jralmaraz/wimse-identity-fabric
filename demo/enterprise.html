@@ -229,6 +229,7 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <div class="snav-item" onclick="showScene('roadmap')">7 · Adoption Roadmap</div>
     <div class="snav-item" onclick="showScene('postquantum')">8 · Post-Quantum Safety</div>
     <div class="snav-item" onclick="showScene('paxos')">9 · Paxos Consensus</div>
+    <div class="snav-item" onclick="showScene('standards')">10 · Standards</div>
   </nav>
   <div class="nav-fade" id="nav-fade"></div>
   <button class="nav-arrow nav-arrow-right" id="nav-next" onclick="navScroll(1)" aria-label="Scroll tabs right">&#8250;</button>
@@ -1678,6 +1679,96 @@ No EC keys accepted</pre>
 
   <div class="callout">
     <strong>Consistency vs latency tradeoff:</strong> Synchronous Raft commit adds ~1–5ms latency per token issuance (one RTT to quorum). For most WIMSE deployments this is acceptable since tokens are cached and reused for their TTL (typically 1h). For ultra-low-latency cases, use async replication with leader-only issuance and accept a small window of split-brain risk.
+  </div>
+</div>
+
+<div class="scene" id="scene-standards">
+  <div class="scene-num">Scenario 10</div>
+  <h1 class="scene-title">Standards Tracker</h1>
+  <p class="scene-lead">This PoC is built on six IETF and OpenID drafts that are actively evolving toward production readiness. The table below shows every tracked standard, the revision implemented here, and which files would need updating if the draft changes. A GitHub Actions workflow checks the IETF Datatracker API daily and opens a GitHub issue whenever a new revision is published.</p>
+
+  <div class="card">
+    <div class="card-title">Tracked standards — revision status</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Last checked: <code>2026-08-01</code> &nbsp;·&nbsp; <a href="standards-baseline.json" target="_blank" style="color:var(--blue)">standards-baseline.json</a> &nbsp;·&nbsp; <a href=".github/workflows/standards-tracker.yml" target="_blank" style="color:var(--blue)">standards-tracker.yml</a></p>
+    <table class="compare-table" style="font-size:12.5px">
+      <tr>
+        <th>Standard</th>
+        <th>Working Group</th>
+        <th>Status</th>
+        <th style="text-align:center">Rev</th>
+        <th>Affected files</th>
+        <th>PoC impact</th>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/" target="_blank" style="color:var(--blue)">WIT — Workload Identity Credentials</a></td>
+        <td style="white-space:nowrap">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-02</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/wit</code>, <code>internal/idp</code>, <code>internal/workload</code></td>
+        <td style="font-size:11px">WIT claims (<code>typ=wit+jwt</code>), <code>cnf.jwk</code> format with <code>alg=ES256</code>, SPIFFE URI <code>sub</code></td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/" target="_blank" style="color:var(--blue)">WPT — Workload Proof Token</a></td>
+        <td style="white-space:nowrap">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-01</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/wpt</code>, <code>internal/workload</code></td>
+        <td style="font-size:11px"><code>typ=application/wpt+jwt</code>, <code>aud</code>=request URI, <code>wth</code>=SHA-256(WIT), <code>jti</code> replay protection</td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-identifier/" target="_blank" style="color:var(--blue)">Identifiers — Workload Identifier</a></td>
+        <td style="white-space:nowrap">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-03</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/wit</code>, <code>pkg/wpt</code>, <code>internal/idp</code></td>
+        <td style="font-size:11px">SPIFFE URI format (<code>spiffe://trust-domain/path</code>), no query / fragment / port allowed</td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/" target="_blank" style="color:var(--blue)">mTLS — Mutual TLS Binding</a></td>
+        <td style="white-space:nowrap">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-02</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/keys/mtls.go</code>, <code>internal/workload</code></td>
+        <td style="font-size:11px">X.509 URI SAN format, EC P-256 requirement, TLS 1.3 minimum</td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-arch/" target="_blank" style="color:var(--blue)">Arch — WIMSE Architecture</a></td>
+        <td style="white-space:nowrap">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-08</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>internal/exchange</code></td>
+        <td style="font-size:11px">Token exchange patterns at trust-domain boundaries, HTTP header names (<code>Workload-Identity-Token</code>)</td>
+      </tr>
+      <tr>
+        <td><a href="https://openid.net/specs/openid-federation-1_0.html" target="_blank" style="color:var(--blue)">OID-FED — OpenID Federation 1.0</a></td>
+        <td style="white-space:nowrap">OpenID Foundation</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>1.0-41</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/federation</code>, <code>internal/exchange</code></td>
+        <td style="font-size:11px">Entity Configuration JWT, Subordinate Statement, <code>authority_hints</code>, trust chain resolution, <code>min(EC.exp,SS.exp)</code> caching</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Automated tracking — how it works</div>
+    <div class="info-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="info-box blue">
+        <div class="ibt">Daily cron — 09:00 UTC</div>
+        <div class="ibv" style="font-size:11px;line-height:1.6">GitHub Actions runs <code>scripts/check_standards.py</code> every morning. The script queries the IETF Datatracker REST API for each tracked draft and compares the returned <code>rev</code> field against <code>standards-baseline.json</code>.</div>
+      </div>
+      <div class="info-box green">
+        <div class="ibt">Revision detected → baseline committed</div>
+        <div class="ibv" style="font-size:11px;line-height:1.6">When a new revision appears, <code>last_known_rev</code> is updated and committed with <code>[skip ci]</code> to avoid triggering further runs. A developer sets <code>implemented_rev</code> manually after updating the Go code to match.</div>
+      </div>
+      <div class="info-box orange">
+        <div class="ibt">GitHub issue created automatically</div>
+        <div class="ibv" style="font-size:11px;line-height:1.6">A <code>standards-update</code> labelled issue is opened listing the new revision, the PoC impact note, affected files, and an action checklist: read the IETF diff, check for breaking claim or header changes, update the implementation, and bump <code>implemented_rev</code>.</div>
+      </div>
+    </div>
+    <div class="callout ok" style="margin-top:1rem">
+      <strong>Manual-only standards:</strong> OpenID Federation 1.0 has no IETF Datatracker API. The tracker skips it from the automated check and flags it for manual review in any generated issue.
+    </div>
   </div>
 </div>
 
