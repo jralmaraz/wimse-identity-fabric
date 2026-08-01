@@ -18,6 +18,10 @@ type GenerateOptions struct {
 	WorkloadKey     *ecdsa.PrivateKey
 	TTL             time.Duration
 	AccessTokenHash string // optional ath
+	// TxnToken is an optional compact Transaction Token JWT (draft-ietf-oauth-transaction-tokens).
+	// When set, its SHA-256 hash is placed in the tth claim, binding this proof
+	// to the business transaction that initiated the call chain.
+	TxnToken string
 }
 
 // Generate creates and signs a WPT bound to a specific WIT and target URI.
@@ -42,6 +46,11 @@ func Generate(opts GenerateOptions) (string, error) {
 		return "", err
 	}
 
+	var tth string
+	if opts.TxnToken != "" {
+		tth = hashToken(opts.TxnToken)
+	}
+
 	now := time.Now()
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -53,6 +62,7 @@ func Generate(opts GenerateOptions) (string, error) {
 		},
 		Wth: hashToken(opts.WIT),
 		Ath: opts.AccessTokenHash,
+		Tth: tth,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)

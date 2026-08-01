@@ -15,6 +15,10 @@ type ValidateOptions struct {
 	WorkloadPublicKey *ecdsa.PublicKey
 	RequestURI        string
 	CheckReplay       bool
+	// TxnToken is the optional compact Transaction Token JWT that should be
+	// bound to this proof via tth. When set, the validator verifies that
+	// claims.Tth == SHA-256(TxnToken). Ignored when empty.
+	TxnToken string
 }
 
 // Validator validates WPTs and optionally tracks JTIs for replay protection
@@ -82,6 +86,14 @@ func (v *Validator) Validate(opts ValidateOptions) (*Claims, error) {
 	expectedWth := hashToken(opts.WITString)
 	if claims.Wth != expectedWth {
 		return nil, errors.New("WPT wth does not match WIT hash")
+	}
+
+	// Verify tth binds this WPT to the presented Transaction Token (if supplied).
+	if opts.TxnToken != "" {
+		expectedTth := hashToken(opts.TxnToken)
+		if claims.Tth != expectedTth {
+			return nil, errors.New("WPT tth does not match Transaction Token hash")
+		}
 	}
 
 	// Replay protection: delegate to the JTIStore.

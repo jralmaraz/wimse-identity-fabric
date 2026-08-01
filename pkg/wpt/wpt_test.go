@@ -204,6 +204,77 @@ func TestWPT_InputValidation_NoKey(t *testing.T) {
 	}
 }
 
+func TestWPT_TxnTokenBinding_HappyPath(t *testing.T) {
+	witToken, workloadKP := setupWIT(t)
+	txnToken := "fake.txn.token.for.test"
+
+	wptToken, err := wpt.Generate(wpt.GenerateOptions{
+		TargetURI:   targetURI,
+		WIT:         witToken,
+		WorkloadKey: workloadKP.Private,
+		TxnToken:    txnToken,
+	})
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	v := wpt.NewValidator()
+	claims, err := v.Validate(wpt.ValidateOptions{
+		WPTString:         wptToken,
+		WITString:         witToken,
+		WorkloadPublicKey: workloadKP.Public,
+		RequestURI:        targetURI,
+		TxnToken:          txnToken,
+	})
+	if err != nil {
+		t.Fatalf("Validate: %v", err)
+	}
+	if claims.Tth == "" {
+		t.Error("expected tth claim to be set")
+	}
+}
+
+func TestWPT_TxnTokenBinding_Mismatch(t *testing.T) {
+	witToken, workloadKP := setupWIT(t)
+
+	wptToken, _ := wpt.Generate(wpt.GenerateOptions{
+		TargetURI:   targetURI,
+		WIT:         witToken,
+		WorkloadKey: workloadKP.Private,
+		TxnToken:    "original.txn.token",
+	})
+
+	v := wpt.NewValidator()
+	_, err := v.Validate(wpt.ValidateOptions{
+		WPTString:         wptToken,
+		WITString:         witToken,
+		WorkloadPublicKey: workloadKP.Public,
+		RequestURI:        targetURI,
+		TxnToken:          "different.txn.token",
+	})
+	if err == nil {
+		t.Fatal("expected error for tth mismatch")
+	}
+}
+
+func TestWPT_TxnTokenBinding_NotRequired(t *testing.T) {
+	// WPT without tth should still validate when no TxnToken is presented.
+	witToken, workloadKP := setupWIT(t)
+	wptToken, _ := wpt.Generate(defaultGenOpts(witToken, workloadKP))
+
+	v := wpt.NewValidator()
+	_, err := v.Validate(wpt.ValidateOptions{
+		WPTString:         wptToken,
+		WITString:         witToken,
+		WorkloadPublicKey: workloadKP.Public,
+		RequestURI:        targetURI,
+		// No TxnToken: tth not checked
+	})
+	if err != nil {
+		t.Fatalf("expected validation without tth to succeed: %v", err)
+	}
+}
+
 func TestWPT_EndToEnd(t *testing.T) {
 	// Full flow: issue WIT, generate WPT, validate both together
 	idpKP, _ := keys.GenerateECKeyPair()

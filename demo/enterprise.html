@@ -1715,7 +1715,15 @@ No EC keys accepted</pre>
         <td><span style="color:var(--orange)">● Active draft</span></td>
         <td style="text-align:center"><code>-01</code></td>
         <td style="font-size:11px;color:var(--muted)"><code>pkg/wpt</code>, <code>internal/workload</code></td>
-        <td style="font-size:11px"><code>typ=application/wpt+jwt</code>, <code>aud</code>=request URI, <code>wth</code>=SHA-256(WIT), <code>jti</code> replay protection</td>
+        <td style="font-size:11px"><code>typ=application/wpt+jwt</code>, <code>aud</code>=request URI, <code>wth</code>=SHA-256(WIT), <code>tth</code>=SHA-256(Txn-Token), <code>jti</code> replay protection</td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-transaction-tokens/" target="_blank" style="color:var(--blue)">Txn-Token — OAuth 2.0 Transaction Tokens</a></td>
+        <td style="white-space:nowrap">IETF OAuth WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-11</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/txntoken</code>, <code>pkg/wpt (tth)</code></td>
+        <td style="font-size:11px"><code>typ=txntoken+jwt</code>, propagates user identity + authz context through call chains; WPT <code>tth</code> binds each hop proof to the same transaction</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-identifier/" target="_blank" style="color:var(--blue)">Identifiers — Workload Identifier</a></td>

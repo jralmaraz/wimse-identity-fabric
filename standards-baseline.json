@@ -95,12 +95,12 @@
       "short": "Txn-Token",
       "wg": "IETF OAuth WG",
       "last_known_rev": "11",
-      "implemented_rev": null,
+      "implemented_rev": "11",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-transaction-tokens/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-transaction-tokens/",
       "impact": "Txn-Token (txntoken+jwt) for call-chain context propagation; tth claim in WPT binds proof to transaction context; req_wl carries requesting workload SPIFFE ID",
-      "used_in": ["pkg/txntoken (planned)", "internal/exchange"]
+      "used_in": ["pkg/txntoken", "pkg/wpt (tth claim)"]
     },
     {
       "id": "rfc9449",
