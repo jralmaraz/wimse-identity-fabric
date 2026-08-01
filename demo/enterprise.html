@@ -24,15 +24,25 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
 
 /* ── Header ── */
-.site-header{border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;background:var(--bg);z-index:100}
+#sticky-shell{position:sticky;top:0;z-index:100;background:var(--bg)}
+.site-header{border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:14px;background:var(--bg)}
 .site-logo{font-size:17px;font-weight:700;color:var(--orange)}
 .site-subtitle{color:var(--muted);font-size:12px}
 .poc-link{margin-left:auto;font-size:12px;padding:5px 14px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);color:var(--blue);text-decoration:none;transition:border-color 0.15s}
 .poc-link:hover{border-color:var(--blue)}
 
 /* ── Scenario nav (tabs) ── */
-.scenario-nav{background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;display:flex;gap:0}
-.snav-item{padding:13px 20px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;color:var(--muted);transition:all 0.15s}
+.nav-wrapper{position:relative;display:flex;align-items:stretch;background:var(--surface);border-bottom:1px solid var(--border)}
+.scenario-nav{flex:1;display:flex;gap:0;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none}
+.scenario-nav::-webkit-scrollbar{display:none}
+.nav-arrow{flex-shrink:0;width:32px;border:none;background:var(--surface);color:var(--muted);font-size:1.3rem;cursor:pointer;transition:color .15s,background .15s;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;padding-bottom:2px;line-height:1}
+.nav-arrow-left{border-right:1px solid var(--border)}
+.nav-arrow-right{border-left:1px solid var(--border)}
+.nav-arrow.show{opacity:1;pointer-events:auto}
+.nav-arrow:hover{color:var(--orange);background:var(--surface2)}
+.nav-fade{position:absolute;right:32px;top:0;bottom:0;width:44px;background:linear-gradient(to right,transparent,var(--surface));pointer-events:none;opacity:0;transition:opacity .2s;z-index:1}
+.nav-fade.show{opacity:1}
+.snav-item{padding:12px 18px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;color:var(--muted);transition:all 0.15s}
 .snav-item:hover{color:var(--text)}
 .snav-item.active{color:var(--orange);border-bottom-color:var(--orange)}
 
@@ -199,6 +209,7 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
 </head>
 <body>
 
+<div id="sticky-shell">
 <header class="site-header">
   <div>
     <div class="site-logo">WIMSE Enterprise Identity Fabric</div>
@@ -206,18 +217,23 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
   </div>
   <a class="poc-link" href="index.html">&#x2190; Standard PoC</a>
 </header>
-
-<nav class="scenario-nav">
-  <div class="snav-item active" onclick="showScene('sprawl')">1 · Identity Sprawl</div>
-  <div class="snav-item" onclick="showScene('solution')">2 · WIMSE Solution</div>
-  <div class="snav-item" onclick="showScene('products')">3 · IdP Integrations</div>
-  <div class="snav-item" onclick="showScene('federation')">4 · Trust Governance</div>
-  <div class="snav-item" onclick="showScene('central-vs-dist')">5 · Centralised vs Distributed</div>
-  <div class="snav-item" onclick="showScene('secrets')">6 · Secrets Management</div>
-  <div class="snav-item" onclick="showScene('roadmap')">7 · Adoption Roadmap</div>
-  <div class="snav-item" onclick="showScene('postquantum')">8 · Post-Quantum Safety</div>
-  <div class="snav-item" onclick="showScene('paxos')">9 · Paxos Consensus</div>
-</nav>
+<div class="nav-wrapper">
+  <button class="nav-arrow nav-arrow-left" id="nav-prev" onclick="navScroll(-1)" aria-label="Scroll tabs left">&#8249;</button>
+  <nav class="scenario-nav" id="main-nav">
+    <div class="snav-item active" onclick="showScene('sprawl')">1 · Identity Sprawl</div>
+    <div class="snav-item" onclick="showScene('solution')">2 · WIMSE Solution</div>
+    <div class="snav-item" onclick="showScene('products')">3 · IdP Integrations</div>
+    <div class="snav-item" onclick="showScene('federation')">4 · Trust Governance</div>
+    <div class="snav-item" onclick="showScene('central-vs-dist')">5 · Centralised vs Distributed</div>
+    <div class="snav-item" onclick="showScene('secrets')">6 · Secrets Management</div>
+    <div class="snav-item" onclick="showScene('roadmap')">7 · Adoption Roadmap</div>
+    <div class="snav-item" onclick="showScene('postquantum')">8 · Post-Quantum Safety</div>
+    <div class="snav-item" onclick="showScene('paxos')">9 · Paxos Consensus</div>
+  </nav>
+  <div class="nav-fade" id="nav-fade"></div>
+  <button class="nav-arrow nav-arrow-right" id="nav-next" onclick="navScroll(1)" aria-label="Scroll tabs right">&#8250;</button>
+</div>
+</div>
 
 <!-- ═══════════════════════════════════════════
      Scene 1 — Identity Sprawl
@@ -1604,8 +1620,31 @@ function showScene(name) {
   document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
   event.target.classList.add('active');
   document.getElementById('scene-' + name).classList.add('active');
+  event.target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  updateNavArrows();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function navScroll(dir) {
+  document.getElementById('main-nav').scrollBy({ left: dir * 220, behavior: 'smooth' });
+}
+
+function updateNavArrows() {
+  const nav = document.getElementById('main-nav');
+  if (!nav) return;
+  const atStart = nav.scrollLeft <= 4;
+  const atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 4;
+  document.getElementById('nav-prev').classList.toggle('show', !atStart);
+  document.getElementById('nav-next').classList.toggle('show', !atEnd);
+  document.getElementById('nav-fade').classList.toggle('show', !atEnd);
+}
+
+(function() {
+  const nav = document.getElementById('main-nav');
+  nav.addEventListener('scroll', updateNavArrows);
+  window.addEventListener('resize', updateNavArrows);
+  setTimeout(updateNavArrows, 80);
+})();
 
 // ── Animation utilities ──────────────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
