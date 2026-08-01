@@ -777,6 +777,73 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
   <div class="callout">
     <strong>Zero-config expansion:</strong> When a new IdP (e.g., a new GCP project) joins, it only needs to register with the Trust Anchor. Every gateway in the estate automatically trusts tokens from the new IdP — without any reconfiguration.
   </div>
+
+  <div class="card">
+    <div class="card-title">Live OID-FED trust resolution — animated walkthrough</div>
+    <button class="play-btn" id="fed-play-btn" onclick="playFedFlow()">&#9654; Play Trust Resolution</button>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px;margin-bottom:10px;overflow:hidden">
+      <svg id="fed-svg" viewBox="0 0 730 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+        <!-- billing-svc -->
+        <rect x="5" y="25" width="104" height="44" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="57" y="44" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="10" font-weight="700">billing-svc</text>
+        <text x="57" y="59" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="7.5">spiffe://corp.example/…</text>
+        <!-- Gateway -->
+        <rect x="140" y="25" width="100" height="44" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="190" y="44" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="10" font-weight="700">Gateway</text>
+        <text x="190" y="59" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">validates WIT</text>
+        <!-- OID-FED Resolver -->
+        <rect x="278" y="25" width="128" height="44" rx="6" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
+        <text x="342" y="44" text-anchor="middle" fill="#bc8cff" font-family="sans-serif" font-size="10" font-weight="700">OID-FED Resolver</text>
+        <text x="342" y="59" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">chain walker</text>
+        <!-- IdP (Entra ID) -->
+        <rect x="440" y="25" width="118" height="44" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="499" y="44" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="10" font-weight="700">IdP (Entra ID)</text>
+        <text x="499" y="59" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="7">idp.azure.corp.example</text>
+        <!-- Trust Anchor -->
+        <rect x="594" y="25" width="130" height="44" rx="6" fill="#161b22" stroke="#ffa657" stroke-width="2"/>
+        <text x="659" y="44" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="10" font-weight="700">Trust Anchor</text>
+        <text x="659" y="59" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="7">trust-anchor.corp.example</text>
+        <!-- Connector lines -->
+        <line x1="109" y1="47" x2="140" y2="47" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="240" y1="47" x2="278" y2="47" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="406" y1="47" x2="440" y2="47" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="558" y1="47" x2="594" y2="47" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <!-- Status bar across bottom -->
+        <text id="fed-status-txt" x="365" y="98" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="10">Click Play to start</text>
+        <!-- Animated packet circles -->
+        <circle id="pf-pk1" r="5" fill="#3fb950"  visibility="hidden"/>
+        <circle id="pf-pk2" r="5" fill="#bc8cff"  visibility="hidden"/>
+        <circle id="pf-pk3" r="5" fill="#58a6ff"  visibility="hidden"/>
+        <circle id="pf-pk4" r="5" fill="#bc8cff"  visibility="hidden"/>
+        <circle id="pf-pk5" r="5" fill="#ffa657"  visibility="hidden"/>
+        <circle id="pf-pk6" r="5" fill="#ffa657"  visibility="hidden"/>
+        <circle id="pf-pk7" r="5" fill="#3fb950"  visibility="hidden"/>
+        <circle id="pf-pk8" r="5" fill="#3fb950"  visibility="hidden"/>
+      </svg>
+    </div>
+    <div class="anim-steps">
+      <div class="anim-step" id="fed-s1">
+        <div class="as-label">① billing-svc presents WIT to Gateway</div>
+        <div class="as-desc">Gateway receives <code>Workload-Identity-Token</code> header, peeks at <code>iss</code> claim: <code>idp.azure.corp.example</code> — no cached key for this issuer.</div>
+      </div>
+      <div class="anim-step" id="fed-s2">
+        <div class="as-label">② OID-FED Resolver fetches Entity Configuration from IdP</div>
+        <div class="as-desc">Resolver fetches <code>https://idp.azure.corp.example/.well-known/openid-federation</code>. Entity Configuration JWT contains the IdP's JWKS and <code>authority_hints</code>.</div>
+      </div>
+      <div class="anim-step" id="fed-s3">
+        <div class="as-label">③ authority_hints points to Trust Anchor — fetch Subordinate Statement</div>
+        <div class="as-desc">Resolver fetches <code>https://trust-anchor.corp.example/federation/fetch?sub=idp.azure.corp.example</code>. Subordinate Statement certifies the IdP's public key, signed by the anchor.</div>
+      </div>
+      <div class="anim-step" id="fed-s4">
+        <div class="as-label">④ Trust chain verified — IdP key certified by anchor</div>
+        <div class="as-desc">Resolver validates SS signature against the pre-configured Trust Anchor key. IdP JWKS is now trusted. Result cached until <code>min(EC.exp, SS.exp)</code>.</div>
+      </div>
+      <div class="anim-step" id="fed-s5">
+        <div class="as-label">⑤ WIT signature verified — 200 OK</div>
+        <div class="as-desc">Gateway uses the certified IdP public key to verify the WIT signature and expiry. <code>sub=spiffe://corp.example/svc/billing</code> authenticated. Request forwarded.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -1618,9 +1685,12 @@ No EC keys accepted</pre>
 function showScene(name) {
   document.querySelectorAll('.snav-item').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
-  event.target.classList.add('active');
+  const navItem = document.querySelector(`.snav-item[onclick*="'${name}'"]`);
+  if (navItem) {
+    navItem.classList.add('active');
+    navItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
   document.getElementById('scene-' + name).classList.add('active');
-  event.target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   updateNavArrows();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1803,6 +1873,72 @@ async function playDistributed() {
 
   btn.disabled = false; btn.textContent = '↺ Animate';
   distRunning = false;
+}
+
+// ── OID-FED trust resolution flow (Scenario 4) ──────────────────────────────
+let fedRunning = false;
+
+function fedStatus(txt) {
+  const el = document.getElementById('fed-status-txt');
+  if (el) el.textContent = txt;
+}
+
+async function playFedFlow() {
+  if (fedRunning) return;
+  fedRunning = true;
+  const btn = document.getElementById('fed-play-btn');
+  btn.disabled = true;
+  ['fed-s1','fed-s2','fed-s3','fed-s4','fed-s5'].forEach(id => setAStep(id, ''));
+  fedStatus('Starting…');
+
+  // ① billing-svc → Gateway: present WIT
+  setAStep('fed-s1', 'active');
+  fedStatus('① billing-svc → Gateway: presenting WIT…');
+  await animPkt('pf-pk1', 57, 47, 190, 47, 650, '#3fb950');
+  await sleep(250);
+  setAStep('fed-s1', 'done');
+
+  // ② Gateway → Resolver → IdP: fetch Entity Configuration
+  setAStep('fed-s2', 'active');
+  fedStatus('② Resolver → IdP: fetching /.well-known/openid-federation…');
+  await animPkt('pf-pk2', 190, 47, 342, 47, 550, '#bc8cff');
+  await sleep(100);
+  await animPkt('pf-pk3', 342, 47, 499, 47, 600, '#bc8cff');
+  await sleep(300);
+  // IdP responds with Entity Configuration
+  fedStatus('② IdP → Resolver: Entity Configuration returned (authority_hints present)');
+  await animPkt('pf-pk4', 499, 47, 342, 47, 600, '#58a6ff');
+  await sleep(300);
+  setAStep('fed-s2', 'done');
+
+  // ③ Resolver → Trust Anchor: fetch Subordinate Statement
+  setAStep('fed-s3', 'active');
+  fedStatus('③ Resolver → Trust Anchor: fetching Subordinate Statement…');
+  await animPkt('pf-pk5', 342, 47, 659, 47, 700, '#ffa657');
+  await sleep(300);
+  fedStatus('③ Trust Anchor → Resolver: Subordinate Statement (SS) returned');
+  await animPkt('pf-pk6', 659, 47, 342, 47, 700, '#ffa657');
+  await sleep(300);
+  setAStep('fed-s3', 'done');
+
+  // ④ Verify SS signature, cache result
+  setAStep('fed-s4', 'active');
+  fedStatus('④ Verifying SS signature against anchor key… caching result');
+  await sleep(700);
+  setAStep('fed-s4', 'done');
+
+  // ⑤ Validate WIT, respond 200 OK
+  setAStep('fed-s5', 'active');
+  fedStatus('⑤ WIT signature verified — routing request');
+  await animPkt('pf-pk7', 190, 47, 57, 47, 550, '#3fb950');
+  await sleep(200);
+  await animPkt('pf-pk8', 57, 47, 190, 47, 450, '#3fb950');
+  await sleep(350);
+  setAStep('fed-s5', 'done');
+  fedStatus('✓ spiffe://corp.example/svc/billing authenticated — 200 OK');
+
+  fedRunning = false;
+  btn.disabled = false;
 }
 
 // ── Secrets flow (Scenario 6) ────────────────────────────────────────────────
