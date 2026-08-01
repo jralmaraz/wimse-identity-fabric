@@ -220,7 +220,8 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
 <div class="nav-wrapper">
   <button class="nav-arrow nav-arrow-left" id="nav-prev" onclick="navScroll(-1)" aria-label="Scroll tabs left">&#8249;</button>
   <nav class="scenario-nav" id="main-nav">
-    <div class="snav-item active" onclick="showScene('sprawl')">1 · Identity Sprawl</div>
+    <div class="snav-item active" onclick="showScene('standards')" style="border-bottom-color:var(--blue);color:var(--blue)">📋 Standards</div>
+    <div class="snav-item" onclick="showScene('sprawl')">1 · Identity Sprawl</div>
     <div class="snav-item" onclick="showScene('solution')">2 · WIMSE Solution</div>
     <div class="snav-item" onclick="showScene('products')">3 · IdP Integrations</div>
     <div class="snav-item" onclick="showScene('federation')">4 · Trust Governance</div>
@@ -229,9 +230,8 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <div class="snav-item" onclick="showScene('roadmap')">7 · Adoption Roadmap</div>
     <div class="snav-item" onclick="showScene('postquantum')">8 · Post-Quantum Safety</div>
     <div class="snav-item" onclick="showScene('paxos')">9 · Paxos Consensus</div>
-    <div class="snav-item" onclick="showScene('standards')">10 · Standards</div>
-    <div class="snav-item" onclick="showScene('attacks')">11 · Attack Scenarios</div>
-    <div class="snav-item" onclick="showScene('fga')">12 · Fine-Grained Authz</div>
+    <div class="snav-item" onclick="showScene('attacks')">10 · Attack Scenarios</div>
+    <div class="snav-item" onclick="showScene('fga')">11 · Fine-Grained Authz</div>
   </nav>
   <div class="nav-fade" id="nav-fade"></div>
   <button class="nav-arrow nav-arrow-right" id="nav-next" onclick="navScroll(1)" aria-label="Scroll tabs right">&#8250;</button>
@@ -241,7 +241,7 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
 <!-- ═══════════════════════════════════════════
      Scene 1 — Identity Sprawl
 ═══════════════════════════════════════════ -->
-<div class="scene active" id="scene-sprawl">
+<div class="scene" id="scene-sprawl">
   <div class="scene-num">Scenario 1</div>
   <h1 class="scene-title">The Identity Sprawl Problem</h1>
   <p class="scene-lead">Large enterprises running workloads across AWS, Azure, and GCP accumulate siloed, duplicate identities — one per cloud, per service, per team. The result: unauditable access, orphaned credentials, and a constant risk of lateral movement.</p>
@@ -1684,7 +1684,7 @@ No EC keys accepted</pre>
   </div>
 </div>
 
-<div class="scene" id="scene-standards">
+<div class="scene active" id="scene-standards">
   <div class="scene-num">Scenario 10</div>
   <h1 class="scene-title">Standards Tracker</h1>
   <p class="scene-lead">This PoC is built on six IETF and OpenID drafts that are actively evolving toward production readiness. The table below shows every tracked standard, the revision implemented here, and which files would need updating if the draft changes. A GitHub Actions workflow checks the IETF Datatracker API daily and opens a GitHub issue whenever a new revision is published.</p>

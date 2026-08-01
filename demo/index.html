@@ -31,15 +31,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .wasm-badge.loading{color:var(--orange)}
 
 /* ── Chapter progress ── */
-.chapter-nav{display:flex;align-items:center;justify-content:center;padding:18px 24px;overflow-x:auto;gap:0}
+.chapter-nav{display:flex;align-items:flex-start;justify-content:center;padding:18px 24px;overflow-x:auto;gap:0}
 .ch-dot{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;position:relative}
 .ch-dot.active{background:var(--blue);border-color:var(--blue);color:#fff;transform:scale(1.18)}
 .ch-dot.done{border-color:var(--green);color:var(--green)}
 .ch-dot:hover:not(.active){border-color:var(--blue);color:var(--blue)}
-.ch-connector{width:36px;height:2px;background:var(--border);flex-shrink:0;transition:background 0.3s}
+.ch-connector{width:36px;height:2px;background:var(--border);flex-shrink:0;transition:background 0.3s;margin-top:14px}
 .ch-connector.done{background:var(--green)}
 .ch-tooltip{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;display:none;z-index:20;pointer-events:none}
 .ch-dot:hover .ch-tooltip{display:block}
+.ch-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
+.ch-label{font-size:9px;color:var(--muted);white-space:nowrap;text-align:center;max-width:58px;overflow:hidden;text-overflow:ellipsis}
+.ch-dot-wrap.active .ch-label{color:var(--orange);font-weight:600}
+.ch-dot-wrap.done .ch-label{color:var(--green)}
+/* ── Standards reference strip ── */
+#std-strip{background:var(--surface);border-bottom:1px solid var(--border);padding:.55rem 24px;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:11px}
+#std-strip .std-label{color:var(--muted);font-weight:600;white-space:nowrap;margin-right:.25rem}
+#std-strip .pill{font-size:10px}
+#std-strip a.std-link{margin-left:auto;color:var(--blue);text-decoration:none;white-space:nowrap;font-size:11px}
+#std-strip a.std-link:hover{text-decoration:underline}
 
 /* ── Chapter layout ── */
 .chapter{display:none;max-width:900px;margin:0 auto;padding:20px 24px 70px}
@@ -218,6 +228,17 @@ select:focus{outline:none;border-color:var(--blue)}
   </div>
 </header>
 
+<div id="std-strip">
+  <span class="std-label">Standards:</span>
+  <span class="pill pill-b">WIT -02</span>
+  <span class="pill pill-b">WPT -01</span>
+  <span class="pill pill-b">Identifiers -03</span>
+  <span class="pill pill-b">mTLS -02</span>
+  <span class="pill pill-b">Arch -08</span>
+  <span class="pill pill-g">DPoP RFC 9449</span>
+  <span class="pill pill-o">OID-FED 1.0 Final</span>
+  <a class="std-link" href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/standards-baseline.json" target="_blank">standards-baseline.json →</a>
+</div>
 <nav class="chapter-nav" id="chapter-nav"></nav>
 
 <!-- ═══════════════════════════════════════════
@@ -957,6 +978,9 @@ const CH_TITLES = [
   'WPT: Prove Each Request', 'The Validation Dance', 'Fine-Grained Authorization',
   'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses', 'OpenID Federation'
 ];
+const CH_SHORT = [
+  'Problem', 'WIT', 'mTLS', 'WPT', 'Validation', 'FGA', 'SD-WIT', 'Exchange', 'Attacks', 'OID-FED'
+];
 let cur = 1;
 const done = new Set();
 
@@ -970,11 +994,21 @@ function buildNav() {
       c.className = 'ch-connector' + (done.has(n - 1) ? ' done' : '');
       nav.appendChild(c);
     }
+    const wrap = document.createElement('div');
+    wrap.className = 'ch-dot-wrap' + (n === cur ? ' active' : '') + (done.has(n) ? ' done' : '');
+
     const d = document.createElement('div');
     d.className = 'ch-dot' + (n === cur ? ' active' : '') + (done.has(n) ? ' done' : '');
     d.innerHTML = `${done.has(n) && n !== cur ? '&#x2713;' : n}<div class="ch-tooltip">${t}</div>`;
     d.onclick = () => goChapter(n);
-    nav.appendChild(d);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'ch-label';
+    lbl.textContent = CH_SHORT[i];
+
+    wrap.appendChild(d);
+    wrap.appendChild(lbl);
+    nav.appendChild(wrap);
   });
 }
 
