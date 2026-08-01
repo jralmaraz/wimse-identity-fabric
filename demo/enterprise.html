@@ -230,6 +230,8 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <div class="snav-item" onclick="showScene('postquantum')">8 · Post-Quantum Safety</div>
     <div class="snav-item" onclick="showScene('paxos')">9 · Paxos Consensus</div>
     <div class="snav-item" onclick="showScene('standards')">10 · Standards</div>
+    <div class="snav-item" onclick="showScene('attacks')">11 · Attack Scenarios</div>
+    <div class="snav-item" onclick="showScene('fga')">12 · Fine-Grained Authz</div>
   </nav>
   <div class="nav-fade" id="nav-fade"></div>
   <button class="nav-arrow nav-arrow-right" id="nav-next" onclick="navScroll(1)" aria-label="Scroll tabs right">&#8250;</button>
@@ -1768,6 +1770,262 @@ No EC keys accepted</pre>
     </div>
     <div class="callout ok" style="margin-top:1rem">
       <strong>Manual-only standards:</strong> OpenID Federation 1.0 has no IETF Datatracker API. The tracker skips it from the automated check and flags it for manual review in any generated issue.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Scenario 11 — Attack Scenarios & Validation Failures                  -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="scene" id="scene-attacks">
+  <div class="scene-num">Scenario 11</div>
+  <h1 class="scene-title">Attack Scenarios &amp; Validation Failures</h1>
+  <p class="scene-lead">WIMSE enforces multiple independent validation layers. Each layer catches a distinct class of attack. This scenario walks through six real attack vectors an adversary might attempt against a WIMSE-protected service — and shows exactly which check stops them.</p>
+
+  <div class="card">
+    <div class="card-title">Validation pipeline — what the middleware verifies (in order)</div>
+    <table class="compare-table" style="font-size:12.5px">
+      <tr><th>#</th><th>Check</th><th>Spec clause</th><th>Catches</th></tr>
+      <tr><td style="text-align:center;color:var(--muted)">1</td><td><code>typ</code> = <code>wit+jwt</code></td><td>workload-creds §4.1</td><td>Tokens of wrong type (e.g. a WPT presented as a WIT)</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">2</td><td>ECDSA signature valid against IdP public key</td><td>RFC 7515 §5.2</td><td>Tampered payload or forged tokens</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">3</td><td><code>iss</code> matches expected issuer</td><td>RFC 7519 §4.1.1</td><td>Tokens from an untrusted or attacker-controlled IdP</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">4</td><td><code>exp</code> not in the past</td><td>RFC 7519 §4.1.4</td><td>Captured and replayed stale tokens</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">5</td><td><code>cnf.jwk</code> parsed — workload public key extracted</td><td>workload-creds §4.2</td><td>WITs with missing or malformed confirmation key</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">6</td><td>WPT <code>typ</code> = <code>application/wpt+jwt</code></td><td>wpt §3.1</td><td>Wrong proof token type</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">7</td><td>WPT signature valid against <code>cnf.jwk</code> from WIT</td><td>wpt §4</td><td>Proof signed with a different key than claimed in WIT</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">8</td><td>WPT <code>aud</code> = request URI (scheme + host + path)</td><td>wpt §3.2</td><td>Proof captured for endpoint A, replayed against endpoint B</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">9</td><td><code>wth</code> = base64url(SHA-256(WIT wire bytes))</td><td>wpt §3.3</td><td>WIT and WPT issued by different parties (mix-and-match)</td></tr>
+      <tr><td style="text-align:center;color:var(--muted)">10</td><td>WPT <code>jti</code> not in replay store</td><td>wpt §4.2 + RFC 9449</td><td>Exact replay of a previously accepted request</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Attack scenarios — what happens when an attacker tries</div>
+    <div class="info-grid" style="grid-template-columns:repeat(2,1fr);gap:1rem">
+
+      <div class="info-box red" style="display:grid;gap:.4rem">
+        <div class="ibt">Attack 1 — Tampered WIT</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>What:</strong> Attacker intercepts a WIT and flips bits in the payload (e.g. changes <code>sub</code> to a higher-privilege identity).</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>Caught by:</strong> Check #2 — ECDSA signature verification fails. The IdP's public key won't validate a modified payload.</div>
+        <div style="font-size:11px"><code style="color:var(--red)">→ 401 Unauthorized</code> — <code>jwt: signature is invalid</code></div>
+      </div>
+
+      <div class="info-box red" style="display:grid;gap:.4rem">
+        <div class="ibt">Attack 2 — Expired WIT replayed</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>What:</strong> Attacker captures a valid WIT during normal traffic and saves it. Attempts to reuse it hours later (after the 1 h TTL).</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>Caught by:</strong> Check #4 — <code>exp</code> claim is in the past. Short-lived tokens (1 h default) limit the window an attacker can exploit a stolen credential.</div>
+        <div style="font-size:11px"><code style="color:var(--red)">→ 401 Unauthorized</code> — <code>jwt: token is expired</code></div>
+      </div>
+
+      <div class="info-box red" style="display:grid;gap:.4rem">
+        <div class="ibt">Attack 3 — Wrong-issuer token</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>What:</strong> Attacker obtains a valid WIT from <code>idp.cloud-b.example</code> and presents it to Workload B in <code>cloud-a.example</code>, hoping the validator won't check the issuer.</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>Caught by:</strong> Check #3 — the validator is seeded with the trusted IdP's public key. A token signed by a different IdP will fail signature verification (different key) or issuer check.</div>
+        <div style="font-size:11px"><code style="color:var(--red)">→ 401 Unauthorized</code> — issuer mismatch</div>
+      </div>
+
+      <div class="info-box red" style="display:grid;gap:.4rem">
+        <div class="ibt">Attack 4 — WPT audience mismatch</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>What:</strong> Attacker captures a WPT bound to <code>https://api.example/orders</code> and replays it against <code>https://api.example/payments</code> (a higher-privilege endpoint).</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>Caught by:</strong> Check #8 — <code>aud</code> in the WPT is compared against the actual request URI. Mismatch → reject. Each WPT is single-use for one specific endpoint.</div>
+        <div style="font-size:11px"><code style="color:var(--red)">→ 401 Unauthorized</code> — <code>aud mismatch</code></div>
+      </div>
+
+      <div class="info-box red" style="display:grid;gap:.4rem">
+        <div class="ibt">Attack 5 — WPT replay (same endpoint)</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>What:</strong> Attacker captures a complete valid request (WIT + WPT headers) and replays the identical HTTP request to the same endpoint within the proof's TTL window.</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>Caught by:</strong> Check #10 — the <code>jti</code> UUID is stored on first acceptance. The second request presents the same <code>jti</code>, which is already in the replay store → rejected immediately.</div>
+        <div style="font-size:11px"><code style="color:var(--red)">→ 401 Unauthorized</code> — <code>jti already seen</code></div>
+      </div>
+
+      <div class="info-box red" style="display:grid;gap:.4rem">
+        <div class="ibt">Attack 6 — Key substitution (cnf mismatch)</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>What:</strong> Attacker steals a victim's WIT (valid, signed by IdP) but doesn't have the victim's private key. They sign a WPT with <em>their own</em> private key and present both headers.</div>
+        <div style="font-size:11px;color:var(--muted)"><strong>Caught by:</strong> Check #7 — WPT signature is verified against the public key extracted from <code>cnf.jwk</code> in the WIT. Attacker's key ≠ victim's <code>cnf.jwk</code> → signature invalid.</div>
+        <div style="font-size:11px"><code style="color:var(--red)">→ 401 Unauthorized</code> — <code>WPT: signature invalid</code></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Defense-in-depth — why each layer matters</div>
+    <table class="compare-table" style="font-size:12.5px">
+      <tr><th>Defence layer</th><th>Without it</th><th>With it</th></tr>
+      <tr><td>Short-lived WIT (1 h TTL)</td><td class="cross">Stolen token valid indefinitely</td><td class="check">Attack window capped at 1 hour</td></tr>
+      <tr><td>Per-request WPT (<code>aud</code> binding)</td><td class="cross">One captured proof works on any endpoint</td><td class="check">Each proof is endpoint-scoped and single-use</td></tr>
+      <tr><td>WPT <code>jti</code> replay store</td><td class="cross">Passive attacker can replay valid requests</td><td class="check">Exact replay rejected in O(1) via in-memory set</td></tr>
+      <tr><td><code>wth</code> binding (WIT ↔ WPT)</td><td class="cross">Attacker can mix-and-match WIT from A with WPT from B</td><td class="check">WIT and WPT must form a cryptographically linked pair</td></tr>
+      <tr><td>mTLS (cert URI SAN = WIT <code>sub</code>)</td><td class="cross">Token presented over plain TLS — MITM can forward stolen headers</td><td class="check">Transport identity must match token identity — MITM impossible without the private key</td></tr>
+    </table>
+    <div class="callout ok" style="margin-top:1rem">
+      <strong>What WIMSE does not prevent on its own:</strong> authorisation (what the authenticated workload is <em>allowed to do</em>) — see Scenario 12 for fine-grained authorisation. Compromised workload private keys must be detected via cert rotation / SPIRE TTL.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Scenario 12 — Fine-Grained Authorization                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="scene" id="scene-fga">
+  <div class="scene-num">Scenario 12</div>
+  <h1 class="scene-title">Fine-Grained Authorization</h1>
+  <p class="scene-lead">WIMSE answers <em>who is this workload?</em> It does not answer <em>is this workload allowed to do this specific thing?</em> Fine-grained authorization (FGA) is the complementary layer that closes that gap — and it is the layer that most enterprises deprioritise because it is hard to integrate. This scenario makes the case for it and shows how it composes naturally with WIMSE.</p>
+
+  <div class="card">
+    <div class="card-title">Two separate concerns — authentication vs authorization</div>
+    <div class="info-grid" style="grid-template-columns:repeat(2,1fr)">
+      <div class="info-box blue">
+        <div class="ibt">WIMSE — Authentication (who)</div>
+        <div class="ibv" style="font-size:11px;line-height:1.7">
+          Answers: <em>"Is this really <code>spiffe://cloud-a.example/svc/billing</code> calling?"</em><br><br>
+          Mechanism: WIT signed by trusted IdP + WPT proof of key possession + mTLS cert URI SAN binding.<br><br>
+          Output: a verified <code>sub</code> claim that downstream services can trust unconditionally.
+        </div>
+      </div>
+      <div class="info-box green">
+        <div class="ibt">FGA — Authorization (what)</div>
+        <div class="ibv" style="font-size:11px;line-height:1.7">
+          Answers: <em>"Is <code>billing-svc</code> allowed to <code>write</code> to <code>invoice:monthly-2026-07</code>?"</em><br><br>
+          Mechanism: relationship graph (Zanzibar / OpenFGA) or attribute policy (OPA / Cedar) evaluated at request time.<br><br>
+          Output: allow / deny decision — no code change needed when policy changes.
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG two-layer flow diagram -->
+    <svg viewBox="0 0 760 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:1.2rem auto 0">
+      <!-- actors -->
+      <rect x="10" y="35" width="120" height="50" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text x="70" y="57" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="10" font-weight="700">billing-svc</text>
+      <text x="70" y="72" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">SPIFFE SVID + WIT</text>
+
+      <rect x="190" y="15" width="140" height="90" rx="7" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="260" y="40" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="10" font-weight="700">WIMSE Gateway</text>
+      <text x="260" y="56" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">① verify WIT sig + exp</text>
+      <text x="260" y="70" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">② verify WPT aud + wth + jti</text>
+      <text x="260" y="84" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">→ extract verified sub</text>
+
+      <rect x="390" y="15" width="140" height="90" rx="7" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="460" y="40" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="10" font-weight="700">FGA Engine</text>
+      <text x="460" y="56" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">③ check(user, action, resource)</text>
+      <text x="460" y="70" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">OpenFGA / OPA / Cedar</text>
+      <text x="460" y="84" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">→ allow / deny</text>
+
+      <rect x="590" y="35" width="120" height="50" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text x="650" y="57" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="10" font-weight="700">invoice-api</text>
+      <text x="650" y="72" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">protected resource</text>
+
+      <!-- arrows -->
+      <line x1="130" y1="60" x2="188" y2="60" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="330" y1="60" x2="388" y2="60" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="530" y1="60" x2="588" y2="60" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
+      <!-- labels -->
+      <text x="159" y="52" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8">WIT+WPT</text>
+      <text x="159" y="63" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8">mTLS</text>
+      <text x="359" y="56" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">sub +</text>
+      <text x="359" y="66" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">action</text>
+      <text x="559" y="56" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">allow →</text>
+      <text x="559" y="66" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">forward</text>
+      <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#7d8590"/></marker></defs>
+
+      <!-- layer labels below -->
+      <text x="260" y="118" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="9" font-weight="600">Layer 1 · WIMSE AuthN</text>
+      <text x="460" y="118" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="9" font-weight="600">Layer 2 · FGA AuthZ</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <div class="card-title">OpenFGA example — relationship model for invoice-api</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">OpenFGA uses a <em>type system</em> and <em>tuples</em> (user, relation, object). The WIMSE <code>sub</code> becomes the FGA user. Policy changes happen in the store — no code deployment needed.</p>
+    <div class="info-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="info-box blue">
+        <div class="ibt">Type system (schema)</div>
+        <div class="ibv" style="font-family:monospace;font-size:10.5px;line-height:1.8;white-space:pre">type workload
+  relations
+    define reader: [workload]
+    define writer: [workload]
+    define admin:  [workload]
+    define can_read: reader
+    define can_write: writer
+    define can_delete: admin</div>
+      </div>
+      <div class="info-box green">
+        <div class="ibt">Policy tuples (data)</div>
+        <div class="ibv" style="font-family:monospace;font-size:10.5px;line-height:2;white-space:pre">(billing-svc, writer, invoice:*)
+(audit-svc,   reader, invoice:*)
+(ops-svc,     admin,  invoice:*)
+
+# billing-svc can write invoices
+# billing-svc CANNOT delete them
+# only ops-svc can delete</div>
+      </div>
+      <div class="info-box orange">
+        <div class="ibt">Check results at runtime</div>
+        <div class="ibv" style="font-size:11px;line-height:2">
+          <span style="color:var(--green)">✓ allow</span> <code>billing-svc write invoice:*</code><br>
+          <span style="color:var(--green)">✓ allow</span> <code>audit-svc read invoice:*</code><br>
+          <span style="color:var(--red)">✗ deny</span>&nbsp; <code>billing-svc delete invoice:*</code><br>
+          <span style="color:var(--red)">✗ deny</span>&nbsp; <code>audit-svc write invoice:*</code><br>
+          <span style="color:var(--green)">✓ allow</span> <code>ops-svc delete invoice:*</code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Why enterprises deprioritise FGA — and why that is a mistake</div>
+    <table class="compare-table" style="font-size:12.5px">
+      <tr><th>The objection</th><th>The reality</th></tr>
+      <tr>
+        <td><strong>"It adds an extra network hop per request"</strong></td>
+        <td class="check">OpenFGA, OPA, and Cedar all support local evaluation via a sidecar or embedded SDK. A policy decision is typically &lt;1 ms. Caching with short TTLs (seconds) further reduces overhead without losing freshness.</td>
+      </tr>
+      <tr>
+        <td><strong>"Every service needs to be integrated"</strong></td>
+        <td class="check">The FGA check lives in the gateway or a shared middleware — exactly where WIMSE validation already lives. Services receive the allow/deny verdict as a header or context value. No per-service code change needed.</td>
+      </tr>
+      <tr>
+        <td><strong>"The schema is hard to keep current"</strong></td>
+        <td class="check">WIMSE's verified <code>sub</code> maps directly to an FGA user without translation. Relations and tuples change in the policy store — no code deployment. WIMSE makes FGA easier because identity is cryptographically verified, not asserted.</td>
+      </tr>
+      <tr>
+        <td><strong>"We already have RBAC in our app"</strong></td>
+        <td class="cross">Hardcoded RBAC in application code cannot express attribute- or relationship-based policies without deployments. It also cannot be audited or changed without a code review cycle — slowing down incident response by hours or days.</td>
+      </tr>
+      <tr>
+        <td><strong>"We'll add it later"</strong></td>
+        <td class="cross">The cost of retrofitting FGA grows with the number of services. Adding FGA early — when WIMSE is being deployed — means one integration point, not N. "Later" usually means never.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">FGA engine options — which to choose</div>
+    <div class="info-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="info-box blue">
+        <div class="ibt">OpenFGA</div>
+        <div class="ibv" style="font-size:11px;line-height:1.6">Google Zanzibar model. Relationship-based. Strong consistency. CNCF project. Best for hierarchical resources (org → team → document).</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Go / Kubernetes native</div>
+      </div>
+      <div class="info-box green">
+        <div class="ibt">OPA / Rego</div>
+        <div class="ibv" style="font-size:11px;line-height:1.6">Policy-as-code. Attribute-based. Embeds as a sidecar (Envoy ext_authz). Best for complex conditional logic involving request attributes.</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">CNCF graduated</div>
+      </div>
+      <div class="info-box purple">
+        <div class="ibt">Cedar (AWS)</div>
+        <div class="ibv" style="font-size:11px;line-height:1.6">Formally verified policy language. Typed. Very fast evaluation. Best when safety proofs matter (e.g. financial or healthcare workloads).</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Open source, AWS-backed</div>
+      </div>
+      <div class="info-box orange">
+        <div class="ibt">SpiceDB / Authzed</div>
+        <div class="ibv" style="font-size:11px;line-height:1.6">Zanzibar model with a managed cloud option. Drop-in alternative to OpenFGA for teams that want SaaS operations with Kubernetes-native deployment.</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Open source + SaaS</div>
+      </div>
+    </div>
+    <div class="callout ok" style="margin-top:1rem">
+      <strong>Recommended pattern for this PoC:</strong> WIMSE validates the token in gateway middleware → extracts <code>sub</code> → forwards <code>X-Workload-Sub</code> header to upstream → upstream calls OpenFGA <code>/stores/{id}/check</code> with <code>user=sub</code>, <code>relation=action</code>, <code>object=resource</code>. Policy tuples managed via GitOps — any team can propose a PR to grant or revoke access. No code deployment required.
     </div>
   </div>
 </div>
