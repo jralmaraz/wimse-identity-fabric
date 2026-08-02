@@ -2168,6 +2168,60 @@ tok, err := auth.Authenticate(
     </table>
     <p style="font-size:12px;color:var(--muted);margin-top:10px">8 tests in <code>pkg/spiffeclientauth/spiffeclientauth_test.go</code>: happy path, token uniqueness, wrong assertion type, empty assertion, tampered WIT, expired WIT, issuer mismatch, scope passthrough.</p>
   </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Live SPIFFE Client Auth flow — animated walkthrough</div>
+    <button class="play-btn" id="sca-play-btn" onclick="playSCAFlow()">&#9654; Play Auth Flow</button>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px;margin-bottom:10px;overflow:hidden">
+      <svg id="sca-svg" viewBox="0 0 730 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+        <!-- IdP / SPIRE -->
+        <rect x="5" y="25" width="110" height="44" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="60" y="44" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="10" font-weight="700">IdP / SPIRE</text>
+        <text x="60" y="59" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">issues wit+jwt</text>
+        <!-- Workload -->
+        <rect x="155" y="25" width="120" height="44" rx="6" fill="#21262d" stroke="#ffa657" stroke-width="1.5"/>
+        <text x="215" y="44" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="10" font-weight="700">Workload</text>
+        <text x="215" y="59" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="7.5">spiffe://…/svc/billing</text>
+        <!-- OAuth AS -->
+        <rect x="325" y="25" width="140" height="44" rx="6" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
+        <text x="395" y="44" text-anchor="middle" fill="#bc8cff" font-family="sans-serif" font-size="10" font-weight="700">OAuth AS</text>
+        <text x="395" y="59" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">validates WIT sig</text>
+        <!-- Resource API -->
+        <rect x="515" y="25" width="120" height="44" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="575" y="44" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="10" font-weight="700">Resource API</text>
+        <text x="575" y="59" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="8">Bearer token</text>
+        <!-- Connector lines -->
+        <line x1="115" y1="47" x2="155" y2="47" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="275" y1="47" x2="325" y2="47" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="465" y1="47" x2="515" y2="47" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <!-- Status -->
+        <text id="sca-status-txt" x="365" y="98" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="10">Click Play to start</text>
+        <!-- Animated packets -->
+        <circle id="sca-pk1" r="5" fill="#3fb950"  visibility="hidden"/>
+        <circle id="sca-pk2" r="5" fill="#ffa657"  visibility="hidden"/>
+        <circle id="sca-pk3" r="5" fill="#58a6ff"  visibility="hidden"/>
+        <circle id="sca-pk4" r="5" fill="#3fb950"  visibility="hidden"/>
+      </svg>
+    </div>
+    <div class="anim-steps">
+      <div class="anim-step" id="sca-s1">
+        <div class="as-label">① IdP issues WIT to workload</div>
+        <div class="as-desc">IdP/SPIRE issues a <code>wit+jwt</code> bound to the workload's public key via <code>cnf.jwk</code>. The workload holds this as its identity credential — no <code>client_secret</code> needed.</div>
+      </div>
+      <div class="anim-step" id="sca-s2">
+        <div class="as-label">② Workload sends WIT as <code>client_assertion</code></div>
+        <div class="as-desc"><code>POST /token</code> with <code>grant_type=client_credentials</code>, <code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer</code>, and <code>client_assertion=&lt;WIT&gt;</code>.</div>
+      </div>
+      <div class="anim-step" id="sca-s3">
+        <div class="as-label">③ AS validates WIT → issues Bearer token</div>
+        <div class="as-desc">AS fetches IdP's JWKS, verifies the WIT's ECDSA signature and expiry. On success, issues a Bearer access token with <code>sub=spiffe://…/svc/billing</code>.</div>
+      </div>
+      <div class="anim-step" id="sca-s4">
+        <div class="as-label">④ Workload calls Resource API with Bearer token</div>
+        <div class="as-desc">Standard OAuth Bearer in <code>Authorization</code> header. Resource server sees <code>sub</code> = SPIFFE URI — full workload identity, zero secrets exchanged anywhere in the flow.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -2291,6 +2345,71 @@ claims, _ := gv.Validate(
       <tr><td>Replay safety</td><td>A static cross-domain token could be replayed indefinitely</td><td><code>jti</code> uniqueness + 5-minute TTL — intercepted grants expire quickly and cannot be replayed</td></tr>
     </table>
     <p style="font-size:12px;color:var(--muted);margin-top:10px">10 tests in <code>pkg/identitychaining/identitychaining_test.go</code>: happy path, <code>typ</code> header, audience mismatch, wrong signing key, expired grant, issuer mismatch, invalid WIT, missing inputs, end-to-end cross-domain flow.</p>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Live Identity Chaining flow — animated walkthrough</div>
+    <button class="play-btn" id="ic-play-btn" onclick="playICFlow()">&#9654; Play Cross-Domain Flow</button>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px;margin-bottom:10px;overflow:hidden">
+      <svg id="ic-svg" viewBox="0 0 730 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+        <!-- Cloud A domain box -->
+        <rect x="3" y="8" width="305" height="92" rx="8" fill="rgba(88,166,255,.04)" stroke="rgba(88,166,255,.25)" stroke-dasharray="5,3"/>
+        <text x="155" y="20" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8" font-weight="700">CLOUD A</text>
+        <!-- Cloud B domain box -->
+        <rect x="318" y="8" width="407" height="92" rx="8" fill="rgba(63,185,80,.04)" stroke="rgba(63,185,80,.25)" stroke-dasharray="5,3"/>
+        <text x="522" y="20" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8" font-weight="700">CLOUD B</text>
+        <!-- Workload A -->
+        <rect x="10" y="28" width="100" height="42" rx="6" fill="#21262d" stroke="#ffa657" stroke-width="1.5"/>
+        <text x="60" y="46" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="9.5" font-weight="700">Workload A</text>
+        <text x="60" y="60" text-anchor="middle" fill="#7d8590" font-family="monospace" font-size="7">spiffe://cloud-a/…</text>
+        <!-- AS-A -->
+        <rect x="155" y="23" width="120" height="52" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="215" y="43" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="9.5" font-weight="700">AS — Cloud A</text>
+        <text x="215" y="58" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="7.5">issues jwt-authz-grant</text>
+        <!-- AS-B -->
+        <rect x="328" y="23" width="120" height="52" rx="6" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="388" y="43" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="9.5" font-weight="700">AS — Cloud B</text>
+        <text x="388" y="58" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="7.5">validates grant</text>
+        <!-- API-B -->
+        <rect x="502" y="28" width="115" height="42" rx="6" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="559" y="46" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="9.5" font-weight="700">API — Cloud B</text>
+        <text x="559" y="60" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="7">protected endpoint</text>
+        <!-- Connector lines -->
+        <line x1="110" y1="49" x2="155" y2="49" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="275" y1="49" x2="328" y2="49" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <line x1="448" y1="49" x2="502" y2="49" stroke="#30363d" stroke-dasharray="3,3" stroke-width="1"/>
+        <!-- Status -->
+        <text id="ic-status-txt" x="365" y="104" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="10">Click Play to start</text>
+        <!-- Animated packets -->
+        <circle id="ic-pk1" r="5" fill="#ffa657" visibility="hidden"/>
+        <circle id="ic-pk2" r="5" fill="#58a6ff" visibility="hidden"/>
+        <circle id="ic-pk3" r="5" fill="#58a6ff" visibility="hidden"/>
+        <circle id="ic-pk4" r="5" fill="#3fb950" visibility="hidden"/>
+        <circle id="ic-pk5" r="5" fill="#3fb950" visibility="hidden"/>
+      </svg>
+    </div>
+    <div class="anim-steps">
+      <div class="anim-step" id="ic-s1">
+        <div class="as-label">① Workload A presents WIT to AS-A</div>
+        <div class="as-desc">Workload sends its <code>wit+jwt</code> to Cloud A's Authorization Server to prove its SPIFFE identity. AS-A validates signature and expiry.</div>
+      </div>
+      <div class="anim-step" id="ic-s2">
+        <div class="as-label">② AS-A issues JWT Authorization Grant</div>
+        <div class="as-desc">AS-A signs a <code>jwt-authz-grant</code> with <code>iss=as.cloud-a.example</code>, <code>sub=spiffe://cloud-a.example/svc/billing</code>, <code>aud=https://as.cloud-b.example/token</code>, 5-min TTL, random <code>jti</code>.</div>
+      </div>
+      <div class="anim-step" id="ic-s3">
+        <div class="as-label">③ Grant crosses trust-domain boundary → AS-B</div>
+        <div class="as-desc">Workload A presents the grant to Cloud B's token endpoint. AS-B validates <code>iss</code>, <code>aud</code>, <code>exp</code>, and <code>jti</code> uniqueness using only Cloud A's public key — no pre-shared secrets.</div>
+      </div>
+      <div class="anim-step" id="ic-s4">
+        <div class="as-label">④ AS-B issues Cloud B domain token</div>
+        <div class="as-desc">AS-B extracts the SPIFFE ID from the grant's <code>sub</code> claim and issues a Cloud B token. Full audit trail — Workload A's identity is preserved across the boundary.</div>
+      </div>
+      <div class="anim-step" id="ic-s5">
+        <div class="as-label">⑤ Workload A calls Cloud B API</div>
+        <div class="as-desc">The Cloud B API receives a domain-native token, verifies it, and recognises the caller's SPIFFE ID. Zero cross-domain secrets; zero pre-registration at AS-B.</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2552,6 +2671,106 @@ async function playFedFlow() {
 
   fedRunning = false;
   btn.disabled = false;
+}
+
+// ── SPIFFE Client Auth flow (Scenario 13) ────────────────────────────────────
+let scaRunning = false;
+function scaStatus(msg) { const el = document.getElementById('sca-status-txt'); if (el) el.textContent = msg; }
+
+async function playSCAFlow() {
+  if (scaRunning) return;
+  scaRunning = true;
+  const btn = document.getElementById('sca-play-btn');
+  btn.disabled = true;
+  ['sca-s1','sca-s2','sca-s3','sca-s4'].forEach(id => setAStep(id, ''));
+  scaStatus('Starting…');
+
+  // ① IdP → Workload: wit+jwt issued
+  setAStep('sca-s1', 'active');
+  scaStatus('① IdP issues wit+jwt to workload…');
+  await animPkt('sca-pk1', 60, 47, 215, 47, 700, '#3fb950');
+  await sleep(250);
+  setAStep('sca-s1', 'done');
+
+  // ② Workload → OAuth AS: POST /token with client_assertion
+  setAStep('sca-s2', 'active');
+  scaStatus('② Workload sends WIT as client_assertion (POST /token)…');
+  await animPkt('sca-pk2', 215, 47, 395, 47, 800, '#ffa657');
+  await sleep(250);
+  setAStep('sca-s2', 'done');
+
+  // ③ AS validates WIT sig, issues Bearer
+  setAStep('sca-s3', 'active');
+  scaStatus('③ AS validates WIT ECDSA signature → issuing Bearer token…');
+  await sleep(600);
+  await animPkt('sca-pk3', 395, 63, 215, 63, 800, '#58a6ff');
+  await sleep(250);
+  setAStep('sca-s3', 'done');
+
+  // ④ Workload → Resource API
+  setAStep('sca-s4', 'active');
+  scaStatus('④ Workload calls Resource API with Bearer token…');
+  await animPkt('sca-pk4', 215, 47, 575, 47, 900, '#3fb950');
+  await sleep(250);
+  setAStep('sca-s4', 'done');
+  scaStatus('✓ spiffe://…/svc/billing authenticated — 200 OK (zero secrets exchanged)');
+
+  btn.disabled = false; btn.textContent = '↺ Replay';
+  scaRunning = false;
+}
+
+// ── Identity Chaining flow (Scenario 14) ─────────────────────────────────────
+let icRunning = false;
+function icStatus(msg) { const el = document.getElementById('ic-status-txt'); if (el) el.textContent = msg; }
+
+async function playICFlow() {
+  if (icRunning) return;
+  icRunning = true;
+  const btn = document.getElementById('ic-play-btn');
+  btn.disabled = true;
+  ['ic-s1','ic-s2','ic-s3','ic-s4','ic-s5'].forEach(id => setAStep(id, ''));
+  icStatus('Starting…');
+
+  // ① Workload A → AS-A: present WIT
+  setAStep('ic-s1', 'active');
+  icStatus('① Workload A → AS-A: presenting wit+jwt…');
+  await animPkt('ic-pk1', 60, 49, 215, 49, 700, '#ffa657');
+  await sleep(250);
+  setAStep('ic-s1', 'done');
+
+  // ② AS-A → Workload A: jwt-authz-grant
+  setAStep('ic-s2', 'active');
+  icStatus('② AS-A issues jwt-authz-grant (aud = Cloud B token endpoint)…');
+  await sleep(400);
+  await animPkt('ic-pk2', 215, 63, 60, 63, 700, '#58a6ff');
+  await sleep(250);
+  setAStep('ic-s2', 'done');
+
+  // ③ Workload A → AS-B: grant crosses domain boundary
+  setAStep('ic-s3', 'active');
+  icStatus('③ Grant crosses trust-domain boundary → AS-B validates…');
+  await animPkt('ic-pk3', 60, 49, 388, 49, 1000, '#58a6ff');
+  await sleep(350);
+  setAStep('ic-s3', 'done');
+
+  // ④ AS-B → Workload A: Cloud B token
+  setAStep('ic-s4', 'active');
+  icStatus('④ AS-B validates grant (iss/aud/exp/jti) → issues Cloud B token…');
+  await sleep(400);
+  await animPkt('ic-pk4', 388, 63, 60, 63, 1000, '#3fb950');
+  await sleep(250);
+  setAStep('ic-s4', 'done');
+
+  // ⑤ Workload A → API-B
+  setAStep('ic-s5', 'active');
+  icStatus('⑤ Workload A calls Cloud B API with domain-B token…');
+  await animPkt('ic-pk5', 60, 49, 559, 49, 1100, '#3fb950');
+  await sleep(250);
+  setAStep('ic-s5', 'done');
+  icStatus('✓ spiffe://cloud-a.example/svc/billing → Cloud B API — 200 OK');
+
+  btn.disabled = false; btn.textContent = '↺ Replay';
+  icRunning = false;
 }
 
 // ── Secrets flow (Scenario 6) ────────────────────────────────────────────────

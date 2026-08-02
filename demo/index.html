@@ -233,6 +233,7 @@ select:focus{outline:none;border-color:var(--blue)}
   <span class="pill pill-b">WIT -02</span>
   <span class="pill pill-b">WPT -01</span>
   <span class="pill pill-b">Txn-Token -11</span>
+  <span class="pill pill-b">SPIFFE-CA -02</span>
   <span class="pill pill-b">Identifiers -03</span>
   <span class="pill pill-b">mTLS -02</span>
   <span class="pill pill-b">Arch -08</span>
@@ -246,7 +247,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 1 — The Problem
 ═══════════════════════════════════════════ -->
 <section class="chapter active" id="ch1">
-  <div class="ch-num">Chapter 1 of 9</div>
+  <div class="ch-num">Chapter 1 of 12</div>
   <h1 class="ch-title">The Problem</h1>
   <p class="ch-lead">Two workloads on the internet want to talk. But how does <strong>Workload&nbsp;B</strong> know the request really came from <strong>Workload&nbsp;A</strong> — and not an attacker?</p>
 
@@ -303,7 +304,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 2 — WIT
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch2">
-  <div class="ch-num">Chapter 2 of 9</div>
+  <div class="ch-num">Chapter 2 of 12</div>
   <h1 class="ch-title">WIT: Your Identity Card</h1>
   <p class="ch-lead">The <strong>Workload Identity Token (WIT)</strong> is a signed JWT issued by a trusted Identity Provider. It carries the workload's URI-based identity and a public key for proof-of-possession.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/" target="_blank">draft-ietf-wimse-workload-creds-02</a> &nbsp;|&nbsp; <code>typ: wit+jwt</code> &nbsp;|&nbsp; alg: ES256</div>
@@ -369,7 +370,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 3 — mTLS
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch3">
-  <div class="ch-num">Chapter 3 of 9</div>
+  <div class="ch-num">Chapter 3 of 12</div>
   <h1 class="ch-title">mTLS: Lock the Channel</h1>
   <p class="ch-lead"><strong>Mutual TLS</strong> adds a transport-layer identity layer: both sides present X.509 certificates with SPIFFE URI Subject Alternative Names before any data flows.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/" target="_blank">draft-ietf-wimse-mutual-tls-02</a> &nbsp;|&nbsp; EC P-256, TLS 1.3+, URI SAN</div>
@@ -431,7 +432,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 4 — WPT
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch4">
-  <div class="ch-num">Chapter 4 of 9</div>
+  <div class="ch-num">Chapter 4 of 12</div>
   <h1 class="ch-title">WPT: Prove Each Request</h1>
   <p class="ch-lead">A <strong>Workload Proof Token (WPT)</strong> is a short-lived, per-request JWT signed with the workload's private key. It binds to the WIT and to the exact target URI — making token theft useless.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/" target="_blank">draft-ietf-wimse-wpt-01</a> &nbsp;|&nbsp; <code>typ: application/wpt+jwt</code> &nbsp;|&nbsp; TTL: 5 minutes</div>
@@ -479,7 +480,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 5 — Validation Dance
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch5">
-  <div class="ch-num">Chapter 5 of 9</div>
+  <div class="ch-num">Chapter 5 of 12</div>
   <h1 class="ch-title">The Validation Dance</h1>
   <p class="ch-lead">When Workload B receives a request it runs <strong>9 checks</strong> before letting it through. Each one protects against a specific attack class.</p>
 
@@ -520,7 +521,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 6 — Fine-Grained Authorization
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch6">
-  <div class="ch-num">Chapter 6 of 9</div>
+  <div class="ch-num">Chapter 6 of 12</div>
   <h1 class="ch-title">Fine-Grained Authorization</h1>
   <p class="ch-lead"><strong>Authentication</strong> answers &ldquo;who are you?&rdquo; — <strong>Authorization</strong> answers &ldquo;what are you allowed to do?&rdquo; The WIT's <code>sub</code> and <code>trust_domain</code> drive fine-grained access control.</p>
 
@@ -592,7 +593,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 7 — Selective Disclosure
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch7">
-  <div class="ch-num">Chapter 7 of 9</div>
+  <div class="ch-num">Chapter 7 of 12</div>
   <h1 class="ch-title">Selective Disclosure</h1>
   <p class="ch-lead">An <strong>SD-WIT</strong> uses the SD-JWT standard to let a workload present only the claims a specific service needs — without re-issuance. Hidden claims are replaced with cryptographic hashes.</p>
   <div class="spec-ref">Format: JWT <code>_sd</code> hash array + Base64URL disclosures after <code>~</code> separator</div>
@@ -655,7 +656,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 8 — Token Exchange
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch8">
-  <div class="ch-num">Chapter 8 of 9</div>
+  <div class="ch-num">Chapter 8 of 12</div>
   <h1 class="ch-title">Token Exchange</h1>
   <p class="ch-lead">Workload A (cloud-a.example) needs to call Workload B (cloud-b.example). Problem: B only trusts its own IdP. A <strong>Token Exchange Service</strong> bridges the trust domains.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-arch/" target="_blank">draft-ietf-wimse-arch-08</a> — token exchange at trust-domain boundaries</div>
@@ -731,7 +732,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 9 — Attacks & Defenses
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch9">
-  <div class="ch-num">Chapter 9 of 10</div>
+  <div class="ch-num">Chapter 9 of 12</div>
   <h1 class="ch-title">Attacks &amp; Defenses</h1>
   <p class="ch-lead">What happens when an attacker captures a valid WPT and tries to replay it? WIMSE's <code>jti</code> tracking makes replay attacks impossible — even with a perfectly valid, unexpired stolen token.</p>
 
@@ -812,7 +813,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 10 — OpenID Federation
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch10">
-  <div class="ch-num">Chapter 10 of 10</div>
+  <div class="ch-num">Chapter 10 of 12</div>
   <h1 class="ch-title">OpenID Federation</h1>
   <p class="ch-lead">Two organisations have their own IdPs and never exchanged a single key out-of-band. <strong>OpenID Federation 1.0</strong> lets a shared Trust Anchor publish cryptographically-signed <em>Subordinate Statements</em> that vouch for each IdP, so any relying party can verify the chain at runtime.</p>
   <div class="spec-ref">Spec: <a href="https://openid.net/specs/openid-federation-1_0.html" target="_blank">OpenID Federation 1.0</a> — entity statements, trust chains, trust anchors</div>
@@ -946,6 +947,176 @@ select:focus{outline:none;border-color:var(--blue)}
 
   <div class="ch-footer">
     <button class="btn btn-secondary" onclick="goChapter(9)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(11)">Next: Transaction Tokens &rarr;</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     Chapter 11 — Transaction Tokens
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch11">
+  <div class="ch-num">Chapter 11 of 12</div>
+  <h1 class="ch-title">Transaction Tokens</h1>
+  <p class="ch-lead">A WIT answers <em>"who is this workload?"</em> — but in a microservice call chain, the receiving service also needs to know <em>"why is this call happening?"</em> <strong>Transaction Tokens</strong> (<code>txntoken+jwt</code>, draft-ietf-oauth-transaction-tokens-11) capture the full originating context — user identity, authorisation details, and transaction ID — so every hop in a chain can trust the same root decision without re-authenticating the user.</p>
+  <div class="spec-ref">Spec: draft-ietf-oauth-transaction-tokens-11 &nbsp;|&nbsp; <code>typ: txntoken+jwt</code> &nbsp;|&nbsp; immutable across call chain</div>
+
+  <div class="info-grid">
+    <div class="info-box orange">
+      <div class="ibt">The problem</div>
+      <div class="ibv" style="font-size:12px;font-family:sans-serif">Workload A authenticates Alice and calls B → C. B and C see only the service WIT — they have no idea Alice triggered this. Per-hop user identity is error-prone and inconsistent.</div>
+    </div>
+    <div class="info-box green">
+      <div class="ibt">The Txn-Token solution</div>
+      <div class="ibv" style="font-size:12px;font-family:sans-serif">At the entry point a <strong>Transaction Token Service (TTS)</strong> mints a <code>txntoken+jwt</code> that is immutable and forwarded unchanged through the chain. Every service verifies the same token.</div>
+    </div>
+  </div>
+
+  <div class="xflow">
+    <div class="xstep"><span class="xarrow">&#x2460;</span><span>User request arrives at the edge workload (gateway). The TTS mints a <code>txntoken+jwt</code> carrying the user's identity, originating IP, entry-point workload SPIFFE ID, and the AS-granted authorisation details.</span></div>
+    <div class="xstep"><span class="xarrow">&#x2461;</span><span>Gateway forwards the request to Workload B with its WIT+WPT (service auth) <em>plus</em> the Txn-Token in a separate header. The Txn-Token is <strong>not replaced</strong> — it travels unmodified.</span></div>
+    <div class="xstep"><span class="xarrow">&#x2462;</span><span>Workload B validates the WIT+WPT for service identity, then validates the Txn-Token for user context. It now knows both <em>who the caller workload is</em> and <em>who the end user is and what they were authorised to do</em>.</span></div>
+    <div class="xstep"><span class="xarrow">&#x2463;</span><span>B calls C in the same way. C sees the same Txn-Token — full auditability across every hop, signed once by the TTS, verifiable by any service with the TTS public key.</span></div>
+  </div>
+
+  <div class="jwt-grid">
+    <div class="jwt-box jp">
+      <h4>txntoken+jwt payload</h4>
+      <pre>{
+  "iss": "https://tts.cloud-a.example",
+  "sub": "alice@corp.example",
+  "aud": ["https://api.cloud-a.example"],
+  "txn": "a3f8c2d1e5b6...",
+  "rctx": {
+    "req_ip": "203.0.113.42",
+    "req_wl": "spiffe://…/svc/gateway"
+  },
+  "azd": [{
+    "type": "payment",
+    "claims": { "amount": "42.00" }
+  }]
+}</pre>
+    </div>
+    <div class="jwt-box jh">
+      <h4>Go — TTS issues &amp; service validates</h4>
+      <pre>// pkg/txntoken — TTS mints
+tts := txntoken.NewIssuer(
+  "https://tts.cloud-a.example",
+  ttsKey, 5*time.Minute)
+
+tok, _ := tts.Issue(txntoken.IssueOptions{
+  Subject:   "alice@corp.example",
+  Audiences: []string{"https://api.…"},
+  ReqCtx:    &amp;txntoken.RequestContext{
+    ReqIP: "203.0.113.42",
+    ReqWL: "spiffe://…/svc/gateway",
+  },
+})
+
+// Downstream service validates
+v := txntoken.NewValidator(
+  "https://tts.cloud-a.example", ttsPub)
+claims, _ := v.Validate(tok)
+// claims.Txn, claims.ReqCtx, claims.AzDetails</pre>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>WPT binding:</strong> A WPT can optionally include a <code>tth</code> claim — <code>base64url(SHA-256(txntoken_compact))</code> — cryptographically tying the per-request proof to the transaction. The <code>pkg/wpt</code> generator accepts a <code>TxnToken</code> field that sets this automatically.
+  </div>
+
+  <div class="callout ok">
+    <strong>10 tests in <code>pkg/txntoken/</code></strong> — happy path, typ header, txn ID propagation, authorisation details, wrong key, expired token, issuer mismatch, missing subject/audience, hash determinism, empty string guard.
+  </div>
+
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(10)">&larr; Back</button>
+    <button class="btn btn-primary" onclick="goChapter(12)">Next: SPIFFE Client Auth &rarr;</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     Chapter 12 — SPIFFE Client Auth
+═══════════════════════════════════════════ -->
+<section class="chapter" id="ch12">
+  <div class="ch-num">Chapter 12 of 12</div>
+  <h1 class="ch-title">SPIFFE Client Authentication</h1>
+  <p class="ch-lead">Workloads already carry WITs that cryptographically prove their SPIFFE identity. Traditional OAuth <code>client_credentials</code> flows require a <code>client_secret</code> — a credential that must be stored, rotated, and protected. <strong>SPIFFE Client Auth</strong> (draft-ietf-oauth-spiffe-client-auth-02) eliminates the secret entirely: the WIT itself becomes the <em>client assertion</em>.</p>
+  <div class="spec-ref">Spec: draft-ietf-oauth-spiffe-client-auth-02 &nbsp;|&nbsp; RFC 7523 JWT Bearer client assertion &nbsp;|&nbsp; <code>client_assertion_type: jwt-bearer</code></div>
+
+  <div class="info-grid">
+    <div class="info-box blue">
+      <div class="ibt">Standard foundation (RFC 7523)</div>
+      <div class="ibv" style="font-size:12px;font-family:sans-serif">RFC 7523 defines <code>urn:ietf:params:oauth:client-assertion-type:jwt-bearer</code> — an OAuth client can authenticate with a signed JWT instead of a secret. SPIFFE Client Auth profiles this for WIMSE workloads: the WIT <em>is</em> that signed JWT.</div>
+    </div>
+    <div class="info-box green">
+      <div class="ibt">What the AS gains</div>
+      <div class="ibv" style="font-size:12px;font-family:sans-serif">The AS validates the WIT's ECDSA signature against the IdP's JWKS — trust it already extends for workload auth. No <code>client_id</code>/<code>client_secret</code> pre-registration. The SPIFFE URI in <code>sub</code> serves as the client identifier.</div>
+    </div>
+  </div>
+
+  <div class="xflow">
+    <div class="xstep"><span class="xarrow">&#x2460;</span><span>Workload holds its WIT (issued by IdP). It needs an OAuth Bearer token to call a Resource API — but there is no <code>client_secret</code> anywhere.</span></div>
+    <div class="xstep"><span class="xarrow">&#x2461;</span><span>Workload sends <code>POST /token</code> to the OAuth AS with <code>grant_type=client_credentials</code>, <code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer</code>, and <code>client_assertion=&lt;WIT&gt;</code>.</span></div>
+    <div class="xstep"><span class="xarrow">&#x2462;</span><span>AS fetches the IdP's JWKS, verifies the WIT's ES256 signature and expiry. On success it issues a Bearer access token with <code>sub=spiffe://…/svc/billing</code> — the workload's SPIFFE identity is preserved.</span></div>
+    <div class="xstep"><span class="xarrow">&#x2463;</span><span>Workload calls the Resource API with the Bearer token. The resource server sees <code>sub</code> = SPIFFE URI. Zero secrets exchanged anywhere in the entire flow.</span></div>
+  </div>
+
+  <div class="jwt-grid">
+    <div class="jwt-box jp">
+      <h4>POST /token — form body &amp; response</h4>
+      <pre>grant_type=client_credentials
+client_assertion_type=
+  urn:ietf:params:oauth:
+  client-assertion-type:jwt-bearer
+client_assertion=&lt;compact WIT JWT&gt;
+scope=read:orders write:payments
+
+// Response
+{
+  "access_token": "&lt;opaque Bearer&gt;",
+  "token_type":   "Bearer",
+  "expires_in":   3600,
+  "sub": "spiffe://cloud-a.example/svc/billing"
+}</pre>
+    </div>
+    <div class="jwt-box jh">
+      <h4>Go — AS-side authenticator</h4>
+      <pre>// pkg/spiffeclientauth
+auth := spiffeclientauth.NewAuthenticator(
+  "https://as.cloud-a.example",
+  wit.NewValidator(
+    "https://idp.cloud-a.example",
+    idpPub,
+  ),
+  time.Hour,
+)
+
+tok, err := auth.Authenticate(
+  spiffeclientauth.AuthRequest{
+    ClientAssertion:     witToken,
+    ClientAssertionType: spiffeclientauth.ClientAssertionType,
+    Scope: "read:orders",
+  },
+)
+// tok.Sub   = "spiffe://cloud-a.example/svc/billing"
+// tok.Token = opaque Bearer string</pre>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>Credential lifecycle solved:</strong> WITs have short TTLs — when one expires the workload requests a fresh one from its IdP automatically. No operator involvement, no rotation scripts, no secret scanners, no vault integrations. The AS needs only the IdP's public key, already distributed via <code>/.well-known/jwks.json</code>.
+  </div>
+
+  <div class="callout ok">
+    <strong>8 tests in <code>pkg/spiffeclientauth/</code></strong> — happy path, token uniqueness per call, wrong assertion type, empty assertion, tampered WIT, expired WIT, issuer mismatch, scope passthrough.
+  </div>
+
+  <div class="callout ok">
+    <strong>Story complete.</strong> From raw TCP with no identity — to cryptographically verifiable, short-lived, replay-protected, fine-grained, <em>federated</em> workload identity with transaction context and secretless OAuth authentication. All cryptographic operations ran in real Go code compiled to WebAssembly in your browser.
+  </div>
+
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(11)">&larr; Back</button>
     <button class="btn btn-green" onclick="goChapter(1)">Start Over</button>
   </div>
 </section>
@@ -977,10 +1148,12 @@ WebAssembly.instantiateStreaming(fetch('wimse.wasm'), go.importObject).then(r =>
 const CH_TITLES = [
   'The Problem', 'WIT: Identity Card', 'mTLS: Lock the Channel',
   'WPT: Prove Each Request', 'The Validation Dance', 'Fine-Grained Authorization',
-  'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses', 'OpenID Federation'
+  'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses', 'OpenID Federation',
+  'Transaction Tokens', 'SPIFFE Client Auth'
 ];
 const CH_SHORT = [
-  'Problem', 'WIT', 'mTLS', 'WPT', 'Validation', 'FGA', 'SD-WIT', 'Exchange', 'Attacks', 'OID-FED'
+  'Problem', 'WIT', 'mTLS', 'WPT', 'Validation', 'FGA', 'SD-WIT', 'Exchange', 'Attacks', 'OID-FED',
+  'Txn-Token', 'SCA'
 ];
 let cur = 1;
 const done = new Set();
@@ -1014,7 +1187,7 @@ function buildNav() {
 }
 
 function goChapter(n) {
-  if (n < 1 || n > 10) return;
+  if (n < 1 || n > 12) return;
   done.add(cur);
   document.getElementById('ch' + cur).classList.remove('active');
   cur = n;
