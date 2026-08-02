@@ -1,17 +1,20 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
+  "_tracking_policy": "docs/standards-tracking.md",
   "last_checked": "2026-08-02",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
       "feed_url": "https://datatracker.ietf.org/group/wimse/documents/feed/",
       "type": "ietf-wg",
+      "source_org": "https://github.com/ietf-wg-wimse",
       "note": "Discovers new WIMSE WG drafts not yet in our baseline"
     },
     {
       "name": "IETF OAuth WG",
       "feed_url": "https://datatracker.ietf.org/group/oauth/documents/feed/",
       "type": "ietf-wg",
+      "source_org": "https://github.com/oauth-wg",
       "note": "Discovers new OAuth WG drafts (DPoP updates, Transaction Tokens, etc.)"
     },
     {
@@ -34,6 +37,7 @@
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-workload-creds/",
+      "source_repo": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-s2s-protocol",
       "impact": "WIT claims structure (typ=wit+jwt), cnf.jwk format, SPIFFE URI sub",
       "used_in": ["pkg/wit", "internal/idp", "internal/workload"]
     },
@@ -47,6 +51,7 @@
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-wpt/",
+      "source_repo": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-s2s-protocol",
       "impact": "WPT claims (typ=application/wpt+jwt), aud=request URI, wth=SHA-256(WIT), tth=SHA-256(Txn-Token), jti replay protection",
       "used_in": ["pkg/wpt", "internal/workload"]
     },
@@ -60,6 +65,7 @@
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-identifier/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-identifier/",
+      "source_repo": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-identifier",
       "impact": "SPIFFE URI format (spiffe://trust-domain/path), no query/fragment/port allowed",
       "used_in": ["pkg/wit", "pkg/wpt", "internal/idp"]
     },
@@ -73,6 +79,7 @@
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-mutual-tls/",
+      "source_repo": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-s2s-protocol",
       "impact": "X.509 URI SAN format, EC P-256 requirement, TLS 1.3 minimum",
       "used_in": ["pkg/keys/mtls.go", "internal/workload"]
     },
@@ -86,6 +93,7 @@
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-arch/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-arch/",
+      "source_repo": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-arch",
       "impact": "Token exchange patterns at trust-domain boundaries, HTTP header names",
       "used_in": ["internal/exchange"]
     },
@@ -99,6 +107,7 @@
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-transaction-tokens/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-transaction-tokens/",
+      "source_repo": "https://github.com/oauth-wg/oauth-transaction-tokens",
       "impact": "Txn-Token (txntoken+jwt) for call-chain context propagation; tth claim in WPT binds proof to transaction context; req_wl carries requesting workload SPIFFE ID",
       "used_in": ["pkg/txntoken", "pkg/wpt (tth claim)"]
     },
@@ -112,6 +121,7 @@
       "status": "rfc",
       "datatracker_url": "https://datatracker.ietf.org/doc/rfc9449/",
       "api_url": null,
+      "source_repo": null,
       "impact": "DPoP proof JWT (dpop+jwt), cnf.jkt thumbprint binding",
       "used_in": ["pkg/wpt"]
     },
@@ -125,11 +135,40 @@
       "status": "final",
       "datatracker_url": "https://openid.net/specs/openid-federation-1_0.html",
       "api_url": null,
+      "source_repo": "https://github.com/openid/federation",
       "rss_url": "https://openid.net/feed/",
       "rss_keywords": ["federation"],
       "last_rss_guid": null,
       "impact": "Entity Configuration JWT, Subordinate Statement, authority_hints, trust chain resolution, min(EC.exp,SS.exp) caching",
       "used_in": ["pkg/federation", "internal/exchange"]
+    },
+    {
+      "id": "draft-ietf-oauth-spiffe-client-auth",
+      "label": "OAuth 2.0 SPIFFE Client Authentication",
+      "short": "SPIFFE-ClientAuth",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": "02",
+      "implemented_rev": "02",
+      "status": "active-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-spiffe-client-auth/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-spiffe-client-auth/",
+      "source_repo": "https://github.com/oauth-wg/oauth-spiffe-client-authentication",
+      "impact": "WIT used as JWT bearer client assertion (client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer) to authenticate to OAuth AS — eliminates shared secrets for workload-to-OAuth-AS authentication",
+      "used_in": ["pkg/spiffeclientauth"]
+    },
+    {
+      "id": "draft-ietf-oauth-identity-chaining",
+      "label": "OAuth Identity and Authorization Chaining Across Domains",
+      "short": "IdentityChaining",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": "17",
+      "implemented_rev": "17",
+      "status": "active-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-identity-chaining/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-identity-chaining/",
+      "source_repo": "https://github.com/oauth-wg/oauth-identity-chaining",
+      "impact": "JWT authorization grant (RFC 7523 profile) for cross-domain token exchange (RFC 8693); AS-A validates WIT and issues grant targeting AS-B; AS-B validates grant and issues its own access token; complements Txn-Token for multi-trust-domain chains",
+      "used_in": ["pkg/identitychaining", "internal/exchange"]
     }
   ]
 }

@@ -232,6 +232,8 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <div class="snav-item" onclick="showScene('paxos')">9 · Paxos Consensus</div>
     <div class="snav-item" onclick="showScene('attacks')">10 · Attack Scenarios</div>
     <div class="snav-item" onclick="showScene('fga')">11 · Fine-Grained Authz</div>
+    <div class="snav-item" onclick="showScene('spiffeclientauth')">12 · SPIFFE Client Auth</div>
+    <div class="snav-item" onclick="showScene('identitychaining')">13 · Identity Chaining</div>
   </nav>
   <div class="nav-fade" id="nav-fade"></div>
   <button class="nav-arrow nav-arrow-right" id="nav-next" onclick="navScroll(1)" aria-label="Scroll tabs right">&#8250;</button>
@@ -1687,7 +1689,7 @@ No EC keys accepted</pre>
 <div class="scene active" id="scene-standards">
   <div class="scene-num">Scenario 10</div>
   <h1 class="scene-title">Standards Tracker</h1>
-  <p class="scene-lead">This PoC is built on six IETF and OpenID drafts that are actively evolving toward production readiness. The table below shows every tracked standard, the revision implemented here, and which files would need updating if the draft changes. A GitHub Actions workflow checks the IETF Datatracker API daily and opens a GitHub issue whenever a new revision is published.</p>
+  <p class="scene-lead">This PoC is built on nine IETF and OpenID drafts that are actively evolving toward production readiness. The table below shows every tracked standard, the revision implemented here, and which files would need updating if the draft changes. A GitHub Actions workflow checks the IETF Datatracker API daily and opens a GitHub issue whenever a new revision is published.</p>
 
   <div class="card">
     <div class="card-title">Tracked standards — revision status</div>
@@ -1756,6 +1758,22 @@ No EC keys accepted</pre>
         <td style="text-align:center"><code>1.0-41</code></td>
         <td style="font-size:11px;color:var(--muted)"><code>pkg/federation</code>, <code>internal/exchange</code></td>
         <td style="font-size:11px">Entity Configuration JWT, Subordinate Statement, <code>authority_hints</code>, trust chain resolution, <code>min(EC.exp,SS.exp)</code> caching</td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-spiffe-client-auth/" target="_blank" style="color:var(--blue)">SPIFFE Client Auth — JWT-bearer OAuth assertion</a></td>
+        <td style="white-space:nowrap">IETF OAuth WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-02</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/spiffeclientauth</code></td>
+        <td style="font-size:11px">WIT as <code>client_assertion</code> (<code>urn:ietf:params:oauth:client-assertion-type:jwt-bearer</code>); AS validates WIT signature, returns Bearer token with <code>sub</code>=SPIFFE ID</td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-identity-chaining/" target="_blank" style="color:var(--blue)">Identity Chaining — JWT Authorization Grant</a></td>
+        <td style="white-space:nowrap">IETF OAuth WG</td>
+        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="text-align:center"><code>-17</code></td>
+        <td style="font-size:11px;color:var(--muted)"><code>pkg/identitychaining</code></td>
+        <td style="font-size:11px"><code>typ=jwt-authz-grant</code>; cross-trust-domain propagation of SPIFFE IDs; <code>aud</code>=target AS, <code>jti</code> replay protection, 5-min grant TTL</td>
       </tr>
     </table>
   </div>
@@ -2035,6 +2053,244 @@ No EC keys accepted</pre>
     <div class="callout ok" style="margin-top:1rem">
       <strong>Recommended pattern for this PoC:</strong> WIMSE validates the token in gateway middleware → extracts <code>sub</code> → forwards <code>X-Workload-Sub</code> header to upstream → upstream calls OpenFGA <code>/stores/{id}/check</code> with <code>user=sub</code>, <code>relation=action</code>, <code>object=resource</code>. Policy tuples managed via GitOps — any team can propose a PR to grant or revoke access. No code deployment required.
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Scenario 13 — SPIFFE Client Auth                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="scene" id="scene-spiffeclientauth">
+  <div class="scene-num">Scenario 13</div>
+  <h1 class="scene-title">SPIFFE Client Authentication</h1>
+  <p class="scene-lead">Workloads already hold a WIT (<code>wit+jwt</code>) that proves their SPIFFE identity. Traditional OAuth client authentication requires a <code>client_id</code> and <code>client_secret</code> — a rotation burden that fails in ephemeral workload environments. <strong>SPIFFE Client Auth</strong> (draft-ietf-oauth-spiffe-client-auth-02) lets the workload use its existing WIT as a JWT bearer <em>client assertion</em>, authenticating to any OAuth 2.0 AS with zero pre-shared secrets.</p>
+
+  <div class="card">
+    <div class="card-title">OAuth 2.0 client_credentials — WIT as client assertion</div>
+    <svg viewBox="0 0 780 160" style="width:100%;max-width:780px;display:block;margin:16px auto">
+      <defs>
+        <marker id="arSCAe" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#58a6ff"/></marker>
+        <marker id="arSCAeg" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3fb950"/></marker>
+        <marker id="arSCAeo" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ffa657"/></marker>
+      </defs>
+
+      <!-- IdP -->
+      <rect x="10" y="35" width="130" height="90" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="75" y="62" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="700">IdP / SPIRE</text>
+      <text x="75" y="78" text-anchor="middle" fill="#7d8590" font-size="9">idp.cloud-a.example</text>
+      <text x="75" y="95" text-anchor="middle" fill="#3fb950" font-size="9">issues wit+jwt</text>
+      <text x="75" y="108" text-anchor="middle" fill="#7d8590" font-size="9">cnf.jwk bound to workload</text>
+
+      <!-- Workload -->
+      <rect x="190" y="50" width="130" height="60" rx="8" fill="#21262d" stroke="#ffa657" stroke-width="1.5"/>
+      <text x="255" y="76" text-anchor="middle" fill="#ffa657" font-size="11" font-weight="700">Workload</text>
+      <text x="255" y="92" text-anchor="middle" fill="#7d8590" font-size="9">spiffe://cloud-a.example</text>
+      <text x="255" y="104" text-anchor="middle" fill="#7d8590" font-size="9">/svc/billing</text>
+
+      <!-- OAuth AS -->
+      <rect x="380" y="35" width="160" height="90" rx="8" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="460" y="62" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="700">OAuth AS</text>
+      <text x="460" y="78" text-anchor="middle" fill="#7d8590" font-size="9">POST /token</text>
+      <text x="460" y="95" text-anchor="middle" fill="#7d8590" font-size="9">validates WIT signature</text>
+      <text x="460" y="108" text-anchor="middle" fill="#3fb950" font-size="9">issues Bearer token</text>
+
+      <!-- API -->
+      <rect x="600" y="50" width="130" height="60" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="665" y="76" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="700">Resource API</text>
+      <text x="665" y="92" text-anchor="middle" fill="#7d8590" font-size="9">Bearer token in header</text>
+      <text x="665" y="104" text-anchor="middle" fill="#7d8590" font-size="9">sub = SPIFFE ID</text>
+
+      <line x1="140" y1="80" x2="188" y2="80" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arSCAe)"/>
+      <text x="164" y="70" fill="#58a6ff" font-size="8" text-anchor="middle">① wit+jwt</text>
+      <line x1="320" y1="80" x2="378" y2="80" stroke="#ffa657" stroke-width="1.5" stroke-dasharray="5,2" marker-end="url(#arSCAeo)"/>
+      <text x="349" y="70" fill="#ffa657" font-size="8" text-anchor="middle">② client_assertion</text>
+      <line x1="378" y1="95" x2="322" y2="95" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arSCAeg)"/>
+      <text x="349" y="114" fill="#3fb950" font-size="8" text-anchor="middle">③ Bearer access_token</text>
+      <line x1="540" y1="80" x2="598" y2="80" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arSCAeg)"/>
+      <text x="569" y="70" fill="#3fb950" font-size="8" text-anchor="middle">④ API call</text>
+    </svg>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">No pre-shared client secret anywhere in the flow. The AS validates the WIT's ECDSA signature against the IdP's public key — the same trust it already extends to workload authentication.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+    <div class="card">
+      <div class="card-title">OAuth request (<code>POST /token</code>)</div>
+      <pre style="font-size:11px;background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto;margin-top:10px;color:var(--text);line-height:1.7"><span style="color:var(--muted)"># application/x-www-form-urlencoded</span>
+grant_type=<span style="color:var(--green)">client_credentials</span>
+client_assertion_type=<span style="color:var(--orange)">urn:ietf:params:oauth:</span>
+  <span style="color:var(--orange)">client-assertion-type:jwt-bearer</span>
+client_assertion=<span style="color:var(--purple)">&lt;compact WIT JWT&gt;</span>
+scope=<span style="color:var(--green)">read:orders write:payments</span>
+
+<span style="color:var(--muted)"># Response</span>
+{
+  <span style="color:var(--blue)">"access_token"</span>: <span style="color:var(--green)">"&lt;opaque 32-byte bearer&gt;"</span>,
+  <span style="color:var(--blue)">"token_type"</span>:   <span style="color:var(--green)">"Bearer"</span>,
+  <span style="color:var(--blue)">"expires_in"</span>:   <span style="color:var(--green)">3600</span>,
+  <span style="color:var(--blue)">"sub"</span>:          <span style="color:var(--green)">"spiffe://cloud-a.example/svc/billing"</span>
+}</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Go — AS-side <code>Authenticator</code></div>
+      <pre style="font-size:11px;background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto;margin-top:10px;color:var(--text);line-height:1.7"><span style="color:var(--muted)">// pkg/spiffeclientauth</span>
+auth := spiffeclientauth.NewAuthenticator(
+  <span style="color:var(--green)">"https://as.cloud-a.example"</span>,
+  wit.NewValidator(
+    <span style="color:var(--green)">"https://idp.cloud-a.example"</span>,
+    idpPub,
+  ),
+  time.Hour,
+)
+
+tok, err := auth.Authenticate(
+  spiffeclientauth.AuthRequest{
+    <span style="color:var(--orange)">ClientAssertion</span>:     witToken,
+    <span style="color:var(--orange)">ClientAssertionType</span>: spiffeclientauth.ClientAssertionType,
+    Scope: <span style="color:var(--green)">"read:orders"</span>,
+  },
+)
+<span style="color:var(--muted)">// tok.Sub = "spiffe://cloud-a.example/svc/billing"</span>
+<span style="color:var(--muted)">// tok.Token = opaque Bearer string</span></pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Why SPIFFE Client Auth over client_secret?</div>
+    <table class="compare-table" style="font-size:12px;margin-top:12px">
+      <tr>
+        <th style="width:25%">Concern</th>
+        <th style="width:37%">client_secret approach</th>
+        <th style="width:38%">SPIFFE Client Auth</th>
+      </tr>
+      <tr><td>Secret storage</td><td>Secret must be stored in vault or env var; risk of leak or misconfiguration</td><td>No secret — the WIT is the credential; IdP's JWKS endpoint provides the verification key</td></tr>
+      <tr><td>Rotation</td><td>Manual rotation required; zero-downtime rollover is complex</td><td>WIT has short TTL; expiry is automatic rotation with no operator involvement</td></tr>
+      <tr><td>Identity in token</td><td>Access token carries only <code>client_id</code> — no workload identity</td><td>Access token's <code>sub</code> = SPIFFE URI — resource server gets workload identity for free</td></tr>
+      <tr><td>Per-workload credentials</td><td>One secret per registration — manual, audit-unfriendly, scale bottleneck</td><td>Every workload holds its own SVID; no registration needed at the AS</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted);margin-top:10px">8 tests in <code>pkg/spiffeclientauth/spiffeclientauth_test.go</code>: happy path, token uniqueness, wrong assertion type, empty assertion, tampered WIT, expired WIT, issuer mismatch, scope passthrough.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Scenario 14 — Identity Chaining                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="scene" id="scene-identitychaining">
+  <div class="scene-num">Scenario 14</div>
+  <h1 class="scene-title">Identity Chaining</h1>
+  <p class="scene-lead">A workload in <strong>Cloud A</strong> needs to call an API in <strong>Cloud B</strong>. Cloud B's AS won't accept Cloud A's WIT — different trust domains, different signing keys. <strong>Identity Chaining</strong> (draft-ietf-oauth-identity-chaining-17) bridges this gap: Cloud A's AS issues a short-lived <em>JWT Authorization Grant</em> addressed to Cloud B's token endpoint. Cloud B validates it with only Cloud A's public key — no pre-configured secrets between the two AS instances.</p>
+
+  <div class="card">
+    <div class="card-title">Cross-trust-domain workload identity propagation</div>
+    <svg viewBox="0 0 780 200" style="width:100%;max-width:780px;display:block;margin:16px auto">
+      <defs>
+        <marker id="arICe" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#7d8590"/></marker>
+        <marker id="arICeb" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#58a6ff"/></marker>
+        <marker id="arICeg" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3fb950"/></marker>
+        <marker id="arICeo" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ffa657"/></marker>
+      </defs>
+
+      <rect x="5" y="10" width="370" height="180" rx="10" fill="rgba(88,166,255,.04)" stroke="rgba(88,166,255,.3)" stroke-dasharray="6,3"/>
+      <text x="190" y="28" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="700">CLOUD A (trust domain: cloud-a.example)</text>
+
+      <rect x="400" y="10" width="370" height="180" rx="10" fill="rgba(63,185,80,.04)" stroke="rgba(63,185,80,.3)" stroke-dasharray="6,3"/>
+      <text x="585" y="28" text-anchor="middle" fill="#3fb950" font-size="10" font-weight="700">CLOUD B (trust domain: cloud-b.example)</text>
+
+      <rect x="20" y="80" width="110" height="60" rx="8" fill="#21262d" stroke="#ffa657" stroke-width="1.5"/>
+      <text x="75" y="106" text-anchor="middle" fill="#ffa657" font-size="11" font-weight="700">Workload A</text>
+      <text x="75" y="120" text-anchor="middle" fill="#7d8590" font-size="9">spiffe://cloud-a.example</text>
+      <text x="75" y="132" text-anchor="middle" fill="#7d8590" font-size="9">/svc/billing</text>
+
+      <rect x="165" y="55" width="130" height="110" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="230" y="80" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="700">AS — Cloud A</text>
+      <text x="230" y="96" text-anchor="middle" fill="#7d8590" font-size="9">validates wit+jwt</text>
+      <text x="230" y="112" text-anchor="middle" fill="#3fb950" font-size="9">issues jwt-authz-grant</text>
+      <text x="230" y="128" text-anchor="middle" fill="#7d8590" font-size="9">signed: domainA key</text>
+      <text x="230" y="144" text-anchor="middle" fill="#7d8590" font-size="9">aud = Cloud B endpoint</text>
+
+      <rect x="415" y="55" width="130" height="110" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="480" y="80" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="700">AS — Cloud B</text>
+      <text x="480" y="96" text-anchor="middle" fill="#7d8590" font-size="9">validates grant</text>
+      <text x="480" y="112" text-anchor="middle" fill="#7d8590" font-size="9">iss, aud, exp, sub</text>
+      <text x="480" y="128" text-anchor="middle" fill="#3fb950" font-size="9">extracts SPIFFE ID</text>
+      <text x="480" y="144" text-anchor="middle" fill="#7d8590" font-size="9">issues Cloud B token</text>
+
+      <rect x="607" y="80" width="130" height="60" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="672" y="106" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="700">API — Cloud B</text>
+      <text x="672" y="120" text-anchor="middle" fill="#7d8590" font-size="9">protected endpoint</text>
+      <text x="672" y="132" text-anchor="middle" fill="#7d8590" font-size="9">sub = SPIFFE ID</text>
+
+      <line x1="130" y1="100" x2="163" y2="100" stroke="#ffa657" stroke-width="1.5" marker-end="url(#arICeo)"/>
+      <text x="147" y="92" fill="#ffa657" font-size="8" text-anchor="middle">① wit+jwt</text>
+      <line x1="163" y1="120" x2="132" y2="120" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arICeb)"/>
+      <text x="147" y="138" fill="#58a6ff" font-size="8" text-anchor="middle">② jwt-authz-grant</text>
+      <line x1="295" y1="105" x2="413" y2="105" stroke="#58a6ff" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arICeb)"/>
+      <text x="354" y="97" fill="#58a6ff" font-size="8" text-anchor="middle">③ jwt-authz-grant (cross-domain)</text>
+      <line x1="413" y1="125" x2="295" y2="125" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arICeg)"/>
+      <text x="354" y="140" fill="#3fb950" font-size="8" text-anchor="middle">④ Cloud B token</text>
+      <line x1="545" y1="110" x2="605" y2="110" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arICeg)"/>
+      <text x="575" y="102" fill="#3fb950" font-size="8" text-anchor="middle">⑤ API call</text>
+    </svg>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">Cloud B only needs Cloud A's public signing key — typically distributed via Cloud A's JWKS endpoint or a mutual trust agreement. The workload's SPIFFE ID flows through the grant's <code>sub</code> claim, giving Cloud B full auditability.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+    <div class="card">
+      <div class="card-title">JWT Authorization Grant structure</div>
+      <pre style="font-size:11px;background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto;margin-top:10px;color:var(--text);line-height:1.7"><span style="color:var(--muted)">// Header</span>
+{
+  <span style="color:var(--blue)">"alg"</span>: <span style="color:var(--green)">"ES256"</span>,
+  <span style="color:var(--orange)">"typ"</span>: <span style="color:var(--orange)">"jwt-authz-grant"</span>
+}
+
+<span style="color:var(--muted)">// Payload</span>
+{
+  <span style="color:var(--blue)">"iss"</span>: <span style="color:var(--green)">"https://as.cloud-a.example"</span>,
+  <span style="color:var(--blue)">"sub"</span>: <span style="color:var(--green)">"spiffe://cloud-a.example/svc/billing"</span>,
+  <span style="color:var(--blue)">"aud"</span>: [<span style="color:var(--orange)">"https://as.cloud-b.example/token"</span>],
+  <span style="color:var(--blue)">"iat"</span>: <span style="color:var(--green)">1753649000</span>,
+  <span style="color:var(--blue)">"exp"</span>: <span style="color:var(--green)">1753649300</span>,  <span style="color:var(--muted)">// 5-min TTL</span>
+  <span style="color:var(--blue)">"jti"</span>: <span style="color:var(--green)">"kY2mNpXx…"</span>  <span style="color:var(--muted)">// replay prevention</span>
+}</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Go — <code>pkg/identitychaining</code></div>
+      <pre style="font-size:11px;background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto;margin-top:10px;color:var(--text);line-height:1.7"><span style="color:var(--muted)">// Domain A: issue grant</span>
+gi := identitychaining.NewGrantIssuer(
+  <span style="color:var(--green)">"https://as.cloud-a.example"</span>,
+  domainAKey, witValidator,
+  5*time.Minute,
+)
+grant, _ := gi.Issue(
+  witToken,
+  <span style="color:var(--orange)">"https://as.cloud-b.example/token"</span>,
+)
+
+<span style="color:var(--muted)">// Domain B: validate grant</span>
+gv := identitychaining.NewGrantValidator(
+  <span style="color:var(--green)">"https://as.cloud-a.example"</span>,
+  domainAPub,
+)
+claims, _ := gv.Validate(
+  grant,
+  <span style="color:var(--orange)">"https://as.cloud-b.example/token"</span>,
+)
+<span style="color:var(--muted)">// claims.Subject = "spiffe://cloud-a.example/svc/billing"</span></pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">Why Identity Chaining?</div>
+    <table class="compare-table" style="font-size:12px;margin-top:12px">
+      <tr>
+        <th style="width:25%">Concern</th>
+        <th style="width:37%">Without Identity Chaining</th>
+        <th style="width:38%">With Identity Chaining</th>
+      </tr>
+      <tr><td>Cross-domain auth</td><td>Workload can't authenticate to domain B — different trust roots, no shared secret</td><td>Domain A's AS issues a grant; domain B validates with domain A's public key only</td></tr>
+      <tr><td>Identity preservation</td><td>Workload must acquire domain B credentials with a separate static identity</td><td>SPIFFE ID from domain A preserved in grant's <code>sub</code> — full audit trail across boundaries</td></tr>
+      <tr><td>Infrastructure dependency</td><td>Requires federation agreement or a common token exchange service</td><td>Grant is self-contained — domain B needs no live connection to domain A after initial key exchange</td></tr>
+      <tr><td>Replay safety</td><td>A static cross-domain token could be replayed indefinitely</td><td><code>jti</code> uniqueness + 5-minute TTL — intercepted grants expire quickly and cannot be replayed</td></tr>
+    </table>
+    <p style="font-size:12px;color:var(--muted);margin-top:10px">10 tests in <code>pkg/identitychaining/identitychaining_test.go</code>: happy path, <code>typ</code> header, audience mismatch, wrong signing key, expired grant, issuer mismatch, invalid WIT, missing inputs, end-to-end cross-domain flow.</p>
   </div>
 </div>
 
