@@ -63,6 +63,19 @@ Phase 5 extends WIT with **selective disclosure** (SD-JWT format, IETF SPICE WG)
 | `draft-ietf-spice-sd-cwt-08` | Phase 5 (reference) | CBOR analog; `cnf` key binding identical to SD-JWT |
 | `draft-mw-wimse-transitive-attestation-00` | Phase 5 (reference) | SPICE as privacy shield layer in WIMSE attestation chains |
 | `openid-federation-1_0` | Phase 6 | Entity Configurations, Subordinate Statements, trust chains, authority_hints |
+| `draft-ietf-oauth-rfc8725bis` | All phases (compliance) | JWT BCP — audit applied 2026-08-02: `WithValidMethods`, `WithExpirationRequired`, `WithIssuedAt`, `typ` checks enforced across all validators |
+| `draft-ietf-wimse-http-signature` | Monitored | RFC 9421 HTTP Message Signatures as alternative to WPT — tracked for future `pkg/wpt` variant |
+| `draft-reece-wimse-cross-org-delegation` | Monitored | Cross-org delegation requirements — informs Phase 4 token exchange |
+| `draft-ietf-oauth-sd-jwt-vc` | Monitored (excluded) | SD-JWT VC for human credentials — deliberately excluded; our `pkg/sdwit` uses base SD-JWT for M2M privacy |
+| `draft-sharma-oauth-identity-propagation-context` | Monitored | Multi-hop identity propagation context — future extension of Phase 4 and Identity Chaining |
+
+### Standards update process
+
+Any new IETF draft discovered by the automated tracker requires completing the
+[due-diligence checklist](docs/standards-tracking.md#due-diligence-checklist-for-every-standards-tracker-finding)
+before the issue is closed. The checklist covers: triage, breaking-change diff review,
+threat model verification (algorithm confusion, replay, audience escalation, key confusion),
+demo updates, and test coverage.
 
 ---
 

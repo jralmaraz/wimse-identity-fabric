@@ -203,6 +203,87 @@
         "pkg/identitychaining",
         "internal/exchange"
       ]
+    },
+    {
+      "id": "draft-ietf-oauth-rfc8725bis",
+      "label": "JSON Web Token Best Current Practices",
+      "short": "JWT-BCP",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": "monitoring",
+      "implemented_rev": "applied-2026-08-02",
+      "status": "active-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-rfc8725bis/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-rfc8725bis/",
+      "source_repo": "https://github.com/oauth-wg/oauth-jwt-bcp",
+      "impact": "Compliance audit applied 2026-08-02: all validators now enforce WithValidMethods (ES256), WithExpirationRequired, WithIssuedAt, and typ header checks across pkg/wpt, pkg/sdwit, pkg/txntoken, pkg/identitychaining.",
+      "used_in": [
+        "pkg/wpt/validator.go",
+        "pkg/sdwit/validator.go",
+        "pkg/txntoken/validator.go",
+        "pkg/identitychaining/validator.go"
+      ]
+    },
+    {
+      "id": "draft-ietf-wimse-http-signature",
+      "label": "WIMSE Workload-to-Workload Authentication with HTTP Signatures",
+      "short": "HTTP-Sig",
+      "wg": "IETF WIMSE WG",
+      "last_known_rev": "monitoring",
+      "implemented_rev": null,
+      "status": "active-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-http-signature/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-http-signature/",
+      "source_repo": "https://github.com/ietf-wg-wimse",
+      "impact": "Alternative to WPT (JWT-based) for workload-to-workload proof using RFC 9421 HTTP Message Signatures. Tracked for future variant of pkg/wpt if WG adopts as primary mechanism.",
+      "used_in": []
+    },
+    {
+      "id": "draft-reece-wimse-cross-org-delegation",
+      "label": "Cross-Organizational Delegation for Workload and Agent Identity",
+      "short": "CrossOrgDelegation",
+      "wg": "IETF WIMSE WG",
+      "last_known_rev": "monitoring",
+      "implemented_rev": null,
+      "status": "individual-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-reece-wimse-cross-org-delegation/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-reece-wimse-cross-org-delegation/",
+      "source_repo": null,
+      "impact": "Formalises cross-org delegation requirements — informs Phase 4 Token Exchange (internal/exchange) and Identity Chaining scenario.",
+      "used_in": [
+        "pkg/identitychaining",
+        "internal/exchange"
+      ]
+    },
+    {
+      "id": "draft-ietf-oauth-sd-jwt-vc",
+      "label": "SD-JWT-based Verifiable Digital Credentials (SD-JWT VC)",
+      "short": "SD-JWT-VC",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": "monitoring",
+      "implemented_rev": null,
+      "status": "active-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-sd-jwt-vc/",
+      "source_repo": "https://github.com/oauth-wg/oauth-sd-jwt-vc",
+      "impact": "SD-JWT VC uses base SD-JWT for credential presentation (human-facing). Our pkg/sdwit uses base SD-JWT for M2M privacy (SD-WIT, typ=wit+sd-jwt) — intentionally NOT SD-JWT VC format. Distinction noted in Ch7 demo.",
+      "used_in": []
+    },
+    {
+      "id": "draft-sharma-oauth-identity-propagation-context",
+      "label": "Identity Propagation Context for Multi-Hop Delegation in OAuth 2.0 Environments",
+      "short": "PropagationContext",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": "monitoring",
+      "implemented_rev": null,
+      "status": "individual-draft",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-sharma-oauth-identity-propagation-context/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-sharma-oauth-identity-propagation-context/",
+      "source_repo": null,
+      "impact": "Multi-hop identity propagation context — augments Ch8 Token Exchange and Identity Chaining scenarios. Tracked for future extension of pkg/identitychaining.",
+      "used_in": [
+        "pkg/identitychaining",
+        "internal/exchange"
+      ]
     }
   ]
 }

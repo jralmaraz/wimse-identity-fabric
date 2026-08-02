@@ -60,6 +60,7 @@ func (v *Validator) Validate(opts ValidateOptions) (*Claims, error) {
 
 	parser := jwt.NewParser(
 		jwt.WithExpirationRequired(),
+		jwt.WithIssuedAt(),
 		jwt.WithValidMethods([]string{"ES256"}),
 		jwt.WithAudience(opts.RequestURI),
 	)

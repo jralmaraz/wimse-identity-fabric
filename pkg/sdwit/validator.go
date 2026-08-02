@@ -37,6 +37,7 @@ func (v *Validator) Validate(sdJWT string) (*VerifiedClaims, error) {
 	// Parse and verify the issuer-signed JWT.
 	parser := jwt.NewParser(
 		jwt.WithExpirationRequired(),
+		jwt.WithIssuedAt(),
 		jwt.WithValidMethods([]string{"ES256"}),
 		jwt.WithIssuer(v.issuerID),
 	)
