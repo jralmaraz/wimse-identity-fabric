@@ -1692,130 +1692,177 @@ No EC keys accepted</pre>
   <p class="scene-lead">This PoC is built on nine implemented IETF and OpenID drafts, plus five additional drafts under active monitoring (see table below). Every implemented standard has an animated demo chapter. A GitHub Actions workflow checks the IETF Datatracker API daily and opens a GitHub issue whenever a new revision is published.</p>
 
   <div class="card">
+    <div class="card-title">IETF standard lifecycle</div>
+    <div style="display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px;font-size:11px">
+      <div style="flex:1;padding:9px 8px;text-align:center;background:rgba(107,114,128,.12);color:var(--muted);font-weight:700;letter-spacing:.2px" title="Submitted by individuals; not yet adopted by any WG. Highly unstable.">Individual Draft</div>
+      <div style="flex:1;padding:9px 8px;text-align:center;background:rgba(245,166,35,.12);color:var(--orange);font-weight:700" title="Adopted by a Working Group (draft-ietf-*). Stable enough to prototype; breaking changes still possible.">WG Draft</div>
+      <div style="flex:1;padding:9px 8px;text-align:center;background:rgba(79,142,247,.12);color:var(--blue);font-weight:700" title="Community-wide review before IESG consideration. Breaking changes unlikely.">Last Call</div>
+      <div style="flex:1;padding:9px 8px;text-align:center;background:rgba(79,142,247,.18);color:var(--blue);font-weight:700" title="Internet Engineering Steering Group technical review.">IESG Review</div>
+      <div style="flex:1;padding:9px 8px;text-align:center;background:rgba(62,207,142,.14);color:var(--green);font-weight:700;border:2px solid var(--green)" title="Published RFC — stable and production-ready. Errata may be filed; an RFC can be obsoleted by a successor.">Published RFC</div>
+      <div style="flex:1;padding:9px 8px;text-align:center;background:rgba(224,82,82,.1);color:var(--red);font-weight:700" title="Superseded by another RFC. Must migrate.">Obsoleted</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:12px;margin-bottom:4px">
+      <div style="background:rgba(62,207,142,.07);border:1px solid rgba(62,207,142,.25);border-radius:6px;padding:10px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">PoC status legend</div>
+        <div style="line-height:1.9">
+          <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span> — Go code + animated demo<br>
+          <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span> — tracked, not yet built<br>
+          <span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:3px;background:rgba(224,82,82,.12);color:var(--red)">✗ Excluded</span> — out of scope (reason documented)
+        </div>
+      </div>
+      <div style="background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.25);border-radius:6px;padding:10px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">Production readiness</div>
+        Only <strong>Published RFCs</strong> should be used in production. WG Drafts are unstable — breaking changes are expected without notice. This PoC implements WG Drafts for early adoption exploration only.
+      </div>
+      <div style="background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.25);border-radius:6px;padding:10px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px">Tracking cadence</div>
+        Daily automated check via GitHub Actions. <code>last_known_rev</code> tracks the latest published revision; <code>implemented_rev</code> tracks what this PoC has actually implemented.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-title">Tracked standards — revision status</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Last checked: <code>2026-08-01</code> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/standards-baseline.json" target="_blank" style="color:var(--blue)">standards-baseline.json</a> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/.github/workflows/standards-tracker.yml" target="_blank" style="color:var(--blue)">standards-tracker.yml</a></p>
-    <table class="compare-table" style="font-size:12.5px">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Last checked: <code>2026-08-02</code> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/standards-baseline.json" target="_blank" style="color:var(--blue)">standards-baseline.json</a> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/.github/workflows/standards-tracker.yml" target="_blank" style="color:var(--blue)">standards-tracker.yml</a></p>
+    <div style="overflow-x:auto">
+    <table class="compare-table" style="font-size:12px;min-width:860px">
       <tr>
         <th>Standard</th>
         <th>Working Group</th>
-        <th>Status</th>
+        <th>IETF Status</th>
+        <th>PoC Status</th>
         <th style="text-align:center">Rev</th>
         <th>Affected files</th>
-        <th>PoC impact</th>
+        <th>Notes</th>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/" target="_blank" style="color:var(--blue)">WIT — Workload Identity Credentials</a></td>
-        <td style="white-space:nowrap">IETF WIMSE WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-02</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/wit</code>, <code>internal/idp</code>, <code>internal/workload</code></td>
-        <td style="font-size:11px">WIT claims (<code>typ=wit+jwt</code>), <code>cnf.jwk</code> format with <code>alg=ES256</code>, SPIFFE URI <code>sub</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/wit</code>, <code>internal/idp</code>, <code>internal/workload</code></td>
+        <td style="font-size:11px">WIT claims (<code>typ=wit+jwt</code>), <code>cnf.jwk</code> with <code>alg=ES256</code>, SPIFFE URI <code>sub</code></td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/" target="_blank" style="color:var(--blue)">WPT — Workload Proof Token</a></td>
-        <td style="white-space:nowrap">IETF WIMSE WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-01</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/wpt</code>, <code>internal/workload</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/wpt</code>, <code>internal/workload</code></td>
         <td style="font-size:11px"><code>typ=application/wpt+jwt</code>, <code>aud</code>=request URI, <code>wth</code>=SHA-256(WIT), <code>tth</code>=SHA-256(Txn-Token), <code>jti</code> replay protection</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-transaction-tokens/" target="_blank" style="color:var(--blue)">Txn-Token — OAuth 2.0 Transaction Tokens</a></td>
-        <td style="white-space:nowrap">IETF OAuth WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-11</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/txntoken</code>, <code>pkg/wpt (tth)</code></td>
-        <td style="font-size:11px"><code>typ=txntoken+jwt</code>, propagates user identity + authz context through call chains; WPT <code>tth</code> binds each hop proof to the same transaction</td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/txntoken</code>, <code>pkg/wpt (tth)</code></td>
+        <td style="font-size:11px"><code>typ=txntoken+jwt</code>, propagates user identity + authz context; WPT <code>tth</code> binds hop proofs to the transaction</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-identifier/" target="_blank" style="color:var(--blue)">Identifiers — Workload Identifier</a></td>
-        <td style="white-space:nowrap">IETF WIMSE WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-03</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/wit</code>, <code>pkg/wpt</code>, <code>internal/idp</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/wit</code>, <code>pkg/wpt</code>, <code>internal/idp</code></td>
         <td style="font-size:11px">SPIFFE URI format (<code>spiffe://trust-domain/path</code>), no query / fragment / port allowed</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/" target="_blank" style="color:var(--blue)">mTLS — Mutual TLS Binding</a></td>
-        <td style="white-space:nowrap">IETF WIMSE WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-02</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/keys/mtls.go</code>, <code>internal/workload</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/keys/mtls.go</code>, <code>internal/workload</code></td>
         <td style="font-size:11px">X.509 URI SAN format, EC P-256 requirement, TLS 1.3 minimum</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-arch/" target="_blank" style="color:var(--blue)">Arch — WIMSE Architecture</a></td>
-        <td style="white-space:nowrap">IETF WIMSE WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-08</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>internal/exchange</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>internal/exchange</code></td>
         <td style="font-size:11px">Token exchange patterns at trust-domain boundaries, HTTP header names (<code>Workload-Identity-Token</code>)</td>
       </tr>
       <tr>
         <td><a href="https://openid.net/specs/openid-federation-1_0.html" target="_blank" style="color:var(--blue)">OID-FED — OpenID Federation 1.0</a></td>
-        <td style="white-space:nowrap">OpenID Foundation</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">OpenID Foundation</td>
+        <td><span style="color:var(--green);white-space:nowrap">● Published (OIDF)</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>1.0-41</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/federation</code>, <code>internal/exchange</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/federation</code>, <code>internal/exchange</code></td>
         <td style="font-size:11px">Entity Configuration JWT, Subordinate Statement, <code>authority_hints</code>, trust chain resolution, <code>min(EC.exp,SS.exp)</code> caching</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-spiffe-client-auth/" target="_blank" style="color:var(--blue)">SPIFFE Client Auth — JWT-bearer OAuth assertion</a></td>
-        <td style="white-space:nowrap">IETF OAuth WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-02</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/spiffeclientauth</code></td>
-        <td style="font-size:11px">WIT as <code>client_assertion</code> (<code>urn:ietf:params:oauth:client-assertion-type:jwt-bearer</code>); AS validates WIT signature, returns Bearer token with <code>sub</code>=SPIFFE ID</td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/spiffeclientauth</code></td>
+        <td style="font-size:11px">WIT as <code>client_assertion</code> (<code>urn:…:jwt-bearer</code>); AS validates WIT sig, returns Bearer token with <code>sub</code>=SPIFFE ID</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-identity-chaining/" target="_blank" style="color:var(--blue)">Identity Chaining — JWT Authorization Grant</a></td>
-        <td style="white-space:nowrap">IETF OAuth WG</td>
-        <td><span style="color:var(--orange)">● Active draft</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>-17</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/identitychaining</code></td>
-        <td style="font-size:11px"><code>typ=jwt-authz-grant</code>; cross-trust-domain propagation of SPIFFE IDs; <code>aud</code>=target AS, <code>jti</code> replay protection, 5-min grant TTL</td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/identitychaining</code></td>
+        <td style="font-size:11px"><code>typ=jwt-authz-grant</code>; cross-trust-domain SPIFFE ID propagation; <code>aud</code>=target AS, <code>jti</code> replay, 5-min TTL</td>
       </tr>
       <tr style="background:rgba(255,255,255,0.03)">
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-rfc8725bis/" target="_blank" style="color:var(--blue)">JWT-BCP — JWT Best Current Practices</a></td>
-        <td style="white-space:nowrap">IETF OAuth WG</td>
-        <td><span style="color:var(--green)">✓ Applied 2026-08-02</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--blue);white-space:nowrap">● Active BCP</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
         <td style="text-align:center"><code>bis</code></td>
-        <td style="font-size:11px;color:var(--muted)">All validator files (<code>pkg/wpt</code>, <code>pkg/sdwit</code>, <code>pkg/txntoken</code>, <code>pkg/identitychaining</code>)</td>
-        <td style="font-size:11px">Compliance audit: all parsers now enforce <code>WithValidMethods(ES256)</code>, <code>WithExpirationRequired</code>, <code>WithIssuedAt</code>, and <code>typ</code> header checks — mitigates algorithm confusion, <code>alg:none</code>, and missing-exp attacks. Commit: <a href="https://github.com/jralmaraz/wimse-identity-fabric/commit/e6ff6a2" target="_blank" style="color:var(--blue)"><code>e6ff6a2</code></a></td>
+        <td style="font-size:10px;color:var(--muted)">All validator files (<code>pkg/wpt</code>, <code>pkg/sdwit</code>, <code>pkg/txntoken</code>, <code>pkg/identitychaining</code>)</td>
+        <td style="font-size:11px">BCP compliance audit 2026-08-02: <code>WithValidMethods(ES256)</code>, <code>WithExpirationRequired</code>, <code>WithIssuedAt</code>, <code>typ</code> check — mitigates alg confusion, <code>alg:none</code>, missing-exp. Commit: <a href="https://github.com/jralmaraz/wimse-identity-fabric/commit/e6ff6a2" target="_blank" style="color:var(--blue)"><code>e6ff6a2</code></a></td>
       </tr>
       <tr>
-        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-http-signature/" target="_blank" style="color:var(--blue)">HTTP-Sig — WIMSE HTTP Message Signature Auth</a></td>
-        <td style="white-space:nowrap">IETF WIMSE WG</td>
-        <td><span style="color:var(--muted)">◌ Monitoring</span></td>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-http-signature/" target="_blank" style="color:var(--blue)">HTTP-Sig — WIMSE HTTP Signature Auth</a></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span></td>
         <td style="text-align:center"><code>—</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/wpt</code> (future — if WG adopts)</td>
-        <td style="font-size:11px">RFC 9421 HTTP Message Signatures as alternative proof mechanism to WPT — tracked; would require a new <code>pkg/httpsig</code> if adopted as the primary proof mechanism by the WG</td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/wpt</code> (future — if WG adopts)</td>
+        <td style="font-size:11px">RFC 9421 HTTP Message Signatures as alternative to WPT; would require <code>pkg/httpsig</code> if adopted as primary by the WG</td>
       </tr>
       <tr style="background:rgba(255,255,255,0.03)">
         <td><a href="https://datatracker.ietf.org/doc/draft-reece-wimse-cross-org-delegation/" target="_blank" style="color:var(--blue)">CrossOrgDelegation — Cross-Org Workload Delegation</a></td>
-        <td style="white-space:nowrap">IETF WIMSE WG</td>
-        <td><span style="color:var(--muted)">◌ Monitoring</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--muted);white-space:nowrap">◌ Individual draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span></td>
         <td style="text-align:center"><code>—</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/identitychaining</code>, <code>internal/exchange</code></td>
-        <td style="font-size:11px">Formalises cross-org delegation requirements — informs Phase 4 token exchange policy and identity chaining semantics; no breaking change to current implementation</td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/identitychaining</code>, <code>internal/exchange</code></td>
+        <td style="font-size:11px">Formalises cross-org delegation requirements; informs Phase 4 token exchange policy. No breaking change to current implementation.</td>
       </tr>
       <tr>
-        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/" target="_blank" style="color:var(--blue)">SD-JWT VC — Selective Disclosure Verifiable Credentials</a></td>
-        <td style="white-space:nowrap">IETF OAuth WG</td>
-        <td><span style="color:var(--red)">✗ Excluded — M2M mismatch</span></td>
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/" target="_blank" style="color:var(--blue)">SD-JWT VC — Selective Disclosure VC</a></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(224,82,82,.12);color:var(--red)">✗ Excluded</span></td>
         <td style="text-align:center"><code>-17</code></td>
-        <td style="font-size:11px;color:var(--muted)">N/A — <code>pkg/sdwit</code> uses base SD-JWT</td>
-        <td style="font-size:11px">VC layer (vct, status lists, Issuer-Holder-Verifier) designed for human credentials. This PoC already uses base SD-JWT for M2M selective disclosure (<code>pkg/sdwit</code>). VC layer adds no value for machine-to-machine workload auth.</td>
+        <td style="font-size:10px;color:var(--muted)">N/A — <code>pkg/sdwit</code> uses base SD-JWT</td>
+        <td style="font-size:11px">VC layer (vct, status lists, Issuer-Holder-Verifier) designed for human credentials. M2M selective disclosure already handled by <code>pkg/sdwit</code> using base SD-JWT. VC layer adds no value for workload auth.</td>
       </tr>
       <tr style="background:rgba(255,255,255,0.03)">
         <td><a href="https://datatracker.ietf.org/doc/draft-sharma-oauth-identity-propagation-context/" target="_blank" style="color:var(--blue)">PropagationContext — Multi-Hop Identity Context</a></td>
-        <td style="white-space:nowrap">IETF OAuth WG</td>
-        <td><span style="color:var(--muted)">◌ Monitoring</span></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--muted);white-space:nowrap">◌ Individual draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span></td>
         <td style="text-align:center"><code>—</code></td>
-        <td style="font-size:11px;color:var(--muted)"><code>pkg/txntoken</code> (future extension)</td>
-        <td style="font-size:11px">Structured identity propagation context for OAuth call chains — complementary to Txn-Token; would extend the <code>req_ctx</code> model if adopted; tracked for Phase 4 multi-hop identity enrichment</td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/txntoken</code> (future extension)</td>
+        <td style="font-size:11px">Structured identity propagation context for OAuth call chains; complementary to Txn-Token; tracked for Phase 4 multi-hop identity enrichment</td>
       </tr>
     </table>
+    </div>
   </div>
 
   <div class="card">
