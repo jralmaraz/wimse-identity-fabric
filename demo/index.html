@@ -697,7 +697,22 @@ select:focus{outline:none;border-color:var(--blue)}
       <!-- Dotted trust lines -->
       <line x1="85" y1="178" x2="270" y2="112" class="wire" style="stroke:rgba(88,166,255,0.3);stroke-dasharray:3,3;stroke-width:1"/>
       <line x1="615" y1="178" x2="430" y2="112" class="wire" style="stroke:rgba(63,185,80,0.3);stroke-dasharray:3,3;stroke-width:1"/>
+      <!-- Animated packets -->
+      <rect id="pkt-ex-wita"  x="145" y="68" width="44" height="12" rx="3" class="pkt" style="display:none;fill:var(--blue)"/>
+      <rect id="pkt-ex-witb"  x="405" y="68" width="44" height="12" rx="3" class="pkt" style="display:none;fill:var(--green)"/>
+      <rect id="pkt-ex-final" x="145" y="68" width="60" height="12" rx="3" class="pkt" style="display:none;fill:var(--orange)"/>
     </svg>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-exchange-flow" onclick="doExchangeFlow()">&#9654; Animate Token Exchange Flow</button>
+  </div>
+  <div id="exchange-flow-steps" style="display:none">
+    <div class="vsteps">
+      <div id="ex-vs1" class="vstep">&#x2460; Workload A POSTs WIT-A to Token Exchange Service</div>
+      <div id="ex-vs2" class="vstep">&#x2461; Exchange validates WIT-A against IdP-A JWKS &amp; applies trust policy</div>
+      <div id="ex-vs3" class="vstep">&#x2462; Exchange issues WIT-B signed by IdP-B key</div>
+      <div id="ex-vs4" class="vstep">&#x2463; Workload A sends WIT-B + fresh WPT to Workload B</div>
+    </div>
   </div>
 
   <div class="xflow">
@@ -1762,6 +1777,51 @@ async function doReplay() {
   }
   nodeClass('ch9-b1', 'ok');
   nodeClass('ch9-b2', 'bad');
+}
+
+// ═══════════════════════════════════════════
+// Ch 8 — Token Exchange flow animation
+// ═══════════════════════════════════════════
+let exRunning = false;
+function exVs(id, pass) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (pass) el.classList.add('pass');
+  else el.classList.remove('pass');
+}
+
+async function doExchangeFlow() {
+  if (exRunning) return;
+  exRunning = true;
+  const btn = document.getElementById('btn-exchange-flow');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Animating&hellip;';
+
+  const steps = document.getElementById('exchange-flow-steps');
+  steps.style.display = 'block';
+  ['ex-vs1','ex-vs2','ex-vs3','ex-vs4'].forEach(id => exVs(id, false));
+
+  // Step 1: Workload A → Token Exchange: WIT-A
+  await animPkt('pkt-ex-wita', 145, 265, 1000);
+  exVs('ex-vs1', true);
+  await sleep(300);
+
+  // Step 2: Exchange validates + applies policy (no packet, pause)
+  await sleep(900);
+  exVs('ex-vs2', true);
+  await sleep(300);
+
+  // Step 3: Token Exchange → Workload B: WIT-B
+  await animPkt('pkt-ex-witb', 405, 535, 1000);
+  exVs('ex-vs3', true);
+  await sleep(300);
+
+  // Step 4: Workload A → Workload B: WIT-B + WPT (full cross-domain call)
+  await animPkt('pkt-ex-final', 145, 535, 1300);
+  exVs('ex-vs4', true);
+
+  btn.disabled = false; btn.textContent = '↺ Replay Animation';
+  exRunning = false;
 }
 
 // ═══════════════════════════════════════════
