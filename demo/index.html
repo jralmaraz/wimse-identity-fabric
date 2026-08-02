@@ -797,6 +797,22 @@ select:focus{outline:none;border-color:var(--blue)}
       <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>aud pinning</strong> — WPT embeds the exact target URI; a stolen WPT is useless against any other endpoint</div></div>
       <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>mTLS transport</strong> — Certificate mismatch blocks unauthorized connections even before token inspection</div></div>
     </div>
+
+    <h3 style="font-size:14px;font-weight:700;margin:20px 0 12px">Transaction Token attack surface</h3>
+    <div class="vsteps">
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>Forged transaction context</strong> — attacker tries to mint a txntoken claiming <code>sub=alice@corp.example</code>. Defense: only the TTS private key can produce a valid ES256 signature; downstream services verify against TTS JWKS — forgery requires the TTS signing key.</div></div>
+      <div class="vstep"><div class="vstep-icon">&#x26A0;</div><div><strong>Token reuse across transactions</strong> — a captured <code>txntoken+jwt</code> replayed in a different call context. Partial mitigation: 5-min TTL limits the window; the unique <code>txn</code> ID enables audit correlation. Note: the spec does not mandate per-token <code>jti</code> replay prevention by default — downstream services should log and monitor <code>txn</code> IDs.</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>Context stripping</strong> — attacker removes the txntoken header before forwarding, eliminating user context. Defense: downstream services should enforce the txntoken as a required policy input and reject requests that omit it.</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong><code>azd</code> tampering</strong> — attacker modifies authorisation details (e.g. increases payment amount) after minting. Defense: any modification to the payload invalidates the ES256 signature — detected immediately on validation.</div></div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:700;margin:20px 0 12px">SPIFFE Client Auth attack surface</h3>
+    <div class="vsteps">
+      <div class="vstep"><div class="vstep-icon">&#x26A0;</div><div><strong>WIT interception → Bearer escalation</strong> — stolen WIT used as <code>client_assertion</code> to obtain a Bearer token from the AS. Unlike WPT (which requires proof-of-possession), the OAuth assertion flow does not cryptographically bind the asserter to the WIT's <code>cnf.jwk</code>. Mitigation: mTLS in transit prevents interception; short WIT TTL (minutes) limits exploitation window; <code>aud</code>-restricted WITs reduce scope.</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>Expired WIT replay</strong> — attacker stores and later reuses an old WIT as <code>client_assertion</code>. Defense: AS validates the <code>exp</code> claim; expired WITs are rejected. WIT short-TTL makes the window small.</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>Issuer confusion / key substitution</strong> — attacker presents a JWT with the right <code>iss</code> value but signed with a different key. Defense: AS validates the ES256 signature against the IdP's live JWKS; forgery requires the IdP's EC P-256 private key.</div></div>
+      <div class="vstep pass"><div class="vstep-icon">&#x2713;</div><div><strong>Scope escalation</strong> — workload requests wider OAuth scopes than its SPIFFE ID is entitled to. Defense: AS enforces allowed-scope policy keyed on <code>sub</code> = SPIFFE URI; the SPIFFE identity is unforgeable (signature-backed), making it a strong policy anchor.</div></div>
+    </div>
   </div>
 
   <div class="callout ok" style="margin-top:20px">
@@ -960,6 +976,61 @@ select:focus{outline:none;border-color:var(--blue)}
   <p class="ch-lead">A WIT answers <em>"who is this workload?"</em> — but in a microservice call chain, the receiving service also needs to know <em>"why is this call happening?"</em> <strong>Transaction Tokens</strong> (<code>txntoken+jwt</code>, draft-ietf-oauth-transaction-tokens-11) capture the full originating context — user identity, authorisation details, and transaction ID — so every hop in a chain can trust the same root decision without re-authenticating the user.</p>
   <div class="spec-ref">Spec: draft-ietf-oauth-transaction-tokens-11 &nbsp;|&nbsp; <code>typ: txntoken+jwt</code> &nbsp;|&nbsp; immutable across call chain</div>
 
+  <div class="diagram">
+    <svg viewBox="0 0 700 148" xmlns="http://www.w3.org/2000/svg">
+      <!-- Gateway -->
+      <rect x="5" y="30" width="100" height="58" rx="8" class="node-box ok"/>
+      <text x="55" y="52" class="node-lbl">Gateway</text>
+      <text x="55" y="67" class="node-sub">entry point</text>
+      <text x="55" y="80" class="node-sub" style="fill:var(--orange)">Alice's request</text>
+      <!-- TTS -->
+      <rect x="155" y="30" width="100" height="58" rx="8" class="node-box hi"/>
+      <text x="205" y="52" class="node-lbl">TTS</text>
+      <text x="205" y="67" class="node-sub">mints txntoken</text>
+      <text x="205" y="80" class="node-sub" style="fill:var(--blue)">5-min TTL</text>
+      <!-- Workload B -->
+      <rect x="330" y="30" width="120" height="58" rx="8" class="node-box"/>
+      <text x="390" y="52" class="node-lbl">Workload B</text>
+      <text x="390" y="67" class="node-sub">validates WIT+WPT</text>
+      <text x="390" y="80" class="node-sub" style="fill:var(--green)">+ txntoken</text>
+      <!-- Workload C -->
+      <rect x="545" y="30" width="150" height="58" rx="8" class="node-box"/>
+      <text x="620" y="52" class="node-lbl">Workload C</text>
+      <text x="620" y="67" class="node-sub">same txntoken</text>
+      <text x="620" y="80" class="node-sub" style="fill:var(--green)">unmodified</text>
+      <!-- Wire: Gateway ↔ TTS (upper, mint/return) -->
+      <line x1="105" y1="51" x2="155" y2="51" class="wire" style="stroke:var(--blue);stroke-dasharray:5,3;stroke-width:1.5"/>
+      <!-- Wire: Gateway → B (lower, main call) -->
+      <line x1="105" y1="71" x2="330" y2="71" class="wire wire-tls"/>
+      <!-- Wire: B → C -->
+      <line x1="450" y1="59" x2="545" y2="59" class="wire wire-tls"/>
+      <!-- Status -->
+      <text id="txn-status" x="350" y="138" text-anchor="middle" fill="var(--muted)" font-family="sans-serif" font-size="11">Click Animate to see the flow</text>
+      <!-- Packets -->
+      <rect id="pkt-txn-mint" x="105" y="43" width="46" height="16" rx="3" fill="var(--blue)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-txn-ret"  x="155" y="61" width="46" height="16" rx="3" fill="var(--blue)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-txn-gw2b" x="105" y="63" width="80" height="16" rx="3" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-txn-b2c"  x="450" y="51" width="80" height="16" rx="3" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+      <text x="128" y="55"  class="pkt-lbl" style="pointer-events:none">mint</text>
+      <text x="178" y="73"  class="pkt-lbl" style="pointer-events:none">txntoken</text>
+      <text x="145" y="75"  class="pkt-lbl" style="pointer-events:none">WIT+WPT+Txn</text>
+      <text x="490" y="63"  class="pkt-lbl" style="pointer-events:none">TxnToken</text>
+    </svg>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-txn-flow" onclick="doTxnFlow()">&#9654; Animate Transaction Token Flow</button>
+  </div>
+
+  <div id="txn-flow-steps" style="display:none;margin-bottom:18px">
+    <div class="vsteps">
+      <div class="vstep" id="txn-vs1"><div class="vstep-icon">1</div><div>Gateway receives Alice's request → calls TTS to mint a <code>txntoken+jwt</code> encoding Alice's identity, originating IP, gateway SPIFFE ID, and AS-granted authorisation details.</div></div>
+      <div class="vstep" id="txn-vs2"><div class="vstep-icon">2</div><div>TTS returns signed <code>txntoken+jwt</code> (ES256, 5-min TTL). Gateway stores it and forwards the downstream call to Workload B with its own WIT+WPT <em>plus</em> the txntoken in a separate header.</div></div>
+      <div class="vstep" id="txn-vs3"><div class="vstep-icon">3</div><div>Workload B validates the WIT+WPT (service authentication) then validates the txntoken (user/transaction context). It now knows <em>who</em> called it <em>and</em> why — from a single verified root.</div></div>
+      <div class="vstep" id="txn-vs4"><div class="vstep-icon">4</div><div>B calls C, forwarding the <strong>same txntoken unmodified</strong>. C verifies it with the TTS public key. Full auditability across the chain — one mint, many hops.</div></div>
+    </div>
+  </div>
+
   <div class="info-grid">
     <div class="info-box orange">
       <div class="ibt">The problem</div>
@@ -1042,6 +1113,62 @@ claims, _ := v.Validate(tok)
   <h1 class="ch-title">SPIFFE Client Authentication</h1>
   <p class="ch-lead">Workloads already carry WITs that cryptographically prove their SPIFFE identity. Traditional OAuth <code>client_credentials</code> flows require a <code>client_secret</code> — a credential that must be stored, rotated, and protected. <strong>SPIFFE Client Auth</strong> (draft-ietf-oauth-spiffe-client-auth-02) eliminates the secret entirely: the WIT itself becomes the <em>client assertion</em>.</p>
   <div class="spec-ref">Spec: draft-ietf-oauth-spiffe-client-auth-02 &nbsp;|&nbsp; RFC 7523 JWT Bearer client assertion &nbsp;|&nbsp; <code>client_assertion_type: jwt-bearer</code></div>
+
+  <div class="diagram">
+    <svg viewBox="0 0 700 148" xmlns="http://www.w3.org/2000/svg">
+      <!-- IdP -->
+      <rect x="5" y="30" width="100" height="58" rx="8" class="node-box hi"/>
+      <text x="55" y="52" class="node-lbl">IdP / SPIRE</text>
+      <text x="55" y="67" class="node-sub">issues wit+jwt</text>
+      <text x="55" y="80" class="node-sub" style="fill:var(--blue)">cnf.jwk bound</text>
+      <!-- Workload -->
+      <rect x="180" y="30" width="110" height="58" rx="8" class="node-box"/>
+      <text x="235" y="52" class="node-lbl">Workload</text>
+      <text x="235" y="67" class="node-sub">spiffe://…/billing</text>
+      <text x="235" y="80" class="node-sub" style="fill:var(--orange)">no client_secret</text>
+      <!-- OAuth AS -->
+      <rect x="368" y="30" width="130" height="58" rx="8" class="node-box" style="stroke:var(--purple)"/>
+      <text x="433" y="52" class="node-lbl" style="fill:var(--purple)">OAuth AS</text>
+      <text x="433" y="67" class="node-sub">validates WIT sig</text>
+      <text x="433" y="80" class="node-sub" style="fill:var(--green)">issues Bearer</text>
+      <!-- Resource API -->
+      <rect x="568" y="30" width="127" height="58" rx="8" class="node-box ok"/>
+      <text x="631" y="52" class="node-lbl">Resource API</text>
+      <text x="631" y="67" class="node-sub">Bearer token</text>
+      <text x="631" y="80" class="node-sub" style="fill:var(--green)">sub = SPIFFE ID</text>
+      <!-- Wire: IdP→Workload (WIT issued) -->
+      <line x1="105" y1="51" x2="180" y2="51" class="wire wire-tls"/>
+      <!-- Wire: Workload ↔ AS (client_assertion / Bearer) -->
+      <line x1="290" y1="51" x2="368" y2="51" class="wire" style="stroke:var(--purple);stroke-dasharray:5,3;stroke-width:1.5"/>
+      <line x1="290" y1="71" x2="368" y2="71" class="wire" style="stroke:var(--purple);stroke-dasharray:5,3;stroke-width:1.5"/>
+      <!-- Wire: Workload → API (API call) -->
+      <line x1="290" y1="85" x2="568" y2="85" class="wire wire-tls" id="sca-wire-api"/>
+      <!-- Status -->
+      <text id="sca-status" x="350" y="138" text-anchor="middle" fill="var(--muted)" font-family="sans-serif" font-size="11">Click Animate to see the flow</text>
+      <!-- Packets -->
+      <rect id="pkt-sca-wit"    x="105" y="43" width="60" height="16" rx="3" fill="var(--blue)"   style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-sca-ca"     x="290" y="43" width="60" height="16" rx="3" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-sca-bearer" x="368" y="63" width="60" height="16" rx="3" fill="var(--purple)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-sca-api"    x="290" y="77" width="60" height="16" rx="3" fill="var(--green)"  style="visibility:hidden;opacity:0.9"/>
+      <text x="135" y="55"  class="pkt-lbl" style="pointer-events:none">wit+jwt</text>
+      <text x="320" y="55"  class="pkt-lbl" style="pointer-events:none">client_assertion</text>
+      <text x="398" y="75"  class="pkt-lbl" style="pointer-events:none">Bearer</text>
+      <text x="320" y="89"  class="pkt-lbl" style="pointer-events:none">API call</text>
+    </svg>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-action" id="btn-sca-flow" onclick="doSCAFlow()">&#9654; Animate SPIFFE Client Auth Flow</button>
+  </div>
+
+  <div id="sca-flow-steps" style="display:none;margin-bottom:18px">
+    <div class="vsteps">
+      <div class="vstep" id="sca-vs1"><div class="vstep-icon">1</div><div>IdP/SPIRE issues a <code>wit+jwt</code> to the workload. The WIT's <code>cnf.jwk</code> embeds the workload's public key. No <code>client_secret</code> is generated or stored anywhere.</div></div>
+      <div class="vstep" id="sca-vs2"><div class="vstep-icon">2</div><div>Workload sends <code>POST /token</code> with <code>grant_type=client_credentials</code>, <code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer</code>, <code>client_assertion=&lt;WIT&gt;</code>.</div></div>
+      <div class="vstep" id="sca-vs3"><div class="vstep-icon">3</div><div>OAuth AS fetches the IdP's JWKS, verifies the WIT's ES256 signature and <code>exp</code>. On success it issues an opaque Bearer access token with <code>sub=spiffe://…/svc/billing</code>.</div></div>
+      <div class="vstep" id="sca-vs4"><div class="vstep-icon">4</div><div>Workload calls the Resource API with <code>Authorization: Bearer &lt;token&gt;</code>. The API sees <code>sub</code> = SPIFFE URI — full workload identity. Zero secrets in the entire flow.</div></div>
+    </div>
+  </div>
 
   <div class="info-grid">
     <div class="info-box blue">
@@ -1635,6 +1762,112 @@ async function doReplay() {
   }
   nodeClass('ch9-b1', 'ok');
   nodeClass('ch9-b2', 'bad');
+}
+
+// ═══════════════════════════════════════════
+// Ch 11 — Transaction Token flow animation
+// ═══════════════════════════════════════════
+let txnRunning = false;
+function txnStatus(msg) { const el = document.getElementById('txn-status'); if (el) el.textContent = msg; }
+function txnVs(id, pass) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (pass) el.classList.add('pass');
+  else el.classList.remove('pass');
+}
+
+async function doTxnFlow() {
+  if (txnRunning) return;
+  txnRunning = true;
+  const btn = document.getElementById('btn-txn-flow');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Animating&hellip;';
+
+  const steps = document.getElementById('txn-flow-steps');
+  steps.style.display = 'block';
+  ['txn-vs1','txn-vs2','txn-vs3','txn-vs4'].forEach(id => txnVs(id, false));
+
+  // Step 1: Gateway mints from TTS (→) and TTS returns (←)
+  txnStatus('① Gateway requests txntoken from TTS…');
+  await animPkt('pkt-txn-mint', 105, 155, 700);
+  await sleep(200);
+  txnStatus('① TTS returns signed txntoken+jwt to Gateway…');
+  await animPkt('pkt-txn-ret', 155, 105, 700);
+  txnVs('txn-vs1', true);
+  await sleep(250);
+
+  // Step 2: Gateway → Workload B (WIT+WPT+TxnToken)
+  txnStatus('② Gateway calls Workload B with WIT+WPT+TxnToken…');
+  await animPkt('pkt-txn-gw2b', 105, 330, 1100);
+  txnVs('txn-vs2', true);
+  await sleep(250);
+
+  // Step 3: B validates (local, no packet)
+  txnStatus('③ Workload B validates WIT+WPT (service auth) + txntoken (user context)…');
+  await sleep(700);
+  txnVs('txn-vs3', true);
+  await sleep(250);
+
+  // Step 4: B → C (same TxnToken forwarded, unmodified)
+  txnStatus('④ Workload B forwards same txntoken (unmodified) to Workload C…');
+  await animPkt('pkt-txn-b2c', 450, 545, 700);
+  txnVs('txn-vs4', true);
+  txnStatus('✓ Full call chain — user identity propagated without re-authentication');
+
+  btn.disabled = false; btn.textContent = '↺ Replay Animation';
+  txnRunning = false;
+}
+
+// ═══════════════════════════════════════════
+// Ch 12 — SPIFFE Client Auth flow animation
+// ═══════════════════════════════════════════
+let scaRunning2 = false;
+function scaStatus2(msg) { const el = document.getElementById('sca-status'); if (el) el.textContent = msg; }
+function scaVs(id, pass) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (pass) el.classList.add('pass');
+  else el.classList.remove('pass');
+}
+
+async function doSCAFlow() {
+  if (scaRunning2) return;
+  scaRunning2 = true;
+  const btn = document.getElementById('btn-sca-flow');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Animating&hellip;';
+
+  const steps = document.getElementById('sca-flow-steps');
+  steps.style.display = 'block';
+  ['sca-vs1','sca-vs2','sca-vs3','sca-vs4'].forEach(id => scaVs(id, false));
+
+  // Step 1: IdP → Workload: WIT issued
+  scaStatus2('① IdP/SPIRE issues wit+jwt to workload…');
+  await animPkt('pkt-sca-wit', 105, 180, 700);
+  scaVs('sca-vs1', true);
+  await sleep(250);
+
+  // Step 2: Workload → AS: client_assertion (WIT)
+  scaStatus2('② Workload sends WIT as client_assertion (POST /token)…');
+  await animPkt('pkt-sca-ca', 290, 368, 800);
+  scaVs('sca-vs2', true);
+  await sleep(300);
+
+  // Step 3: AS → Workload: Bearer token
+  scaStatus2('③ AS validates WIT ECDSA signature → issues Bearer token…');
+  await sleep(500);
+  await animPkt('pkt-sca-bearer', 368, 290, 800);
+  scaVs('sca-vs3', true);
+  await sleep(250);
+
+  // Step 4: Workload → Resource API
+  scaStatus2('④ Workload calls Resource API with Bearer token…');
+  await animPkt('pkt-sca-api', 290, 568, 1000);
+  scaVs('sca-vs4', true);
+  scaStatus2('✓ spiffe://…/svc/billing authenticated — 200 OK (zero secrets exchanged)');
+
+  btn.disabled = false; btn.textContent = '↺ Replay Animation';
+  scaRunning2 = false;
 }
 
 // ═══════════════════════════════════════════
