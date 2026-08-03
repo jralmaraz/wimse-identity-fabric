@@ -234,6 +234,7 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <div class="snav-item" onclick="showScene('fga')">11 · Fine-Grained Authz</div>
     <div class="snav-item" onclick="showScene('spiffeclientauth')">12 · SPIFFE Client Auth</div>
     <div class="snav-item" onclick="showScene('identitychaining')">13 · Identity Chaining</div>
+    <div class="snav-item" onclick="showScene('standards-vs')">14 · vs Existing Standards</div>
   </nav>
   <div class="nav-fade" id="nav-fade"></div>
   <button class="nav-arrow nav-arrow-right" id="nav-next" onclick="navScroll(1)" aria-label="Scroll tabs right">&#8250;</button>
@@ -362,8 +363,9 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     </div>
   </div>
 
-  <div style="display:flex;gap:12px;margin-top:32px">
+  <div style="display:flex;gap:12px;margin-top:32px;flex-wrap:wrap">
     <button style="padding:9px 20px;border-radius:6px;background:var(--orange);color:#0d1117;font-weight:700;border:none;cursor:pointer;font-size:13px" onclick="showScene('solution')">See the WIMSE Solution &rarr;</button>
+    <button style="padding:9px 20px;border-radius:6px;background:var(--surface2);color:var(--text);font-weight:700;border:1px solid var(--border);cursor:pointer;font-size:13px" onclick="showScene('standards-vs')">WIMSE vs RFC-level Comparison &rarr;</button>
   </div>
 </div>
 
@@ -2539,6 +2541,194 @@ claims, _ := gv.Validate(
         <div class="as-desc">The Cloud B API receives a domain-native token, verifies it, and recognises the caller's SPIFFE ID. Zero cross-domain secrets; zero pre-registration at AS-B.</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Scenario 15 — WIMSE vs Existing Standards                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="scene" id="scene-standards-vs">
+  <div class="scene-num">Scenario 15</div>
+  <h1 class="scene-title">WIMSE vs Existing Standards</h1>
+  <p class="scene-lead">WIMSE does not replace OAuth 2.0, OIDC, or TLS — it composes with them. This scenario maps six common enterprise workload identity flows to the standards teams reach for today, identifies the precise gap each leaves at scale, and shows which WIMSE primitive closes it.</p>
+
+  <div class="card">
+    <div class="card-title">Standards applicability map — six core workload identity flows</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Each row is a real flow. <em>Current standard</em> is what teams already have. <em>WIMSE primitive</em> is the composable layer that closes the gap — without replacing the existing investment.</p>
+    <div style="overflow-x:auto">
+    <table class="compare-table" style="font-size:12px;min-width:820px">
+      <tr>
+        <th style="width:19%">Flow</th>
+        <th style="width:17%">Current standard</th>
+        <th style="width:22%">Gap at scale</th>
+        <th style="width:19%">WIMSE primitive</th>
+        <th style="width:23%">Advantage</th>
+      </tr>
+      <tr>
+        <td><strong>Workload-to-workload auth</strong><br><span style="font-size:10px;color:var(--muted)">billing-svc → payment-svc</span></td>
+        <td>RFC 8705 mTLS + RFC 6750 Bearer<br><span style="font-size:10px;color:var(--muted)">or shared client_secret</span></td>
+        <td>mTLS proves cert identity, not application identity; Bearer tokens are ambient — stolen token = full access until expiry; no per-request URI binding</td>
+        <td><strong>WIT</strong> (typ: wit+jwt) + <strong>WPT</strong> (typ: application/wpt+jwt)<br><span style="font-size:10px;color:var(--muted)">draft-ietf-wimse-workload-creds / draft-ietf-wimse-wpt</span></td>
+        <td>Application-layer identity bound to workload's EC key; per-request proof locked to exact target URI — stolen WPT is worthless outside its intended call</td>
+      </tr>
+      <tr>
+        <td><strong>OAuth client authentication</strong><br><span style="font-size:10px;color:var(--muted)">workload authenticates to token endpoint</span></td>
+        <td>RFC 6749 §2.3 client_secret<br>or RFC 7523 private_key_jwt<br><span style="font-size:10px;color:var(--muted)">+ client registration at every AS</span></td>
+        <td>client_secret is a long-lived shared secret — single compromise affects all workload instances; private_key_jwt requires static key management and pre-registration at each AS</td>
+        <td><strong>SPIFFE Client Auth</strong><br><span style="font-size:10px;color:var(--muted)">draft-ietf-oauth-spiffe-client-auth</span></td>
+        <td>WIT is the credential — AS validates against SPIFFE trust domain JWKS; zero pre-registration, zero shared secrets anywhere in the flow</td>
+      </tr>
+      <tr>
+        <td><strong>Cross-domain token exchange</strong><br><span style="font-size:10px;color:var(--muted)">cloud-a workload calls cloud-b API</span></td>
+        <td>RFC 8693 generic token exchange<br>or bilateral OIDC federation<br><span style="font-size:10px;color:var(--muted)">+ pre-shared trust per AS pair</span></td>
+        <td>RFC 8693 exchanges tokens without defining portable workload identity format; bilateral OIDC requires pre-registration between every pair of AS instances — O(N²) config at scale</td>
+        <td><strong>Identity Chaining</strong><br><span style="font-size:10px;color:var(--muted)">draft-ietf-oauth-identity-chaining (RFC 7523 + RFC 8693 profile)</span></td>
+        <td>SPIFFE ID preserved in jwt-authz-grant <code>sub</code>; domain B needs only domain A's public key — N domains need N configs, not N² bilateral agreements</td>
+      </tr>
+      <tr>
+        <td><strong>Multi-hop audit trail</strong><br><span style="font-size:10px;color:var(--muted)">user → gateway → svc-A → svc-B</span></td>
+        <td>Bearer token forwarding<br>or unsigned <code>Forwarded</code> / <code>X-Forwarded-For</code> headers</td>
+        <td>Forwarded Bearer is ambient — any intermediate can forge context; headers are unsigned and trivially spoofable; no cryptographic binding between request hops</td>
+        <td><strong>Txn-Token</strong> + WPT <code>tth</code> claim<br><span style="font-size:10px;color:var(--muted)">draft-ietf-oauth-transaction-tokens</span></td>
+        <td><code>tth</code> in every WPT is SHA-256 of the originating Txn-Token; forged intermediate hops are detectable; entire chain is cryptographically auditable</td>
+      </tr>
+      <tr>
+        <td><strong>Identity federation at scale</strong><br><span style="font-size:10px;color:var(--muted)">IdP-A trusts IdP-B across orgs</span></td>
+        <td>SAML 2.0 metadata federation<br>or OIDC point-to-point Discovery<br><span style="font-size:10px;color:var(--muted)">per-IdP bilateral registration</span></td>
+        <td>SAML is human-centric and operationally heavyweight for machine identities; OIDC Discovery requires bilateral pre-registration for every IdP pair — does not scale to dynamic multi-cloud topologies</td>
+        <td><strong>OID-FED 1.0</strong><br><span style="font-size:10px;color:var(--muted)">openid-federation-1_0 — Entity Configuration + trust chain resolution</span></td>
+        <td>Each IdP publishes one Entity Configuration; trust established by path traversal through an authority hierarchy — no bilateral pre-registration; dynamic trust at runtime</td>
+      </tr>
+      <tr>
+        <td><strong>Selective credential disclosure</strong><br><span style="font-size:10px;color:var(--muted)">workload shares only needed claims</span></td>
+        <td>Full JWT (all claims visible to every relay)<br>or opaque token + introspection endpoint<br><span style="font-size:10px;color:var(--muted)">RFC 7662</span></td>
+        <td>Full JWT leaks every claim (trust domain, environment, role) to every relay in the chain; opaque introspection requires an online round-trip to the token endpoint per request</td>
+        <td><strong>SD-WIT</strong><br><span style="font-size:10px;color:var(--muted)">typ: wit+sd-jwt (base SD-JWT, not SD-JWT VC)</span></td>
+        <td>Each relay receives only disclosed claims; no introspection endpoint required; fully offline validation; cryptographic proof of what was not disclosed</td>
+      </tr>
+    </table>
+    </div>
+  </div>
+
+  <!-- Deep-dive 1: WIT + WPT -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">① WIT + WPT vs mTLS + Bearer — why application-layer identity matters</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">mTLS + Bearer token (today)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li>mTLS cert identity doesn't survive TLS-terminating load balancers or service mesh sidecars — the application never sees who connected</li>
+          <li>Bearer tokens have <em>ambient authority</em> — any process holding the token can use it; there is no cryptographic link between the token and the calling process</li>
+          <li>Stolen Bearer token is fully functional until expiry — which may be hours or days</li>
+          <li>No standard way to prove <em>which URI</em> was called — SSRF attacks can use a valid token against unintended endpoints</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">WIT + WPT (WIMSE)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li>WIT carries the workload's SPIFFE URI (<code>spiffe://trust-domain/svc/billing</code>) in <code>sub</code>, cryptographically signed by the IdP — portable across every layer</li>
+          <li>WPT is signed by the <em>workload's own EC key</em> (proved via <code>cnf.jwk</code> in WIT) — stolen WPT is useless without the private key</li>
+          <li>WPT <code>aud</code> = exact target URI; <code>wth</code> = SHA-256 of the WIT — SSRF and token reuse across endpoints are structurally impossible</li>
+          <li>WPT TTL: 5 minutes; <code>jti</code> replay store prevents double-submission within the window</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:12px;font-size:12px">
+      <strong>RFC baseline:</strong> WIT profiles RFC 7519 (JWT) with <code>typ=wit+jwt</code>; WPT profiles RFC 7519 with <code>typ=application/wpt+jwt</code> and adds <code>wth</code> (analogous to DPoP's <code>ath</code> in RFC 9449). Both are composed <em>on top of</em> existing OAuth/JWT infrastructure — no new wire protocol.
+    </div>
+  </div>
+
+  <!-- Deep-dive 2: SPIFFE Client Auth -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">② SPIFFE Client Auth vs client_secret / private_key_jwt — eliminating shared secrets from OAuth flows</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">client_secret / private_key_jwt (today)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li><code>client_secret</code> is a shared secret — stored in env vars or vaults; all workload instances share one secret; single leak compromises all instances</li>
+          <li><code>private_key_jwt</code> (RFC 7523) is stronger but requires out-of-band client registration at every AS — static key management at each endpoint</li>
+          <li>Both require pre-coordination between the workload operator and AS operator before the first token request</li>
+          <li>Key rotation requires coordinated update at AS and all workload instances</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">SPIFFE Client Auth (WIMSE)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li>WIT is sent as <code>client_assertion</code> with <code>client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer</code> — a standard RFC 7523 profile</li>
+          <li>AS validates the WIT signature against the SPIFFE trust domain's JWKS endpoint — no pre-registration required at the AS</li>
+          <li>Each workload instance has its own EC key pair; compromise of one instance does not affect others</li>
+          <li>Zero shared secrets in the entire flow — IdP issues short-lived WITs, workload rotates keys at SPIRE TTL intervals automatically</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:12px;font-size:12px">
+      <strong>RFC baseline:</strong> SPIFFE Client Auth is a strict profile of RFC 7523 §2.2 (JWT Bearer client assertion) — it reuses the existing OAuth token endpoint, content-type, and grant_type. AS operators add one configuration: trust the SPIFFE trust domain's JWKS URL. No protocol changes required.
+    </div>
+  </div>
+
+  <!-- Deep-dive 3: Identity Chaining + Txn-Token -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">③ Identity Chaining + Txn-Token vs RFC 8693 + header forwarding</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">RFC 8693 + Bearer forwarding (today)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li>RFC 8693 token exchange is generic — it defines the exchange protocol but not the identity format; the resulting token may not preserve the caller's workload identity across domains</li>
+          <li>Forwarding the original Bearer token to downstream services grants those services the full authority of the original token — no scope reduction</li>
+          <li>Caller identity in multi-hop chains relies on unsigned headers (<code>X-Caller-ID</code>), which any hop can spoof</li>
+          <li>No cryptographic proof that hop N called hop N+1 — the audit trail is hearsay</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Identity Chaining + Txn-Token (WIMSE)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li>Identity Chaining (profiles RFC 7523 + RFC 8693): jwt-authz-grant carries SPIFFE ID in <code>sub</code>; domain B validates with domain A's public key only — SPIFFE ID is preserved end-to-end</li>
+          <li>Txn-Token binds the entire call chain to the originating user context — propagated as a compact signed JWT (typ: txntoken+jwt)</li>
+          <li>WPT <code>tth</code> = SHA-256(Txn-Token): every workload-to-workload hop proves it is part of the same originating transaction — forged intermediate hops are detectable</li>
+          <li>5-minute TTL + <code>jti</code> uniqueness on every token in the chain</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:12px;font-size:12px">
+      <strong>RFC baseline:</strong> Identity Chaining profiles RFC 7523 §2.1 (JWT Bearer authorization grant) and RFC 8693 §2.1 (token exchange request). Txn-Token adds a new JWT type but flows over standard <code>Authorization</code> headers. Both compose cleanly with existing AS infrastructure.
+    </div>
+  </div>
+
+  <!-- Deep-dive 4: OID-FED vs SAML / OIDC bilateral -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">④ OID-FED 1.0 vs SAML 2.0 federation and OIDC bilateral registration</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">SAML 2.0 / OIDC point-to-point (today)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li>SAML 2.0 metadata federation (InCommon, eduGAIN) is designed for human identity and SSO — not workload machine identity; metadata XML format is heavyweight and operationally complex</li>
+          <li>OIDC Discovery-based federation requires bilateral pre-registration: IdP-A registers with IdP-B and vice versa — O(N²) configuration for N IdPs</li>
+          <li>Adding a new IdP to the mesh requires updating every existing peer — operational bottleneck and risk of misconfiguration</li>
+          <li>Trust changes (key rotation, policy updates) require propagating to all bilateral peers</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">OID-FED 1.0 (WIMSE)</div>
+        <ul style="font-size:12px;color:var(--text);line-height:1.8;padding-left:16px;margin:0">
+          <li>Each IdP publishes one self-signed <em>Entity Configuration JWT</em> at <code>/.well-known/openid-federation</code> — one config, all trust</li>
+          <li>Trust is established by traversing the authority hierarchy: leaf → intermediate → Trust Anchor; new IdP joins by registering with one intermediate — O(N) total configurations</li>
+          <li>Trust chain cached at <code>min(EC.exp, SS.exp)</code> — typically 24h; stale chains refresh automatically without manual intervention</li>
+          <li>Key rotation: IdP rotates its EC key pair; the new key appears in its Entity Configuration within the next cache TTL — no bilateral notification required</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:12px;font-size:12px">
+      <strong>RFC baseline:</strong> OID-FED 1.0 is built entirely on JWT (RFC 7519) and JOSE (RFC 7515/7517). Entity Configurations are signed JWTs; Subordinate Statements are signed JWTs; trust chain resolution is pure public-key cryptography. No new wire format — any JOSE-capable implementation can participate.
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:20px">
+    <strong>The WIMSE thesis in one sentence:</strong> Every WIMSE primitive is a <em>precisely-scoped composable layer</em> that closes one specific gap in existing standards — WIT+WPT for ambient token and application-layer identity, SPIFFE Client Auth for shared-secret elimination, Identity Chaining + Txn-Token for cross-domain auditability, OID-FED for federated trust at O(N) cost, SD-WIT for privacy-preserving M2M disclosure — without replacing the OAuth, OIDC, JWT, or TLS infrastructure already deployed.
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:32px;flex-wrap:wrap">
+    <button style="padding:9px 20px;border-radius:6px;background:var(--surface2);color:var(--text);font-weight:700;border:1px solid var(--border);cursor:pointer;font-size:13px" onclick="showScene('sprawl')">&larr; The Problem</button>
+    <button style="padding:9px 20px;border-radius:6px;background:var(--orange);color:#0d1117;font-weight:700;border:none;cursor:pointer;font-size:13px" onclick="showScene('solution')">See WIMSE Solution &rarr;</button>
   </div>
 </div>
 
