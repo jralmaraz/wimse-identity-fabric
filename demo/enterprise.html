@@ -320,6 +320,48 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <strong>Root cause:</strong> Every cloud hyperscaler provides its own identity primitive (IAM role, service principal, service account). None of them speak to each other. The workload has no portable, verifiable identity that works outside its originating cloud.
   </div>
 
+  <div class="card" style="margin-top:20px">
+    <div class="card-title">Why not just use what's already there?</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Every team asks this first. Here's what each existing approach provides — and the specific gap that WIMSE fills.</p>
+    <div style="overflow-x:auto">
+    <table class="compare-table" style="font-size:12px;min-width:700px">
+      <tr>
+        <th style="width:22%">Existing approach</th>
+        <th style="width:28%">What it gives you</th>
+        <th style="width:50%;color:#f85149">What it doesn't solve</th>
+      </tr>
+      <tr>
+        <td><strong>OAuth Bearer token</strong><br><span style="font-size:10px;color:var(--muted);font-family:monospace">Authorization: Bearer eyJ…</span></td>
+        <td>Authorization for an action or scope on one AS</td>
+        <td>Ambient authority — anyone holding the token can use it (no key binding). Stolen token = full access until expiry. Cross-cloud calls require federation setup per AS pair. No per-request, per-URI proof.</td>
+      </tr>
+      <tr>
+        <td><strong>mTLS alone (SPIFFE/SPIRE)</strong><br><span style="font-size:10px;color:var(--muted);font-family:monospace">X.509 cert, URI SAN</span></td>
+        <td>Strong transport-layer identity per TCP connection</td>
+        <td>Certificate identity doesn't survive TLS-terminating load balancers or service meshes. Cert validity is hours or days — no short-lived, per-request proof. Doesn't express <em>what</em> the workload is calling or <em>why</em>.</td>
+      </tr>
+      <tr>
+        <td><strong>API keys / shared secrets</strong><br><span style="font-size:10px;color:var(--muted);font-family:monospace">X-Api-Key: sk-live-XXXX</span></td>
+        <td>Simple, fast service-to-service auth</td>
+        <td>Static and long-lived. Shared across all instances of the service — one compromise = full compromise. No automatic expiry. No workload-specific identity; the key is indistinguishable from a leaked copy.</td>
+      </tr>
+      <tr>
+        <td><strong>Cloud IAM roles</strong><br><span style="font-size:10px;color:var(--muted);font-family:monospace">AWS IRSA · GCP WIF · Azure MI</span></td>
+        <td>Strong cryptographic identity within one cloud</td>
+        <td>Cloud-specific — AWS IRSA tokens aren't accepted by a GCP resource. No portable identity URI that works cross-cloud, on-prem, or at edge. No standard for cross-domain workload auth.</td>
+      </tr>
+      <tr>
+        <td><strong>Kubernetes Service Accounts</strong><br><span style="font-size:10px;color:var(--muted);font-family:monospace">projected serviceAccountToken</span></td>
+        <td>Pod identity within a single cluster</td>
+        <td>Cluster-scoped. All pods in the same Deployment share one SA — no per-workload-instance identity. Tokens aren't accepted outside the cluster they were issued for.</td>
+      </tr>
+    </table>
+    </div>
+    <div class="callout" style="margin-top:14px;font-size:13px">
+      <strong>WIMSE adds the missing layer:</strong> a portable <code>spiffe://trust-domain/svc/billing</code> URI that works everywhere, a short-lived <strong>WIT</strong> bound to the workload's EC key pair (stolen token → useless without the key), and a per-request <strong>WPT</strong> tied to the exact target URI — making replay and forgery cryptographically impossible. Cloud IAM still handles infrastructure bootstrapping; WIMSE handles every application-layer call.
+    </div>
+  </div>
+
   <div style="display:flex;gap:12px;margin-top:32px">
     <button style="padding:9px 20px;border-radius:6px;background:var(--orange);color:#0d1117;font-weight:700;border:none;cursor:pointer;font-size:13px" onclick="showScene('solution')">See the WIMSE Solution &rarr;</button>
   </div>
