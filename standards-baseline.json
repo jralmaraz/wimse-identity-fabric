@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-08-03",
+  "last_checked": "2026-08-04",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -259,7 +259,7 @@
       "label": "SD-JWT-based Verifiable Digital Credentials (SD-JWT VC)",
       "short": "SD-JWT-VC",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "17",
+      "last_known_rev": "18",
       "implemented_rev": null,
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/",
@@ -296,7 +296,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-sweeney-wimse-credential-delegation/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-sweeney-wimse-credential-delegation/",
       "source_repo": null,
-      "impact": "Formalises credential delegation semantics for AI agents across WIMSE trust domains — directly adjacent to the AgentChain and cross-domain delegation patterns. Monitor for WG adoption; if adopted would inform internal/exchange and identity-chaining cross-domain scenarios.",
+      "impact": "Formalises credential delegation semantics for AI agents across WIMSE trust domains \u2014 directly adjacent to the AgentChain and cross-domain delegation patterns. Monitor for WG adoption; if adopted would inform internal/exchange and identity-chaining cross-domain scenarios.",
       "used_in": [],
       "_triage": "2026-08-04: assessed in issue #4. Individual draft, relevant, no implementation change needed yet."
     },
@@ -305,13 +305,13 @@
       "label": "OAuth Proof of Possession Tokens with HTTP Message Signatures",
       "short": "OAuth-HTTPSig",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "00",
+      "last_known_rev": "03",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-richer-oauth-httpsig/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-richer-oauth-httpsig/",
       "source_repo": null,
-      "impact": "RFC 9421 HTTP Message Signatures as OAuth PoP mechanism — same design space as WPT per-request proof but using HTTP Signatures rather than a separate proof JWT. Complements draft-ietf-wimse-http-signature. Monitor: if WG adopts this direction it could affect the long-term role of WPT.",
+      "impact": "RFC 9421 HTTP Message Signatures as OAuth PoP mechanism \u2014 same design space as WPT per-request proof but using HTTP Signatures rather than a separate proof JWT. Complements draft-ietf-wimse-http-signature. Monitor: if WG adopts this direction it could affect the long-term role of WPT.",
       "used_in": [],
       "_triage": "2026-08-04: assessed in issue #4. Relevant to WPT design space, monitor only."
     },
@@ -320,7 +320,7 @@
       "label": "JWT Profile for OAuth 2.0 Enveloped Proof of Possession (EPOP)",
       "short": "EPOP",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "00",
+      "last_known_rev": "03",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ambekar-oauth-epop/",
@@ -335,13 +335,13 @@
       "label": "OAuth 2.0 Delegated Authorization",
       "short": "DelegatedAuthz",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "00",
+      "last_known_rev": "03",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-li-oauth-delegated-authorization/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-li-oauth-delegated-authorization/",
       "source_repo": null,
-      "impact": "OAuth delegated authorization patterns — could inform cross-domain token exchange (internal/exchange) and identity chaining scenarios. Monitor for M2M delegation relevance.",
+      "impact": "OAuth delegated authorization patterns \u2014 could inform cross-domain token exchange (internal/exchange) and identity chaining scenarios. Monitor for M2M delegation relevance.",
       "used_in": [],
       "_triage": "2026-08-04: assessed in issue #4. Low-medium relevance, monitor only."
     },
@@ -350,7 +350,7 @@
       "label": "Delegated Refresh Tokens for OAuth 2.0 Token Exchange",
       "short": "AsyncDelegation",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "00",
+      "last_known_rev": "05",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-zhu-oauth-async-delegation/",
@@ -371,9 +371,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-cross-device-security/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Human cross-device authentication flows (TV/IoT login). Not applicable — PoC focuses on M2M workload identity, not human-facing authentication.",
+      "impact": "Human cross-device authentication flows (TV/IoT login). Not applicable \u2014 PoC focuses on M2M workload identity, not human-facing authentication.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     },
     {
       "id": "draft-bandyopadhayaya-oauth-ciba-push-binding",
@@ -386,9 +386,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-bandyopadhayaya-oauth-ciba-push-binding/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Client Initiated Backchannel Authentication (CIBA) for human authentication via decoupled device. Not applicable — human-facing flow.",
+      "impact": "Client Initiated Backchannel Authentication (CIBA) for human authentication via decoupled device. Not applicable \u2014 human-facing flow.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     },
     {
       "id": "draft-bandyopadhayaya-oauth-push-device",
@@ -401,9 +401,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-bandyopadhayaya-oauth-push-device/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Device lifecycle for CIBA push-based human authentication. Not applicable — human-facing flow.",
+      "impact": "Device lifecycle for CIBA push-based human authentication. Not applicable \u2014 human-facing flow.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     },
     {
       "id": "draft-parecki-oauth-refresh-token-scope-response",
@@ -416,9 +416,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-parecki-oauth-refresh-token-scope-response/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Refresh token scope response for human OAuth clients. Not applicable — WIMSE workloads use short-lived token re-issuance, not refresh token flows.",
+      "impact": "Refresh token scope response for human OAuth clients. Not applicable \u2014 WIMSE workloads use short-lived token re-issuance, not refresh token flows.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     }
   ]
 }
