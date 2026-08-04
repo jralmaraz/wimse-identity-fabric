@@ -28,6 +28,9 @@ infra/terraform/terraform.tfvars
 .vscode/
 *.swp
 
-# Demo: generated WASM artifacts (built by CI)
-demo/wimse.wasm
-demo/wasm_exec.js
+# Demo: WASM artifacts — pre-built binaries are committed for Cloudflare Pages
+# (Pages has no Go build step; rebuild locally with:
+#   GOOS=js GOARCH=wasm go build -o demo/wimse.wasm ./cmd/demo-wasm/
+#   cp $(go env GOROOT)/lib/wasm/wasm_exec.js demo/ )
+# demo/wimse.wasm    ← tracked (intentional)
+# demo/wasm_exec.js  ← tracked (intentional)
