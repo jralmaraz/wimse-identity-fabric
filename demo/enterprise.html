@@ -96,6 +96,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .oss-badge{background:rgba(63,185,80,0.15);color:var(--green)}
 .cloud-badge{background:rgba(255,166,87,0.15);color:var(--orange)}
 .vault-badge{background:rgba(188,140,255,0.15);color:var(--purple)}
+.enterprise-badge{background:rgba(220,80,80,0.15);color:#e06060}
 
 /* ── Architecture flow ── */
 .arch-flow{display:flex;flex-direction:column;gap:0;margin-bottom:18px}
@@ -684,8 +685,107 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     </div>
   </div>
 
+  <!-- CyberArk Conjur Cloud / Secure Workload Access -->
+  <div class="product-section">
+    <div class="product-header">
+      <div class="idp-badge enterprise-badge">Enterprise SaaS · CyberArk</div>
+      <div class="product-name">CyberArk Conjur Cloud — Secure Workload Access (SWA)</div>
+    </div>
+    <div class="idp-grid">
+      <div class="idp-card">
+        <h4>Integration Pattern</h4>
+        <div class="idp-type">Managed SPIFFE SVID issuance + cross-cloud JWT swap + WIMSE application layer</div>
+        <div class="integration-steps">
+          <div class="int-step">CyberArk SWA's SPIFFE agent attests the workload (platform attestation: Kubernetes SAT, AWS IAM, GCP SA, Azure MI). A SPIFFE SVID (X.509 cert with SPIFFE URI SAN) is issued automatically — no manual PKI ops.</div>
+          <div class="int-step">For cloud API calls, SWA performs a JWT swap: SVID → short-lived AWS role token / Azure access token / GCP service account token. No static cloud credentials ever touch the workload.</div>
+          <div class="int-step">Secrets accessed via Conjur vault are authorised by the SVID identity. Conjur policies map SPIFFE IDs to secrets using path-based allow rules — no shared secrets.</div>
+          <div class="int-step">A lightweight WIMSE sidecar exchanges the SWA-issued SVID for a WIT (<code>typ: wit+jwt, cnf.jwk</code>) from the WIMSE IdP. WPT is generated per-request. CyberArk handles the transport layer; WIMSE adds the application-layer proof.</div>
+        </div>
+      </div>
+      <div class="idp-card">
+        <h4>Pros &amp; Cons</h4>
+        <div class="pros" style="margin-bottom:10px">
+          <h4>Pros</h4>
+          <ul>
+            <li>Fully managed SPIFFE infrastructure — no SPIRE cluster to operate</li>
+            <li>Native cross-cloud JWT swap (AWS/Azure/GCP) without static creds</li>
+            <li>Conjur secrets management tightly coupled to SPIFFE identity</li>
+            <li>PAM + privileged access audit in one platform (SOC 2 / FedRAMP)</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Enterprise SaaS pricing; proprietary Conjur API surface</li>
+            <li>WIMSE WIT / WPT application layer still requires sidecar (SWA is SPIFFE-only)</li>
+            <li>Vendor lock-in on SVID issuance path and secrets API</li>
+            <li>Cross-cloud JWT swap is CyberArk-specific — not portable across PAM vendors</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- CyberArk SWA vs DIY WIMSE comparison -->
+    <div style="margin-top:20px">
+      <h4 style="color:var(--text-muted);font-size:12px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Layer comparison — CyberArk SWA vs DIY WIMSE stack</h4>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="border-bottom:1px solid #30363d">
+            <th style="text-align:left;padding:6px 10px;color:var(--text-muted);font-weight:600">Capability</th>
+            <th style="text-align:center;padding:6px 10px;color:#e06060;font-weight:600">CyberArk SWA</th>
+            <th style="text-align:center;padding:6px 10px;color:var(--blue);font-weight:600">DIY WIMSE stack</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #21262d">
+            <td style="padding:6px 10px;color:var(--text)">SPIFFE SVID issuance</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">✔ managed</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--orange)">✔ via SPIRE (self-hosted)</td>
+          </tr>
+          <tr style="border-bottom:1px solid #21262d">
+            <td style="padding:6px 10px;color:var(--text)">Cross-cloud JWT swap (AWS/Azure/GCP)</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">✔ native</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--text-muted)">custom sidecar or WIF</td>
+          </tr>
+          <tr style="border-bottom:1px solid #21262d">
+            <td style="padding:6px 10px;color:var(--text)">Secrets management</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">✔ Conjur</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--text-muted)">Vault / cloud SM separately</td>
+          </tr>
+          <tr style="border-bottom:1px solid #21262d">
+            <td style="padding:6px 10px;color:var(--text)">WIT application-layer identity (<code>typ: wit+jwt</code>)</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--text-muted)">needs WIMSE sidecar</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">✔ native</td>
+          </tr>
+          <tr style="border-bottom:1px solid #21262d">
+            <td style="padding:6px 10px;color:var(--text)">WPT per-request proof binding</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--text-muted)">needs WIMSE sidecar</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">✔ native</td>
+          </tr>
+          <tr style="border-bottom:1px solid #21262d">
+            <td style="padding:6px 10px;color:var(--text)">Open IETF standard</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--orange)">SPIFFE open; Conjur proprietary</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">✔ IETF WIMSE WG drafts</td>
+          </tr>
+          <tr style="border-bottom:1px solid #21262d">
+            <td style="padding:6px 10px;color:var(--text)">Vendor dependency</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--orange)">CyberArk SaaS</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">none (IETF + OSS)</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;color:var(--text)">Operational complexity</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--green)">low (managed)</td>
+            <td style="text-align:center;padding:6px 10px;color:var(--orange)">high (SPIRE + IdP + WPT)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout" style="margin-top:12px;background:rgba(88,166,255,0.07);border-color:rgba(88,166,255,0.25)">
+        <strong>Complementary layers, not competing choices.</strong> CyberArk SWA excels at the transport and secrets layer (SVID issuance, cross-cloud credential swap, Conjur policies). WIMSE adds the application-layer identity proof (WIT <code>cnf.jwk</code> binding, per-request WPT, OID-FED trust resolution). Enterprises with existing CyberArk/Conjur deployments can add WIMSE on top without replacing their PAM investment.
+      </div>
+    </div>
+  </div>
+
   <div class="callout ok">
-    <strong>Recommendation:</strong> Most enterprises use a combination. Vault for secrets + PKI; Keycloak or Okta as the WIMSE IdP; Entra ID for Azure-native workloads. WIMSE's OID-FED layer lets all three coexist under a single corporate trust anchor.
+    <strong>Recommendation:</strong> Most enterprises use a combination. Vault for secrets + PKI; Keycloak or Okta as the WIMSE IdP; Entra ID for Azure-native workloads. Enterprises with existing CyberArk Conjur deployments can use SWA for managed SPIFFE + cross-cloud JWT swap and layer WIMSE on top for application-layer proof. WIMSE's OID-FED layer lets all coexist under a single corporate trust anchor.
   </div>
 
   <!-- Animated unified flow -->
@@ -696,6 +796,7 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
       <div class="ptab" onclick="selectProduct('entra',this)">Entra ID</div>
       <div class="ptab" onclick="selectProduct('keycloak',this)">Keycloak</div>
       <div class="ptab" onclick="selectProduct('vault',this)">Vault</div>
+      <div class="ptab" onclick="selectProduct('cyberark',this)">CyberArk SWA</div>
     </div>
     <button class="play-btn" id="flow-play-btn" onclick="playProductFlow()">&#9654; Play Flow</button>
     <svg class="anim-flow-svg" viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg">
@@ -2837,6 +2938,16 @@ const PRODUCTS = {
       { label:'Vault JWT auth: cert → Vault token', desc:'Workload authenticates to Vault JWT/TLS auth method using the mTLS cert identity. Vault issues a scoped Vault token.', x1:245, x2:425, col:'#bc8cff' },
       { label:'WIMSE sidecar: Vault token → WIT', desc:'Vault Agent or WIMSE sidecar exchanges Vault token for WIT at WIMSE IdP endpoint. cnf.jwk embeds workload public key.', x1:425, x2:65, col:'#3fb950' },
       { label:'mTLS + WIT + WPT to target', desc:'Full stack: mTLS for transport, WIT for identity, WPT for per-request proof. Vault audit log captures every secret access.', x1:65, x2:620, col:'#3fb950' },
+    ],
+  },
+  cyberark: {
+    actors: ['Workload','CyberArk SWA','Conjur / WIT','Target Svc'],
+    subs:   ['spiffe://corp…','SVID + JWT swap','secrets → WIT','mTLS + WIT'],
+    steps: [
+      { label:'Platform attestation → SVID', desc:'CyberArk SWA agent attests the workload (K8s SAT, AWS IAM, GCP SA, Azure MI). A SPIFFE SVID (X.509 cert with SPIFFE URI SAN) is issued automatically — no manual PKI ops.', x1:65, x2:245, col:'#e06060' },
+      { label:'Cross-cloud JWT swap via SWA', desc:'SVID identity presented to SWA JWT service. SWA swaps it for a short-lived AWS role token, Azure access token, or GCP SA token. No static cloud credentials ever touch the workload.', x1:245, x2:425, col:'#e06060' },
+      { label:'WIMSE sidecar: SVID → WIT', desc:'WIMSE sidecar exchanges the SVID at the WIMSE IdP endpoint. WIT issued with sub=spiffe://corp.example/svc/billing and cnf.jwk set to workload EC P-256 public key.', x1:425, x2:65, col:'#3fb950' },
+      { label:'mTLS + WIT + WPT to target', desc:'Transport layer: mTLS cert from SVID. Application layer: WIT for identity, WPT (signed per-request, aud=URI, wth=hash(WIT)) for proof. CyberArk covers transport; WIMSE covers application.', x1:65, x2:620, col:'#3fb950' },
     ],
   },
 };
