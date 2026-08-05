@@ -526,30 +526,36 @@ select:focus{outline:none;border-color:var(--blue)}
   <p class="ch-lead"><strong>Authentication</strong> answers &ldquo;who are you?&rdquo; — <strong>Authorization</strong> answers &ldquo;what are you allowed to do?&rdquo; The WIT's <code>sub</code> and <code>trust_domain</code> drive fine-grained access control.</p>
 
   <div class="diagram">
-    <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg">
-      <line x1="145" y1="92" x2="205" y2="92" class="wire wire-tls"/>
-      <line x1="335" y1="92" x2="395" y2="92" class="wire wire-tls"/>
-      <line id="wire-ch6-res" x1="525" y1="92" x2="585" y2="92" class="wire wire-plain"/>
-      <!-- A -->
-      <rect x="10" y="65" width="130" height="54" rx="8" class="node-box ok"/>
-      <text x="75" y="86" class="node-lbl">Workload A</text>
-      <text x="75" y="101" class="node-sub">authenticated</text>
-      <!-- Middleware -->
-      <rect x="210" y="65" width="120" height="54" rx="8" class="node-box hi"/>
-      <text x="270" y="86" class="node-lbl">Middleware</text>
-      <text x="270" y="101" class="node-sub">WIT validated</text>
-      <!-- Policy Engine -->
-      <rect x="400" y="65" width="120" height="54" rx="8" class="node-box" id="ch6-pol-node"/>
-      <text x="460" y="86" class="node-lbl">Policy Engine</text>
-      <text x="460" y="101" class="node-sub">ABAC rules</text>
+    <svg viewBox="0 0 700 255" xmlns="http://www.w3.org/2000/svg">
+      <!-- Main horizontal wires -->
+      <line x1="140" y1="77" x2="208" y2="77" class="wire wire-tls"/>
+      <line id="wire-ch6-res" x1="332" y1="77" x2="404" y2="77" class="wire wire-plain"/>
+      <!-- T-junction vertical wires: Middleware ↕ Policy Engine -->
+      <line x1="263" y1="104" x2="263" y2="153" style="fill:none;stroke:var(--muted);stroke-width:1.5"/>
+      <line x1="277" y1="153" x2="277" y2="104" style="fill:none;stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5,3"/>
+      <!-- T-junction labels -->
+      <text x="256" y="132" text-anchor="end" style="fill:var(--muted);font-size:8px;font-family:monospace">query</text>
+      <text x="284" y="132" style="fill:var(--muted);font-size:8px;font-family:monospace">allow/deny</text>
+      <!-- Workload A -->
+      <rect x="10" y="50" width="130" height="54" rx="8" class="node-box ok"/>
+      <text x="75" y="71" class="node-lbl">Workload A</text>
+      <text x="75" y="86" class="node-sub">authenticated</text>
+      <!-- Middleware (intercepts, consults policy engine, decides forward/reject) -->
+      <rect x="210" y="50" width="120" height="54" rx="8" class="node-box hi"/>
+      <text x="270" y="71" class="node-lbl">Middleware</text>
+      <text x="270" y="86" class="node-sub">WIT validated</text>
       <!-- Resource -->
-      <rect x="590" y="65" width="105" height="54" rx="8" class="node-box" id="ch6-res-node"/>
-      <text x="642" y="86" class="node-lbl">Resource</text>
-      <text x="642" y="101" class="node-sub" id="ch6-res-lbl">api:billing-data</text>
+      <rect x="408" y="50" width="120" height="54" rx="8" class="node-box" id="ch6-res-node"/>
+      <text x="468" y="71" class="node-lbl">Resource</text>
+      <text x="468" y="86" class="node-sub" id="ch6-res-lbl">api:billing-data</text>
+      <!-- Policy Engine — below Middleware (T-junction: side call) -->
+      <rect x="175" y="155" width="190" height="54" rx="8" class="node-box" id="ch6-pol-node"/>
+      <text x="270" y="176" class="node-lbl">Policy Engine</text>
+      <text x="270" y="191" class="node-sub">ABAC rules</text>
       <!-- Packets -->
-      <rect id="pkt-az-req" x="145" y="80" width="56" height="18" rx="4" fill="var(--purple)" style="visibility:hidden;opacity:0.9"/>
-      <rect id="pkt-az-pol" x="335" y="80" width="56" height="18" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
-      <rect id="pkt-az-acc" x="525" y="80" width="56" height="18" rx="4" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-az-req" x="140" y="65" width="56" height="18" rx="4" fill="var(--purple)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-az-pol" x="261" y="104" width="18" height="30" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-az-acc" x="332" y="65" width="56" height="18" rx="4" fill="var(--green)"  style="visibility:hidden;opacity:0.9"/>
     </svg>
   </div>
 
@@ -698,9 +704,9 @@ select:focus{outline:none;border-color:var(--blue)}
       <line x1="85" y1="178" x2="270" y2="112" class="wire" style="stroke:rgba(88,166,255,0.3);stroke-dasharray:3,3;stroke-width:1"/>
       <line x1="615" y1="178" x2="430" y2="112" class="wire" style="stroke:rgba(63,185,80,0.3);stroke-dasharray:3,3;stroke-width:1"/>
       <!-- Animated packets -->
-      <rect id="pkt-ex-wita"  x="145" y="68" width="44" height="12" rx="3" class="pkt" style="display:none;fill:var(--blue)"/>
-      <rect id="pkt-ex-witb"  x="405" y="68" width="44" height="12" rx="3" class="pkt" style="display:none;fill:var(--green)"/>
-      <rect id="pkt-ex-final" x="145" y="68" width="60" height="12" rx="3" class="pkt" style="display:none;fill:var(--orange)"/>
+      <rect id="pkt-ex-wita"  x="145" y="68" width="44" height="12" rx="3" fill="var(--blue)"   style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-ex-witb"  x="405" y="68" width="44" height="12" rx="3" fill="var(--green)"  style="visibility:hidden;opacity:0.9"/>
+      <rect id="pkt-ex-final" x="145" y="68" width="60" height="12" rx="3" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
     </svg>
   </div>
   <div class="btn-row">
@@ -1359,6 +1365,21 @@ async function animPkt(id, fromX, toX, dur = 1200) {
   el.getAnimations().forEach(a => a.cancel());
 }
 
+async function animPktV(id, fromY, toY, dur = 1200) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.visibility = 'visible';
+  const dy = toY - fromY;
+  await el.animate([
+    { transform: 'translateY(0)', opacity: 0 },
+    { transform: 'translateY(0)', opacity: 0.9, offset: 0.08 },
+    { transform: `translateY(${dy}px)`, opacity: 0.9, offset: 0.92 },
+    { transform: `translateY(${dy}px)`, opacity: 0 },
+  ], { duration: dur, easing: 'ease-in-out', fill: 'forwards' }).finished;
+  el.style.visibility = 'hidden';
+  el.getAnimations().forEach(a => a.cancel());
+}
+
 async function animPktWithLabel(pktId, lblId, fromX, toX, dur = 1200) {
   const el = document.getElementById(pktId);
   const lbl = document.getElementById(lblId);
@@ -1634,9 +1655,9 @@ async function doAuthz() {
   const action = document.getElementById('az-action').value;
   document.getElementById('ch6-res-lbl').textContent = resource;
 
-  // Animate through nodes
-  await animPkt('pkt-az-req', 145, 205, 600);
-  await animPkt('pkt-az-pol', 335, 395, 600);
+  // Animate: request arrives at middleware, middleware queries policy engine (T-junction)
+  await animPkt('pkt-az-req', 140, 210, 600);
+  await animPktV('pkt-az-pol', 104, 155, 600);
 
   const r = wcall('checkAuthorization', resource, action);
   btn.disabled = false;
@@ -1654,7 +1675,7 @@ async function doAuthz() {
   </div>`;
 
   if (d.allowed) {
-    await animPkt('pkt-az-acc', 525, 585, 600);
+    await animPkt('pkt-az-acc', 332, 406, 600);
     nodeClass('ch6-res-node', 'ok');
     setWire('wire-ch6-res', 'wire-tls');
   } else {

@@ -2151,45 +2151,53 @@ No EC keys accepted</pre>
       </div>
     </div>
 
-    <!-- SVG two-layer flow diagram -->
-    <svg viewBox="0 0 760 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:1.2rem auto 0">
-      <!-- actors -->
-      <rect x="10" y="35" width="120" height="50" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-      <text x="70" y="57" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="10" font-weight="700">billing-svc</text>
-      <text x="70" y="72" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">SPIFFE SVID + WIT</text>
-
-      <rect x="190" y="15" width="140" height="90" rx="7" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
-      <text x="260" y="40" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="10" font-weight="700">WIMSE Gateway</text>
-      <text x="260" y="56" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">① verify WIT sig + exp</text>
-      <text x="260" y="70" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">② verify WPT aud + wth + jti</text>
-      <text x="260" y="84" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">→ extract verified sub</text>
-
-      <rect x="390" y="15" width="140" height="90" rx="7" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
-      <text x="460" y="40" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="10" font-weight="700">FGA Engine</text>
-      <text x="460" y="56" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">③ check(user, action, resource)</text>
-      <text x="460" y="70" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">OpenFGA / OPA / Cedar</text>
-      <text x="460" y="84" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">→ allow / deny</text>
-
-      <rect x="590" y="35" width="120" height="50" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-      <text x="650" y="57" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="10" font-weight="700">invoice-api</text>
-      <text x="650" y="72" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">protected resource</text>
-
-      <!-- arrows -->
-      <line x1="130" y1="60" x2="188" y2="60" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr)"/>
-      <line x1="330" y1="60" x2="388" y2="60" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
-      <line x1="530" y1="60" x2="588" y2="60" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
-      <!-- labels -->
-      <text x="159" y="52" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8">WIT+WPT</text>
-      <text x="159" y="63" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8">mTLS</text>
-      <text x="359" y="56" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">sub +</text>
-      <text x="359" y="66" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">action</text>
-      <text x="559" y="56" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">allow →</text>
-      <text x="559" y="66" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">forward</text>
+    <!-- SVG two-layer flow diagram — T-junction: middleware intercepts, consults FGA, then forwards -->
+    <svg viewBox="0 0 760 248" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:1.2rem auto 0">
       <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#7d8590"/></marker></defs>
 
-      <!-- layer labels below -->
-      <text x="260" y="118" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="9" font-weight="600">Layer 1 · WIMSE AuthN</text>
-      <text x="460" y="118" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="9" font-weight="600">Layer 2 · FGA AuthZ</text>
+      <!-- billing-svc (left) -->
+      <rect x="10" y="38" width="120" height="52" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text x="70" y="60" text-anchor="middle" fill="#ffa657" font-family="sans-serif" font-size="10" font-weight="700">billing-svc</text>
+      <text x="70" y="75" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">SPIFFE SVID + WIT</text>
+
+      <!-- WIMSE Gateway (centre — intercepts and decides) -->
+      <rect x="186" y="18" width="152" height="92" rx="7" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="262" y="43" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="10" font-weight="700">WIMSE Gateway</text>
+      <text x="262" y="58" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">① verify WIT sig + exp</text>
+      <text x="262" y="72" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">② verify WPT aud + wth + jti</text>
+      <text x="262" y="86" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">→ extract verified sub</text>
+
+      <!-- invoice-api (right) -->
+      <rect x="416" y="38" width="130" height="52" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+      <text x="481" y="60" text-anchor="middle" fill="#e6edf3" font-family="sans-serif" font-size="10" font-weight="700">invoice-api</text>
+      <text x="481" y="75" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">protected resource</text>
+
+      <!-- FGA Engine — below Gateway (T-junction: side call, not in the main path) -->
+      <rect x="148" y="163" width="228" height="55" rx="7" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="262" y="185" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="10" font-weight="700">FGA Engine</text>
+      <text x="262" y="200" text-anchor="middle" fill="#7d8590" font-family="sans-serif" font-size="9">check(user, action, resource) · OpenFGA / OPA / Cedar → allow / deny</text>
+
+      <!-- Arrow ①: billing-svc → Gateway -->
+      <line x1="130" y1="64" x2="184" y2="64" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="157" y="56" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8">WIT+WPT</text>
+      <text x="157" y="67" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="8">mTLS</text>
+
+      <!-- T-junction ②: Gateway → FGA (query, solid) -->
+      <line x1="254" y1="111" x2="254" y2="161" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="246" y="140" text-anchor="end" fill="#3fb950" font-family="sans-serif" font-size="8">query</text>
+
+      <!-- T-junction ③: FGA → Gateway (allow/deny response, dashed) -->
+      <line x1="270" y1="161" x2="270" y2="111" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="278" y="140" fill="#3fb950" font-family="sans-serif" font-size="8">allow/deny</text>
+
+      <!-- Arrow ④: Gateway → invoice-api (gateway forwards if FGA allows) -->
+      <line x1="338" y1="64" x2="414" y2="64" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="376" y="56" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">allow →</text>
+      <text x="376" y="67" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="8">forward</text>
+
+      <!-- Layer labels -->
+      <text x="377" y="126" text-anchor="middle" fill="#58a6ff" font-family="sans-serif" font-size="9" font-weight="600">Layer 1 · WIMSE AuthN</text>
+      <text x="262" y="234" text-anchor="middle" fill="#3fb950" font-family="sans-serif" font-size="9" font-weight="600">Layer 2 · FGA AuthZ (side call)</text>
     </svg>
   </div>
 
