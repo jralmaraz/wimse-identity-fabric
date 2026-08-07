@@ -488,6 +488,20 @@
       "impact": "Defines an Identity Continuation Assertion (typ: oauth-identity-continuation+jwt, claims: identity_continuation_handle, act, cnf.jkt, jti, exp \u2264300s) enabling intermediate workloads to obtain audience-specific user identity tokens without re-authentication, layered on RFC 8693 Token Exchange. Adjacent to pkg/identitychaining (jwt-authz-grant) and internal/exchange \u2014 but focuses on pairwise *user* subject propagation across IdP boundaries, not workload/SPIFFE identity. Monitor: if pattern gains WG traction it could complement or formalise cross-domain identity chaining.",
       "used_in": [],
       "_triage": "2026-08-05: assessed in issue #8. Addresses user (pairwise) subject propagation \u2014 different problem space from WIT workload identity. No implementation change needed; monitor for convergence with identity chaining."
+    },
+    {
+      "id": "draft-hardt-oauth-aauth-protocol",
+      "label": "AAuth Protocol (Agentic Authorization)",
+      "short": "AAuth",
+      "wg": "IETF OAuth WG",
+      "last_known_rev": null,
+      "implemented_rev": null,
+      "status": "not-applicable",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-hardt-oauth-aauth-protocol/",
+      "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-hardt-oauth-aauth-protocol/",
+      "source_repo": null,
+      "impact": "OUT OF SCOPE for this workload identity PoC. AAuth is AI-agent-specific authorization \u2014 how agents request delegated permissions for sub-tasks. Primary coverage is in the wimse-agent-fabric PoC. No implementation planned here.",
+      "used_in": []
     }
   ]
 }
