@@ -1868,7 +1868,7 @@ No EC keys accepted</pre>
 
   <div class="card">
     <div class="card-title">Tracked standards — revision status</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Last checked: <code>2026-08-02</code> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/standards-baseline.json" target="_blank" style="color:var(--blue)">standards-baseline.json</a> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/.github/workflows/standards-tracker.yml" target="_blank" style="color:var(--blue)">standards-tracker.yml</a></p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Last checked: <code>2026-08-07</code> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/standards-baseline.json" target="_blank" style="color:var(--blue)">standards-baseline.json</a> &nbsp;·&nbsp; <a href="https://github.com/jralmaraz/wimse-identity-fabric/blob/main/.github/workflows/standards-tracker.yml" target="_blank" style="color:var(--blue)">standards-tracker.yml</a></p>
     <div style="overflow-x:auto">
     <table class="compare-table" style="font-size:12px;min-width:860px">
       <tr>
@@ -1975,9 +1975,36 @@ No EC keys accepted</pre>
         <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
         <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
         <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span></td>
-        <td style="text-align:center"><code>—</code></td>
+        <td style="text-align:center"><code>-06</code></td>
         <td style="font-size:10px;color:var(--muted)"><code>pkg/wpt</code> (future — if WG adopts)</td>
-        <td style="font-size:11px">RFC 9421 HTTP Message Signatures as alternative to WPT; would require <code>pkg/httpsig</code> if adopted as primary by the WG</td>
+        <td style="font-size:11px">RFC 9421 HTTP Message Signatures as alternative to WPT; would require <code>pkg/httpsig</code> if adopted as primary by the WG. Bumped -05 → -06 on 2026-08-04.</td>
+      </tr>
+      <tr style="background:rgba(255,255,255,0.03)">
+        <td><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-identity-practices/" target="_blank" style="color:var(--blue)">WI-Practices — WIMSE Workload Identity Practices</a></td>
+        <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
+        <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span></td>
+        <td style="text-align:center"><code>-05</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/wit</code>, <code>pkg/wpt</code></td>
+        <td style="font-size:11px">Best practices for workload identity credential management: SPIFFE-based WIT, short-lived WPT issuance, no long-lived secrets, cert rotation. Validates design choices across this PoC. Note: draft is explicitly independent of the WIMSE architecture specs — a complementary reference document, not a protocol spec. <strong>Primary home for this draft</strong> — agent-specific concerns live in wimse-agent-fabric.</td>
+      </tr>
+      <tr>
+        <td><a href="https://datatracker.ietf.org/doc/draft-gazitt-oauth-authzen-token-exchange/" target="_blank" style="color:var(--blue)">AuthZEN-TE — AuthZEN Binding for OAuth 2.0 Token Exchange</a></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--muted);white-space:nowrap">◌ Individual draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span></td>
+        <td style="text-align:center"><code>-00</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/tokenexchange</code>, <code>pkg/identitychaining</code></td>
+        <td style="font-size:11px">Externalises the AS policy decision in WPT Token Exchange to an AuthZEN PDP API — the "which workload may obtain a WPT targeting which audience" decision that <code>pkg/tokenexchange</code> currently handles with local policy. If adopted, implementation adds an AuthZEN client call at the exchange decision point. Rev 00 — monitor.</td>
+      </tr>
+      <tr style="background:rgba(255,255,255,0.03)">
+        <td><a href="https://datatracker.ietf.org/doc/draft-gazitt-oauth-authzen-issuance/" target="_blank" style="color:var(--blue)">AuthZEN-Issuance — AuthZEN Profile for OAuth 2.0 Token Issuance</a></td>
+        <td style="white-space:nowrap;font-size:11px">IETF OAuth WG</td>
+        <td><span style="color:var(--muted);white-space:nowrap">◌ Individual draft</span></td>
+        <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(107,114,128,.15);color:var(--muted)">◌ Monitoring</span></td>
+        <td style="text-align:center"><code>-00</code></td>
+        <td style="font-size:10px;color:var(--muted)"><code>pkg/tokenexchange</code></td>
+        <td style="font-size:11px">Parent spec: defines the AuthZEN five-tuple (subject, resource, action, context, environment) for externalising any OAuth token issuance decision to a PDP. Companion to AuthZEN-TE. Rev 00 — monitor.</td>
       </tr>
       <tr style="background:rgba(255,255,255,0.03)">
         <td><a href="https://datatracker.ietf.org/doc/draft-reece-wimse-cross-org-delegation/" target="_blank" style="color:var(--blue)">CrossOrgDelegation — Cross-Org Workload Delegation</a></td>
