@@ -737,6 +737,17 @@ select:focus{outline:none;border-color:var(--blue)}
     <strong>Multi-cloud in practice:</strong> This is how a workload in AWS calls a workload in GCP without a shared IdP or hard-coded credentials. The Exchange Service is the minimal, auditable trust boundary between domains.
   </div>
 
+  <div class="callout" style="border-color:var(--blue)">
+    <strong>Emerging standard — AuthZEN (monitoring):</strong>
+    RFC 8693 Token Exchange says the AS decision is "governed by local policy" — without defining how.
+    <a href="https://datatracker.ietf.org/doc/draft-gazitt-oauth-authzen-token-exchange/" target="_blank" style="color:var(--blue)">draft-gazitt-oauth-authzen-token-exchange</a> fills that gap:
+    it specifies how the token exchange request (subject workload, target audience, grant type) maps onto an
+    <a href="https://datatracker.ietf.org/doc/draft-gazitt-oauth-authzen-issuance/" target="_blank" style="color:var(--blue)">AuthZEN PDP API</a> call —
+    an interoperable interface for externalising the "which workload may exchange a WIT for a WPT targeting which audience" decision
+    to any compliant policy engine (OPA, OpenFGA, Cerbos).
+    Both drafts are rev 00 (individual, early stage). Tracked in <code>standards-baseline.json</code>.
+  </div>
+
   <div class="ch-footer">
     <button class="btn btn-secondary" onclick="goChapter(7)">&larr; Back</button>
     <button class="btn btn-primary" onclick="goChapter(9)">Next: Attacks &amp; Defenses &rarr;</button>
