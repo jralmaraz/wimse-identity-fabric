@@ -2,9 +2,11 @@
 
 A Go implementation of the **IETF WIMSE** (Workload Identity in Multi-System Environments) standard, built as an incremental six-phase PoC. It demonstrates the complete workload identity stack: token issuance, workload-to-workload authentication over mutual TLS, cross-trust-domain token exchange, selective disclosure credentials, and **OpenID Federation 1.0** for dynamic cross-domain trust — all with an interactive browser demo compiled to WebAssembly.
 
+**Live demo:** https://wimse-identity-fabric.pages.dev
+
 **Demos:**
-- [Standard PoC](demo/index.html) — 10-chapter interactive story running live WASM crypto in your browser
-- [Enterprise Demo](demo/enterprise.html) — Identity sprawl, WIMSE solution, IdP integration patterns (Okta, Entra ID, Keycloak, Vault), centralised vs distributed, secrets management
+- [Standard PoC](https://wimse-identity-fabric.pages.dev) — 10-chapter interactive story running live WASM crypto in your browser
+- [Enterprise Demo](https://wimse-identity-fabric.pages.dev/enterprise.html) — Identity sprawl, WIMSE solution, IdP integration patterns (Okta, Entra ID, Keycloak, Vault), centralised vs distributed, secrets management
 
 ## Table of Contents
 
