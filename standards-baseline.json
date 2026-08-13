@@ -210,7 +210,7 @@
       "short": "JWT-BCP",
       "wg": "IETF OAuth WG",
       "last_known_rev": "09",
-      "implemented_rev": "applied-2026-08-02",
+      "implemented_rev": "09",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-rfc8725bis/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-rfc8725bis/",
@@ -243,7 +243,7 @@
       "short": "WI-Practices",
       "wg": "IETF WIMSE WG",
       "last_known_rev": "06",
-      "implemented_rev": null,
+      "implemented_rev": "06",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-identity-practices/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-workload-identity-practices/",
@@ -502,6 +502,38 @@
       "source_repo": null,
       "impact": "OUT OF SCOPE for this workload identity PoC. AAuth is AI-agent-specific authorization \u2014 how agents request delegated permissions for sub-tasks. Primary coverage is in the wimse-agent-fabric PoC. No implementation planned here.",
       "used_in": []
+    },
+    {
+      "id": "draft-chen-oauth-agent-authz-use-cases",
+      "label": "Agent Authorization use cases and gap analysis",
+      "status": "discovered",
+      "first_seen": "2026-08-12",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-chen-oauth-agent-authz-use-cases/"
+    },
+    {
+      "id": "draft-ietf-oauth-browser-based-apps",
+      "label": "OAuth 2.0 for Browser-Based Applications",
+      "status": "discovered",
+      "first_seen": "2026-08-11",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-browser-based-apps/"
+    },
+    {
+      "id": "draft-zehavi-oauth-rar-metadata",
+      "label": "OAuth 2.0 RAR Metadata and Error Remediation",
+      "status": "discovered",
+      "first_seen": "2026-08-09",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-zehavi-oauth-rar-metadata/"
+    },
+    {
+      "id": "draft-zehavi-oauth-authz-req-del-chain",
+      "label": "OAuth Authorization Request Delegation Chain",
+      "status": "discovered",
+      "first_seen": "2026-08-07",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-zehavi-oauth-authz-req-del-chain/"
     }
   ]
 }
