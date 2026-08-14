@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-08-13",
+  "last_checked": "2026-08-14",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -494,7 +494,7 @@
       "label": "AAuth Protocol (Agentic Authorization)",
       "short": "AAuth",
       "wg": "IETF OAuth WG",
-      "last_known_rev": null,
+      "last_known_rev": "10",
       "implemented_rev": null,
       "status": "not-applicable",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-hardt-oauth-aauth-protocol/",
@@ -534,6 +534,38 @@
       "first_seen": "2026-08-07",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-zehavi-oauth-authz-req-del-chain/"
+    },
+    {
+      "id": "draft-jia-oauth-scope-aggregation",
+      "label": "OAuth 2.0 Scope Aggregation for Multi-Step AI Agent Workflows",
+      "status": "discovered",
+      "first_seen": "2026-08-14",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-jia-oauth-scope-aggregation/"
+    },
+    {
+      "id": "draft-ietf-oauth-rfc7523bis",
+      "label": "Updates to OAuth 2.0 JSON Web Token (JWT) Client Authentication and Assertion-Based Authorization Grants",
+      "status": "discovered",
+      "first_seen": "2026-08-13",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-rfc7523bis/"
+    },
+    {
+      "id": "draft-ietf-oauth-status-list",
+      "label": "Token Status List (TSL)",
+      "status": "discovered",
+      "first_seen": "2026-08-13",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/"
+    },
+    {
+      "id": "draft-winmagic-oauth-condition-bound-keys",
+      "label": "Condition-Bound Keys for Mutual-TLS Client Authentication and DPoP",
+      "status": "discovered",
+      "first_seen": "2026-08-12",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-winmagic-oauth-condition-bound-keys/"
     }
   ]
 }
