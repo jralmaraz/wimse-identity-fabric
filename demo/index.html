@@ -78,7 +78,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ch-footer{display:flex;gap:12px;margin-top:40px;justify-content:space-between}
 
 /* ── Diagram (SVG) ── */
-.diagram{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;margin-bottom:20px;overflow:hidden}
+.diagram{background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(56,139,253,.08) 0%,transparent 70%),var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;margin-bottom:20px;overflow:hidden}
 .diagram svg{width:100%;height:auto;display:block}
 .node-box{fill:var(--surface2);stroke:var(--border);stroke-width:1.5}
 .node-box.ok{stroke:var(--green);stroke-width:2}
@@ -91,6 +91,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .wire-tls{stroke:var(--green);stroke-width:2.5}
 .wire-hs{stroke:var(--orange);stroke-dasharray:8,4;animation:dashscroll 0.6s linear infinite}
 @keyframes dashscroll{to{stroke-dashoffset:-12}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 .pkt-lbl{fill:var(--text);font-family:monospace;font-size:9px;text-anchor:middle;pointer-events:none}
 
 /* ── Info grid ── */
@@ -1366,11 +1367,13 @@ async function animPkt(id, fromX, toX, dur = 1200) {
   if (!el) return;
   el.style.visibility = 'visible';
   const dx = toX - fromX;
+  const arc = -22; // bezier arc apex (px above wire)
   await el.animate([
-    { transform: 'translateX(0)', opacity: 0 },
-    { transform: 'translateX(0)', opacity: 0.9, offset: 0.08 },
-    { transform: `translateX(${dx}px)`, opacity: 0.9, offset: 0.92 },
-    { transform: `translateX(${dx}px)`, opacity: 0 },
+    { transform: 'translate(0px,0px)', opacity: 0 },
+    { transform: 'translate(0px,0px)', opacity: 0.9, offset: 0.08 },
+    { transform: `translate(${dx*0.5}px,${arc}px)`, opacity: 1, offset: 0.5 },
+    { transform: `translate(${dx}px,0px)`, opacity: 0.9, offset: 0.92 },
+    { transform: `translate(${dx}px,0px)`, opacity: 0 },
   ], { duration: dur, easing: 'ease-in-out', fill: 'forwards' }).finished;
   el.style.visibility = 'hidden';
   el.getAnimations().forEach(a => a.cancel());
