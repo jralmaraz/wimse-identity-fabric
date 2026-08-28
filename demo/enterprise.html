@@ -1738,6 +1738,60 @@ No EC keys accepted</pre>
   <div class="callout">
     <strong>Action now:</strong> (1) Inventory all trust material (WIT signing keys, mTLS CA, OID-FED Trust Anchor). (2) Prioritise Trust Anchor PQ migration — it's the highest-impact long-lived key. (3) Deploy hybrid-capable validators before the quantum deadline. (4) Monitor NIST and IETF (e.g. <code>draft-ietf-jose-pqc</code>) for finalised JOSE PQ algorithm identifiers.
   </div>
+
+  <div class="card">
+    <div class="card-title">Token Size Impact: ES256 → ML-DSA-65</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Every WIMSE token carries its signature in HTTP headers on every request. The size increase is not theoretical — it's bandwidth and latency on each call in your service mesh.</p>
+    <div style="overflow-x:auto">
+      <table class="compare-table">
+        <tr>
+          <th>Token / Component</th>
+          <th>ES256 (today)</th>
+          <th>ML-DSA-65 (post-migration)</th>
+          <th>Increase</th>
+        </tr>
+        <tr>
+          <td><strong>Signature bytes</strong></td>
+          <td>64 B</td>
+          <td>3,309 B</td>
+          <td style="color:#f85149;font-weight:700">52×</td>
+        </tr>
+        <tr>
+          <td><strong>Public key (<code>cnf.jwk</code>)</strong></td>
+          <td>65 B</td>
+          <td>1,952 B</td>
+          <td style="color:#f85149;font-weight:700">30×</td>
+        </tr>
+        <tr>
+          <td><strong>WPT JWT</strong> <span style="font-size:11px;font-weight:400;color:var(--muted)">(per-request — Authorization: WPT)</span></td>
+          <td>~410 B</td>
+          <td>~4,750 B</td>
+          <td style="color:#f85149;font-weight:700">11.6×</td>
+        </tr>
+        <tr>
+          <td><strong>WIT JWT</strong> <span style="font-size:11px;font-weight:400;color:var(--muted)">(hourly — Workload-Identity-Token)</span></td>
+          <td>~680 B</td>
+          <td>~3,900 B</td>
+          <td style="color:#ffa657;font-weight:700">5.7×</td>
+        </tr>
+        <tr>
+          <td><strong>mTLS cert chain</strong> <span style="font-size:11px;font-weight:400;color:var(--muted)">(2 certs, TLS handshake)</span></td>
+          <td>~3.0 KB</td>
+          <td>~11.5 KB</td>
+          <td style="color:#ffa657;font-weight:700">3.8×</td>
+        </tr>
+      </table>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:10px">At 1,000 req/s, a single workload pair generates <strong style="color:var(--text)">4.75 MB/s</strong> of Authorization header traffic under ML-DSA-65 vs. 410 KB/s today. JWT base64url payloads contain high-entropy bytes that do not compress under HTTP/2 HPACK.</p>
+  </div>
+
+  <div class="callout ok">
+    <strong>Migrate IdP signing first — not workload signing.</strong> The TNFL threat is concentrated in the WIT issuance path. The IdP private key signs every WIT for every workload identity. If an adversary harvests a signed WIT and the IdP public key today, Shor's algorithm recovers the IdP private key in the CRQC era — enabling forgery of any workload identity in the entire trust domain. By contrast, a harvested WPT is bound to a specific target URI, expires in five minutes, and cannot be reused. <strong>Migrate the IdP signing key to ML-DSA-65 before migrating workload per-request keys.</strong>
+  </div>
+
+  <div class="callout">
+    <strong>FIPS 140-3 HSM gap — mid-2027.</strong> No FIPS 140-3 validated HSM token currently supports production ML-DSA-65 signing. Validation certificates from major HSM vendors are expected no earlier than mid-2027. Until then, FIPS-required deployments cannot move WPT signing to ML-DSA-65 with HSM-backed keys. <strong>Interim option:</strong> migrate the IdP (low signing frequency, easier to put in a non-FIPS enclave) using SP 800-208 stateful hash-based signatures (LMS/XMSS) — FIPS-approved today via CNSA 2.0 — while ML-DSA HSM validation matures.
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
