@@ -1894,9 +1894,9 @@ No EC keys accepted</pre>
         <td style="white-space:nowrap;font-size:11px">IETF WIMSE WG</td>
         <td><span style="color:var(--orange);white-space:nowrap">● WG Draft</span></td>
         <td><span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(62,207,142,.15);color:var(--green)">✓ Implemented</span></td>
-        <td style="text-align:center"><code>-01</code></td>
+        <td style="text-align:center"><code>-02</code></td>
         <td style="font-size:10px;color:var(--muted)"><code>pkg/wpt</code>, <code>internal/workload</code></td>
-        <td style="font-size:11px"><code>typ=application/wpt+jwt</code>, <code>aud</code>=request URI, <code>wth</code>=SHA-256(WIT), <code>tth</code>=SHA-256(Txn-Token), <code>jti</code> replay protection</td>
+        <td style="font-size:11px"><code>typ=application/wpt+jwt</code>, <code>aud</code>=request URI, <code>wth</code>=SHA-256(WIT), <code>tth</code>=SHA-256(Txn-Token), <code>jti</code> replay protection; conveyed via <code>Authorization: WPT &lt;token&gt;</code> (breaking change in -02)</td>
       </tr>
       <tr>
         <td><a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-transaction-tokens/" target="_blank" style="color:var(--blue)">Txn-Token — OAuth 2.0 Transaction Tokens</a></td>
@@ -2942,7 +2942,7 @@ const PRODUCTS = {
       { label:'Get cloud credential', desc:'Workload calls cloud metadata service to obtain IRSA / WIF / Workload Identity Pool token.', x1:65, x2:245, col:'#ffa657' },
       { label:'Exchange at Okta',      desc:'Cloud credential presented to Okta. Okta validates and issues an OAuth access token with custom workload claims.', x1:245, x2:425, col:'#58a6ff' },
       { label:'WIMSE sidecar issues WIT', desc:'Okta token exchanged at WIMSE IdP sidecar. WIT issued with cnf.jwk set to workload EC P-256 public key.', x1:425, x2:65, col:'#3fb950' },
-      { label:'Call target with WIT + WPT', desc:'Workload calls target service attaching Workload-Identity-Token and per-request Workload-Proof-Token headers.', x1:65, x2:620, col:'#3fb950' },
+      { label:'Call target with WIT + WPT', desc:'Workload calls target service with Workload-Identity-Token header and per-request WPT via Authorization: WPT &lt;token&gt; (WPT-02).', x1:65, x2:620, col:'#3fb950' },
     ],
   },
   entra: {
@@ -2952,7 +2952,7 @@ const PRODUCTS = {
       { label:'Azure Managed Identity assertion', desc:'Workload obtains OIDC assertion from Azure IMDS endpoint using Managed Identity or federated credential.', x1:65, x2:245, col:'#ffa657' },
       { label:'Entra ID validates + issues token', desc:'Entra ID validates assertion. Workload Identity Federation (WIF) maps to Entra app registration. Entra token issued.', x1:245, x2:425, col:'#58a6ff' },
       { label:'WIMSE IdP issues WIT', desc:'WIMSE IdP (Keycloak or Vault) validates Entra token via OIDC, issues WIT with sub=spiffe://corp.example/svc/billing.', x1:425, x2:65, col:'#3fb950' },
-      { label:'Call target with WIT + WPT', desc:'WIT cached for its TTL (1h). Per-request WPT generated for each call. Entra Conditional Access governs exchanges.', x1:65, x2:620, col:'#3fb950' },
+      { label:'Call target with WIT + WPT', desc:'WIT cached for its TTL (1h). Per-request WPT sent via Authorization: WPT &lt;token&gt; (WPT-02). Entra Conditional Access governs exchanges.', x1:65, x2:620, col:'#3fb950' },
     ],
   },
   keycloak: {

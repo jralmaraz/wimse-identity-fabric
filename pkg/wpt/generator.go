@@ -16,8 +16,7 @@ type GenerateOptions struct {
 	TargetURI       string
 	WIT             string
 	WorkloadKey     *ecdsa.PrivateKey
-	TTL             time.Duration
-	AccessTokenHash string // optional ath
+	TTL      time.Duration
 	// TxnToken is an optional compact Transaction Token JWT (draft-ietf-oauth-transaction-tokens).
 	// When set, its SHA-256 hash is placed in the tth claim, binding this proof
 	// to the business transaction that initiated the call chain.
@@ -61,7 +60,6 @@ func Generate(opts GenerateOptions) (string, error) {
 			ID:        jti,
 		},
 		Wth: hashToken(opts.WIT),
-		Ath: opts.AccessTokenHash,
 		Tth: tth,
 	}
 

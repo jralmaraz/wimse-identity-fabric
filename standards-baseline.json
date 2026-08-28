@@ -54,12 +54,12 @@
       "short": "WPT",
       "wg": "IETF WIMSE WG",
       "last_known_rev": "02",
-      "implemented_rev": "01",
+      "implemented_rev": "02",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-wpt/",
       "source_repo": "https://github.com/ietf-wg-wimse/draft-ietf-wimse-s2s-protocol",
-      "impact": "WPT claims (typ=application/wpt+jwt), aud=request URI, wth=SHA-256(WIT), tth=SHA-256(Txn-Token), jti replay protection",
+      "impact": "Breaking changes in -02: (1) WPT now conveyed via Authorization: WPT <token> instead of Workload-Proof-Token header; (2) ath claim removed; (3) error responses use 401 + WWW-Authenticate: WPT. Core claims unchanged: aud, wth, tth, jti.",
       "used_in": [
         "pkg/wpt",
         "internal/workload"
@@ -210,7 +210,7 @@
       "short": "JWT-BCP",
       "wg": "IETF OAuth WG",
       "last_known_rev": "10",
-      "implemented_rev": "09",
+      "implemented_rev": "10",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-rfc8725bis/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-rfc8725bis/",
