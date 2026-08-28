@@ -65,6 +65,6 @@ func (c *Client) attachHeaders(req *http.Request, targetURL string) error {
 		return err
 	}
 	req.Header.Set(HeaderWIT, c.wit)
-	req.Header.Set(HeaderWPT, wptToken)
+	req.Header.Set("Authorization", wptScheme+wptToken)
 	return nil
 }

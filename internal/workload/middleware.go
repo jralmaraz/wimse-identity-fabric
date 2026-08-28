@@ -2,6 +2,7 @@ package workload
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/example/wimse-identity-fabric/pkg/wit"
 	"github.com/example/wimse-identity-fabric/pkg/wpt"
@@ -10,10 +11,12 @@ import (
 
 const (
 	HeaderWIT = "Workload-Identity-Token"
-	HeaderWPT = "Workload-Proof-Token"
 
 	// CtxWITClaims is the gin context key for validated WIT claims.
 	CtxWITClaims = "wimse_wit_claims"
+
+	// wptScheme is the Authorization header scheme for WPT (draft-ietf-wimse-wpt-02).
+	wptScheme = "WPT "
 )
 
 // WIMSEAuth returns a Gin middleware that validates WIT+WPT on every request.
@@ -21,7 +24,7 @@ const (
 //  1. Extracts WIT from Workload-Identity-Token header
 //  2. Validates WIT (issuer, exp, sig) using witValidator
 //  3. Extracts WorkloadKey from cnf claim
-//  4. Extracts WPT from Workload-Proof-Token header
+//  4. Extracts WPT from Authorization: WPT <token> header (draft-ietf-wimse-wpt-02)
 //  5. Validates WPT (sig, aud=request URI, wth, exp, jti replay)
 //  6. Injects validated WITClaims into Gin context
 func WIMSEAuth(witValidator *wit.Validator, wptValidator *wpt.Validator) gin.HandlerFunc {
@@ -38,11 +41,14 @@ func WIMSEAuth(witValidator *wit.Validator, wptValidator *wpt.Validator) gin.Han
 			return
 		}
 
-		wptToken := c.GetHeader(HeaderWPT)
-		if wptToken == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing " + HeaderWPT})
+		// WPT is conveyed via Authorization: WPT <token> (draft-ietf-wimse-wpt-02).
+		authHeader := c.GetHeader("Authorization")
+		if !strings.HasPrefix(authHeader, wptScheme) {
+			c.Header("WWW-Authenticate", "WPT")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing WPT in Authorization header"})
 			return
 		}
+		wptToken := strings.TrimPrefix(authHeader, wptScheme)
 
 		// Build the request URI for audience validation
 		scheme := "https"
@@ -52,13 +58,14 @@ func WIMSEAuth(witValidator *wit.Validator, wptValidator *wpt.Validator) gin.Han
 		requestURI := scheme + "://" + c.Request.Host + c.Request.RequestURI
 
 		_, err = wptValidator.Validate(wpt.ValidateOptions{
-			WPTString:        wptToken,
-			WITString:        witToken,
+			WPTString:         wptToken,
+			WITString:         witToken,
 			WorkloadPublicKey: witResult.WorkloadKey,
-			RequestURI:       requestURI,
-			CheckReplay:      true,
+			RequestURI:        requestURI,
+			CheckReplay:       true,
 		})
 		if err != nil {
+			c.Header("WWW-Authenticate", "WPT")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid WPT: " + err.Error()})
 			return
 		}

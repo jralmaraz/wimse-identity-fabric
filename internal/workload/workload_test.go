@@ -57,7 +57,7 @@ func makeRequest(t *testing.T, srv *httptest.Server, witToken, wptToken string) 
 		req.Header.Set(workload.HeaderWIT, witToken)
 	}
 	if wptToken != "" {
-		req.Header.Set(workload.HeaderWPT, wptToken)
+		req.Header.Set("Authorization", "WPT "+wptToken)
 	}
 	resp, err := srv.Client().Do(req)
 	if err != nil {
@@ -191,7 +191,11 @@ func TestClient_AttachesHeaders(t *testing.T) {
 	var capturedWIT, capturedWPT string
 	captureServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		capturedWIT = r.Header.Get(workload.HeaderWIT)
-		capturedWPT = r.Header.Get(workload.HeaderWPT)
+		// WPT-02: WPT is conveyed via Authorization: WPT <token>
+		auth := r.Header.Get("Authorization")
+		if strings.HasPrefix(auth, "WPT ") {
+			capturedWPT = strings.TrimPrefix(auth, "WPT ")
+		}
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer captureServer.Close()
