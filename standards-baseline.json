@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-09-02",
+  "last_checked": "2026-09-03",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -638,6 +638,30 @@
       "first_seen": "2026-09-01",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-chu-oauth-subject-key-binding/"
+    },
+    {
+      "id": "draft-ietf-oauth-attestation-based-client-auth",
+      "label": "OAuth 2.0 Attestation-Based Client Authentication",
+      "status": "discovered",
+      "first_seen": "2026-09-03",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-attestation-based-client-auth/"
+    },
+    {
+      "id": "draft-ietf-oauth-v2-1",
+      "label": "The OAuth 2.1 Authorization Framework",
+      "status": "discovered",
+      "first_seen": "2026-09-03",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/"
+    },
+    {
+      "id": "draft-kemp-oauth-x509-bearer",
+      "label": "X.509 Certificate Bearer Profile for OAuth 2.0 Client Authentication and Authorization Grants",
+      "status": "discovered",
+      "first_seen": "2026-09-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-kemp-oauth-x509-bearer/"
     }
   ]
 }
