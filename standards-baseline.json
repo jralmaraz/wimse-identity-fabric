@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-09-08",
+  "last_checked": "2026-09-09",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -25,7 +25,7 @@
         "federation",
         "connect"
       ],
-      "last_guid": "https://openid.net/?p=73237",
+      "last_guid": "https://openid.net/?p=73342",
       "note": "Catches OIDF spec publications, errata, and public review periods"
     }
   ],
@@ -479,7 +479,7 @@
       "label": "Identity Continuation Assertion for OAuth 2.0 Token Exchange",
       "short": "IDContinuation",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "01",
+      "last_known_rev": "02",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-id-continuation-assertion/",
@@ -662,6 +662,14 @@
       "first_seen": "2026-09-02",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-kemp-oauth-x509-bearer/"
+    },
+    {
+      "id": "draft-reddy-wimse-aggregate-signatures",
+      "label": "Aggregate Signatures for WIMSE Delegation-Chain Integrity",
+      "status": "discovered",
+      "first_seen": "2026-09-08",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-reddy-wimse-aggregate-signatures/"
     }
   ]
 }
