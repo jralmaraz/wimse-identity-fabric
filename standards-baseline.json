@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-09-10",
+  "last_checked": "2026-09-11",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -25,7 +25,7 @@
         "federation",
         "connect"
       ],
-      "last_guid": "https://openid.net/?p=73342",
+      "last_guid": "https://openid.net/?p=71644",
       "note": "Catches OIDF spec publications, errata, and public review periods"
     }
   ],
@@ -678,6 +678,14 @@
       "first_seen": "2026-09-09",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-klrc-aiagent-auth/"
+    },
+    {
+      "id": "draft-fletcher-oauth-txn-token-chaining-profile",
+      "label": "Transaction Token Authorization Grant Profile for OAuth Identity and Authorization Chaining",
+      "status": "discovered",
+      "first_seen": "2026-09-10",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-fletcher-oauth-txn-token-chaining-profile/"
     }
   ]
 }
