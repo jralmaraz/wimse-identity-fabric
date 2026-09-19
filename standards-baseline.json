@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-09-18",
+  "last_checked": "2026-09-19",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -182,7 +182,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-spiffe-client-auth/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-spiffe-client-auth/",
       "source_repo": "https://github.com/oauth-wg/oauth-spiffe-client-authentication",
-      "impact": "WIT used as JWT bearer client assertion (client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer) to authenticate to OAuth AS — eliminates shared secrets for workload-to-OAuth-AS authentication",
+      "impact": "WIT used as JWT bearer client assertion (client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer) to authenticate to OAuth AS \u2014 eliminates shared secrets for workload-to-OAuth-AS authentication",
       "used_in": [
         "pkg/spiffeclientauth"
       ]
@@ -236,7 +236,7 @@
       "source_repo": "https://github.com/ietf-wg-wimse",
       "impact": "Alternative to WPT (JWT-based) for workload-to-workload proof using RFC 9421 HTTP Message Signatures. Tracked for future variant of pkg/wpt if WG adopts as primary mechanism.",
       "used_in": [],
-      "_triage": "2026-09-18: WIMSE WG active-draft at rev-06 with no implementation. This is a gap — unlike individual monitor drafts, http-signature is a WG document on the standards track. Tracked for future pkg/httpsig implementation. See: needs its own tracking issue to prioritise relative to WPT."
+      "_triage": "2026-09-18: WIMSE WG active-draft at rev-06 with no implementation. This is a gap \u2014 unlike individual monitor drafts, http-signature is a WG document on the standards track. Tracked for future pkg/httpsig implementation. See: needs its own tracking issue to prioritise relative to WPT."
     },
     {
       "id": "draft-ietf-wimse-workload-identity-practices",
@@ -249,12 +249,12 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-identity-practices/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-workload-identity-practices/",
       "source_repo": null,
-      "impact": "Directly aligned with this PoC: documents best practices for SPIFFE-based workload identity, short-lived WPT credential issuance, cert rotation, and no long-lived secrets. Validates the workload credential model in pkg/wit and pkg/wpt. Note: draft explicitly covers industry practices independent of WIMSE architecture specs — a useful cross-reference.",
+      "impact": "Directly aligned with this PoC: documents best practices for SPIFFE-based workload identity, short-lived WPT credential issuance, cert rotation, and no long-lived secrets. Validates the workload credential model in pkg/wit and pkg/wpt. Note: draft explicitly covers industry practices independent of WIMSE architecture specs \u2014 a useful cross-reference.",
       "used_in": [
         "pkg/wit",
         "pkg/wpt"
       ],
-      "_triage": "2026-08-07: monitored. Best practices doc, not a protocol spec — primary home here in wimse-identity-fabric. Validates existing design choices. No implementation needed."
+      "_triage": "2026-08-07: monitored. Best practices doc, not a protocol spec \u2014 primary home here in wimse-identity-fabric. Validates existing design choices. No implementation needed."
     },
     {
       "id": "draft-gazitt-oauth-authzen-token-exchange",
@@ -267,7 +267,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-gazitt-oauth-authzen-token-exchange/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-gazitt-oauth-authzen-token-exchange/",
       "source_repo": null,
-      "impact": "Externalises the AS policy decision in WPT Token Exchange to an AuthZEN PDP API. Relevant to pkg/tokenexchange: the 'which workload may exchange a WIT for a WPT targeting which audience' decision is exactly the policy seam this draft formalises. Rev 00 — monitor for when the WG adopts; implementation would add an AuthZEN client to the token exchange endpoint.",
+      "impact": "Externalises the AS policy decision in WPT Token Exchange to an AuthZEN PDP API. Relevant to pkg/tokenexchange: the 'which workload may exchange a WIT for a WPT targeting which audience' decision is exactly the policy seam this draft formalises. Rev 00 \u2014 monitor for when the WG adopts; implementation would add an AuthZEN client to the token exchange endpoint.",
       "used_in": [
         "pkg/tokenexchange",
         "pkg/txntoken",
@@ -286,7 +286,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-gazitt-oauth-authzen-issuance/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-gazitt-oauth-authzen-issuance/",
       "source_repo": null,
-      "impact": "Parent spec defining the AuthZEN five-tuple (subject, resource, action, context, environment) for externalising OAuth token issuance decisions to a PDP. Companion to AuthZEN-TE. Rev 00 — monitor.",
+      "impact": "Parent spec defining the AuthZEN five-tuple (subject, resource, action, context, environment) for externalising OAuth token issuance decisions to a PDP. Companion to AuthZEN-TE. Rev 00 \u2014 monitor.",
       "used_in": [
         "pkg/tokenexchange"
       ],
@@ -303,12 +303,12 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-reece-wimse-cross-org-delegation/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-reece-wimse-cross-org-delegation/",
       "source_repo": null,
-      "impact": "Formalises cross-org delegation requirements — informs Phase 4 Token Exchange (internal/exchange) and Identity Chaining scenario.",
+      "impact": "Formalises cross-org delegation requirements \u2014 informs Phase 4 Token Exchange (internal/exchange) and Identity Chaining scenario.",
       "used_in": [
         "pkg/identitychaining",
         "internal/exchange"
       ],
-      "_triage": "2026-09-18: rev-02 read. Pure problem-statement + requirements doc — defines no new token types, claims, or wire formats. Confirms the multi-trust-domain delegation gap that identity chaining + token exchange address. No code change needed. Continue monitoring for when the WG issues a companion mechanism draft."
+      "_triage": "2026-09-18: rev-02 read. Pure problem-statement + requirements doc \u2014 defines no new token types, claims, or wire formats. Confirms the multi-trust-domain delegation gap that identity chaining + token exchange address. No code change needed. Continue monitoring for when the WG issues a companion mechanism draft."
     },
     {
       "id": "draft-ietf-oauth-sd-jwt-vc",
@@ -321,7 +321,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-sd-jwt-vc/",
       "source_repo": "https://github.com/oauth-wg/oauth-sd-jwt-vc",
-      "impact": "SD-JWT VC uses base SD-JWT for credential presentation (human-facing). Our pkg/sdwit uses base SD-JWT for M2M privacy (SD-WIT, typ=wit+sd-jwt) — intentionally NOT SD-JWT VC format. Distinction noted in Ch7 demo.",
+      "impact": "SD-JWT VC uses base SD-JWT for credential presentation (human-facing). Our pkg/sdwit uses base SD-JWT for M2M privacy (SD-WIT, typ=wit+sd-jwt) \u2014 intentionally NOT SD-JWT VC format. Distinction noted in Ch7 demo.",
       "used_in": [],
       "_triage": "2026-09-18: at rev-19. Confirmed not-applicable: pkg/sdwit uses base SD-JWT for M2M workload privacy (SD-WIT, typ=wit+sd-jwt), not the SD-JWT VC credential presentation format. Distinction documented in Ch7 demo. No implementation needed."
     },
@@ -336,7 +336,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-sharma-oauth-identity-propagation-context/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-sharma-oauth-identity-propagation-context/",
       "source_repo": null,
-      "impact": "Multi-hop identity propagation context — augments Ch8 Token Exchange and Identity Chaining scenarios. Tracked for future extension of pkg/identitychaining.",
+      "impact": "Multi-hop identity propagation context \u2014 augments Ch8 Token Exchange and Identity Chaining scenarios. Tracked for future extension of pkg/identitychaining.",
       "used_in": [
         "pkg/identitychaining",
         "internal/exchange"
@@ -353,7 +353,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-sweeney-wimse-credential-delegation/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-sweeney-wimse-credential-delegation/",
       "source_repo": null,
-      "impact": "Formalises credential delegation semantics for AI agents across WIMSE trust domains — directly adjacent to the AgentChain and cross-domain delegation patterns. Monitor for WG adoption; if adopted would inform internal/exchange and identity-chaining cross-domain scenarios.",
+      "impact": "Formalises credential delegation semantics for AI agents across WIMSE trust domains \u2014 directly adjacent to the AgentChain and cross-domain delegation patterns. Monitor for WG adoption; if adopted would inform internal/exchange and identity-chaining cross-domain scenarios.",
       "used_in": [],
       "_triage": "2026-08-04: assessed in issue #4. Individual draft, relevant, no implementation change needed yet."
     },
@@ -368,7 +368,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-richer-oauth-httpsig/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-richer-oauth-httpsig/",
       "source_repo": null,
-      "impact": "RFC 9421 HTTP Message Signatures as OAuth PoP mechanism — same design space as WPT per-request proof but using HTTP Signatures rather than a separate proof JWT. Complements draft-ietf-wimse-http-signature. Monitor: if WG adopts this direction it could affect the long-term role of WPT.",
+      "impact": "RFC 9421 HTTP Message Signatures as OAuth PoP mechanism \u2014 same design space as WPT per-request proof but using HTTP Signatures rather than a separate proof JWT. Complements draft-ietf-wimse-http-signature. Monitor: if WG adopts this direction it could affect the long-term role of WPT.",
       "used_in": [],
       "_triage": "2026-08-04: assessed in issue #4. Relevant to WPT design space, monitor only."
     },
@@ -398,7 +398,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-li-oauth-delegated-authorization/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-li-oauth-delegated-authorization/",
       "source_repo": null,
-      "impact": "OAuth delegated authorization patterns — could inform cross-domain token exchange (internal/exchange) and identity chaining scenarios. Monitor for M2M delegation relevance.",
+      "impact": "OAuth delegated authorization patterns \u2014 could inform cross-domain token exchange (internal/exchange) and identity chaining scenarios. Monitor for M2M delegation relevance.",
       "used_in": [],
       "_triage": "2026-08-04: assessed in issue #4. Low-medium relevance, monitor only."
     },
@@ -428,9 +428,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-cross-device-security/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Human cross-device authentication flows (TV/IoT login). Not applicable — PoC focuses on M2M workload identity, not human-facing authentication.",
+      "impact": "Human cross-device authentication flows (TV/IoT login). Not applicable \u2014 PoC focuses on M2M workload identity, not human-facing authentication.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     },
     {
       "id": "draft-bandyopadhayaya-oauth-ciba-push-binding",
@@ -443,9 +443,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-bandyopadhayaya-oauth-ciba-push-binding/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Client Initiated Backchannel Authentication (CIBA) for human authentication via decoupled device. Not applicable — human-facing flow.",
+      "impact": "Client Initiated Backchannel Authentication (CIBA) for human authentication via decoupled device. Not applicable \u2014 human-facing flow.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     },
     {
       "id": "draft-bandyopadhayaya-oauth-push-device",
@@ -458,9 +458,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-bandyopadhayaya-oauth-push-device/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Device lifecycle for CIBA push-based human authentication. Not applicable — human-facing flow.",
+      "impact": "Device lifecycle for CIBA push-based human authentication. Not applicable \u2014 human-facing flow.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     },
     {
       "id": "draft-parecki-oauth-refresh-token-scope-response",
@@ -473,9 +473,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-parecki-oauth-refresh-token-scope-response/",
       "api_url": null,
       "source_repo": null,
-      "impact": "Refresh token scope response for human OAuth clients. Not applicable — WIMSE workloads use short-lived token re-issuance, not refresh token flows.",
+      "impact": "Refresh token scope response for human OAuth clients. Not applicable \u2014 WIMSE workloads use short-lived token re-issuance, not refresh token flows.",
       "used_in": [],
-      "_triage": "2026-08-04: assessed in issue #4. Dismissed — not relevant to M2M workload identity."
+      "_triage": "2026-08-04: assessed in issue #4. Dismissed \u2014 not relevant to M2M workload identity."
     },
     {
       "id": "draft-mcguinness-oauth-id-continuation-assertion",
@@ -488,9 +488,9 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-id-continuation-assertion/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-mcguinness-oauth-id-continuation-assertion/",
       "source_repo": null,
-      "impact": "Defines an Identity Continuation Assertion (typ: oauth-identity-continuation+jwt, claims: identity_continuation_handle, act, cnf.jkt, jti, exp ≤300s) enabling intermediate workloads to obtain audience-specific user identity tokens without re-authentication, layered on RFC 8693 Token Exchange. Adjacent to pkg/identitychaining (jwt-authz-grant) and internal/exchange — but focuses on pairwise *user* subject propagation across IdP boundaries, not workload/SPIFFE identity. Monitor: if pattern gains WG traction it could complement or formalise cross-domain identity chaining.",
+      "impact": "Defines an Identity Continuation Assertion (typ: oauth-identity-continuation+jwt, claims: identity_continuation_handle, act, cnf.jkt, jti, exp \u2264300s) enabling intermediate workloads to obtain audience-specific user identity tokens without re-authentication, layered on RFC 8693 Token Exchange. Adjacent to pkg/identitychaining (jwt-authz-grant) and internal/exchange \u2014 but focuses on pairwise *user* subject propagation across IdP boundaries, not workload/SPIFFE identity. Monitor: if pattern gains WG traction it could complement or formalise cross-domain identity chaining.",
       "used_in": [],
-      "_triage": "2026-08-05: assessed in issue #8. Addresses user (pairwise) subject propagation — different problem space from WIT workload identity. No implementation change needed; monitor for convergence with identity chaining."
+      "_triage": "2026-08-05: assessed in issue #8. Addresses user (pairwise) subject propagation \u2014 different problem space from WIT workload identity. No implementation change needed; monitor for convergence with identity chaining."
     },
     {
       "id": "draft-hardt-oauth-aauth-protocol",
@@ -503,7 +503,7 @@
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-hardt-oauth-aauth-protocol/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-hardt-oauth-aauth-protocol/",
       "source_repo": null,
-      "impact": "OUT OF SCOPE for this workload identity PoC. AAuth is AI-agent-specific authorization — how agents request delegated permissions for sub-tasks. Primary coverage is in the wimse-agent-fabric PoC. No implementation planned here.",
+      "impact": "OUT OF SCOPE for this workload identity PoC. AAuth is AI-agent-specific authorization \u2014 how agents request delegated permissions for sub-tasks. Primary coverage is in the wimse-agent-fabric PoC. No implementation planned here.",
       "used_in": []
     },
     {
@@ -512,7 +512,7 @@
       "status": "not-applicable",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-chen-oauth-agent-authz-use-cases/",
-      "_triage": "2026-09-18: AI agent authz use cases — wimse-agent-fabric territory.",
+      "_triage": "2026-09-18: AI agent authz use cases \u2014 wimse-agent-fabric territory.",
       "last_known_rev": "01"
     },
     {
@@ -521,7 +521,7 @@
       "status": "not-applicable",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-browser-based-apps/",
-      "_triage": "2026-09-18: Browser-based human authentication flows — not M2M workload identity.",
+      "_triage": "2026-09-18: Browser-based human authentication flows \u2014 not M2M workload identity.",
       "last_known_rev": "23"
     },
     {
@@ -546,7 +546,7 @@
       "last_known_rev": "00",
       "implemented_rev": null,
       "source_repo": null,
-      "impact": "Authorization request delegation chain — formalises delegation context in authorization requests. Adjacent to identity chaining and cross-org delegation scenarios.",
+      "impact": "Authorization request delegation chain \u2014 formalises delegation context in authorization requests. Adjacent to identity chaining and cross-org delegation scenarios.",
       "used_in": [
         "pkg/identitychaining"
       ],
@@ -563,7 +563,7 @@
       "implemented_rev": null,
       "api_url": null,
       "source_repo": null,
-      "impact": "Multi-step AI agent scope aggregation across OAuth servers. Not applicable to this workload identity PoC — AI agent authorization scope is wimse-agent-fabric territory.",
+      "impact": "Multi-step AI agent scope aggregation across OAuth servers. Not applicable to this workload identity PoC \u2014 AI agent authorization scope is wimse-agent-fabric territory.",
       "used_in": [],
       "_triage": "2026-09-18: AI agent authorization scope aggregation. Out of scope for wimse-identity-fabric."
     },
@@ -578,11 +578,11 @@
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-rfc7523bis/",
       "source_repo": "https://github.com/oauth-wg/oauth-jwt-bearer",
-      "impact": "Tightens aud claim for client authentication JWTs: aud MUST be the AS issuer identifier URL, NOT the token endpoint URL. Introduces typ: \"client-authentication+jwt\". IMPORTANT: pkg/spiffeclientauth uses WIT (typ=wit+jwt) as client_assertion per draft-ietf-oauth-spiffe-client-auth — no direct impact now, but monitor: if spiffe-client-auth updates to require rfc7523bis aud constraints the WIT's aud value at the token endpoint would need to match the AS issuer ID.",
+      "impact": "Tightens aud claim for client authentication JWTs: aud MUST be the AS issuer identifier URL, NOT the token endpoint URL. Introduces typ: \"client-authentication+jwt\". IMPORTANT: pkg/spiffeclientauth uses WIT (typ=wit+jwt) as client_assertion per draft-ietf-oauth-spiffe-client-auth \u2014 no direct impact now, but monitor: if spiffe-client-auth updates to require rfc7523bis aud constraints the WIT's aud value at the token endpoint would need to match the AS issuer ID.",
       "used_in": [
         "pkg/spiffeclientauth"
       ],
-      "_triage": "2026-09-18: active-draft at rev-11. aud tightening for client-auth JWTs. No immediate code change — PoC uses WIT-as-assertion (its own typ), not the new client-authentication+jwt typ. Monitor for convergence with spiffe-client-auth draft."
+      "_triage": "2026-09-18: active-draft at rev-11. aud tightening for client-auth JWTs. No immediate code change \u2014 PoC uses WIT-as-assertion (its own typ), not the new client-authentication+jwt typ. Monitor for convergence with spiffe-client-auth draft."
     },
     {
       "id": "draft-ietf-oauth-status-list",
@@ -591,13 +591,13 @@
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/",
       "short": "TokenStatusList",
-      "last_known_rev": "07",
+      "last_known_rev": "21",
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-status-list/",
       "source_repo": "https://github.com/oauth-wg/oauth-status-list",
-      "impact": "Defines a status claim in WIT/WPT tokens pointing to a revocation bitmap endpoint. Currently PoC has no WIT revocation mechanism — short TTL is the primary defence. Monitor: if deployment scenarios require revocation before TTL expiry, TSL is the likely mechanism.",
+      "impact": "Defines a status claim in WIT/WPT tokens pointing to a revocation bitmap endpoint. Currently PoC has no WIT revocation mechanism \u2014 short TTL is the primary defence. Monitor: if deployment scenarios require revocation before TTL expiry, TSL is the likely mechanism.",
       "used_in": [],
-      "_triage": "2026-09-18: WG document, active-draft. No immediate implementation — short-lived WIT model (5 min TTL) makes hard revocation optional. Track for future revocation scenarios."
+      "_triage": "2026-09-18: WG document, active-draft. No immediate implementation \u2014 short-lived WIT model (5 min TTL) makes hard revocation optional. Track for future revocation scenarios."
     },
     {
       "id": "draft-winmagic-oauth-condition-bound-keys",
@@ -606,11 +606,11 @@
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-winmagic-oauth-condition-bound-keys/",
       "short": "ConditionBoundKeys",
-      "last_known_rev": "01",
+      "last_known_rev": "00",
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-winmagic-oauth-condition-bound-keys/",
       "source_repo": null,
-      "impact": "Non-exfiltratable keys bound to presence/condition constraints — keys physically cannot leave the workload. Adjacent to pkg/keys/mtls.go and WPT cnf binding. Highly relevant if deployed in regulated or high-threat environments where key exfiltration is the primary risk.",
+      "impact": "Non-exfiltratable keys bound to presence/condition constraints \u2014 keys physically cannot leave the workload. Adjacent to pkg/keys/mtls.go and WPT cnf binding. Highly relevant if deployed in regulated or high-threat environments where key exfiltration is the primary risk.",
       "used_in": [],
       "_triage": "2026-09-18: individual-draft, early stage. Relevant design direction for hardware-backed workload keys. Monitor for WG adoption."
     },
@@ -623,7 +623,7 @@
       "last_known_rev": "00",
       "implemented_rev": null,
       "source_repo": null,
-      "impact": "AuthZEN claims in JWT access tokens — companion to AuthZEN-TE and AuthZEN-Issuance. Monitor alongside those drafts.",
+      "impact": "AuthZEN claims in JWT access tokens \u2014 companion to AuthZEN-TE and AuthZEN-Issuance. Monitor alongside those drafts.",
       "used_in": [
         "pkg/tokenexchange"
       ],
@@ -635,7 +635,7 @@
       "status": "not-applicable",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ekahraman-oauth-attestation-authz-native-app/",
-      "_triage": "2026-09-18: Attestation-based authz for native (human) apps — not applicable to M2M workload identity.",
+      "_triage": "2026-09-18: Attestation-based authz for native (human) apps \u2014 not applicable to M2M workload identity.",
       "last_known_rev": "00"
     },
     {
@@ -657,7 +657,7 @@
       "status": "not-applicable",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-asor-wimse-agent-delegation-chain/",
-      "_triage": "2026-09-18: Verifiable attenuated delegation for AI agent chains — wimse-agent-fabric territory.",
+      "_triage": "2026-09-18: Verifiable attenuated delegation for AI agent chains \u2014 wimse-agent-fabric territory.",
       "last_known_rev": "01"
     },
     {
@@ -666,7 +666,7 @@
       "status": "not-applicable",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-first-party-apps/",
-      "_triage": "2026-09-18: First-party human OAuth flows — not M2M workload identity.",
+      "_triage": "2026-09-18: First-party human OAuth flows \u2014 not M2M workload identity.",
       "last_known_rev": "07"
     },
     {
@@ -675,7 +675,7 @@
       "status": "not-applicable",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-li-oauth-policy-based-anonymous-tokens/",
-      "_triage": "2026-09-18: Privacy-preserving anonymous access tokens for human subjects — not applicable.",
+      "_triage": "2026-09-18: Privacy-preserving anonymous access tokens for human subjects \u2014 not applicable.",
       "last_known_rev": "00"
     },
     {
@@ -684,7 +684,7 @@
       "status": "not-applicable",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-mishra-oauth-agent-grants/",
-      "_triage": "2026-09-18: AI agent OAuth delegation grants — wimse-agent-fabric territory.",
+      "_triage": "2026-09-18: AI agent OAuth delegation grants \u2014 wimse-agent-fabric territory.",
       "last_known_rev": "00"
     },
     {
@@ -698,7 +698,7 @@
       "implemented_rev": null,
       "api_url": null,
       "source_repo": null,
-      "impact": "Attenuated delegation profile for AI agents — capability-restricted delegation tokens for sub-agents. Out of scope here; primary coverage in wimse-agent-fabric PoC.",
+      "impact": "Attenuated delegation profile for AI agents \u2014 capability-restricted delegation tokens for sub-agents. Out of scope here; primary coverage in wimse-agent-fabric PoC.",
       "used_in": [],
       "_triage": "2026-09-18: AI agent delegation, attenuated authority. wimse-agent-fabric territory."
     },
@@ -713,9 +713,9 @@
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-chu-oauth-subject-key-binding/",
       "source_repo": null,
-      "impact": "Defines subject_keys JWK Set claim in JWT access tokens — distinct from cnf (sender-constraining). Enables RS to verify authorization evidence signed by the subject, not just sender-constrained PoP. Adjacent to WPT cnf binding but different use case. Low immediate relevance; monitor.",
+      "impact": "Defines subject_keys JWK Set claim in JWT access tokens \u2014 distinct from cnf (sender-constraining). Enables RS to verify authorization evidence signed by the subject, not just sender-constrained PoP. Adjacent to WPT cnf binding but different use case. Low immediate relevance; monitor.",
       "used_in": [],
-      "_triage": "2026-09-18: individual-draft -00. subject_keys vs cnf distinction is important but no implementation needed — WPT cnf binding is sender-constraining, not subject-signing. Monitor."
+      "_triage": "2026-09-18: individual-draft -00. subject_keys vs cnf distinction is important but no implementation needed \u2014 WPT cnf binding is sender-constraining, not subject-signing. Monitor."
     },
     {
       "id": "draft-ietf-oauth-attestation-based-client-auth",
@@ -723,11 +723,11 @@
       "status": "active-draft",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-attestation-based-client-auth/",
-      "last_known_rev": "04",
+      "last_known_rev": "11",
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-attestation-based-client-auth/",
       "source_repo": null,
-      "impact": "WG document defining attestation-based client authentication (client-attestation+jwt). Directly adjacent to pkg/spiffeclientauth — workload attestation evidence could replace or augment WIT-based client auth. Monitor closely.",
+      "impact": "WG document defining attestation-based client authentication (client-attestation+jwt). Directly adjacent to pkg/spiffeclientauth \u2014 workload attestation evidence could replace or augment WIT-based client auth. Monitor closely.",
       "used_in": [
         "pkg/spiffeclientauth"
       ],
@@ -739,16 +739,16 @@
       "status": "active-draft",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/",
-      "last_known_rev": "12",
+      "last_known_rev": "16",
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-v2-1/",
       "source_repo": null,
-      "impact": "OAuth 2.1 consolidation — removes implicit flow, mandates PKCE, tightens redirect URI validation. Underpins all OAuth-based specs here. Monitor: if AS implementations update to OAuth 2.1-only, check token exchange and client credentials flows.",
+      "impact": "OAuth 2.1 consolidation \u2014 removes implicit flow, mandates PKCE, tightens redirect URI validation. Underpins all OAuth-based specs here. Monitor: if AS implementations update to OAuth 2.1-only, check token exchange and client credentials flows.",
       "used_in": [
         "internal/exchange",
         "internal/idp"
       ],
-      "_triage": "2026-09-18: base spec update. No immediate code change — PoC uses client_credentials + token exchange, both retained in 2.1. Monitor for breaking changes."
+      "_triage": "2026-09-18: base spec update. No immediate code change \u2014 PoC uses client_credentials + token exchange, both retained in 2.1. Monitor for breaking changes."
     },
     {
       "id": "draft-kemp-oauth-x509-bearer",
@@ -759,7 +759,7 @@
       "last_known_rev": "00",
       "implemented_rev": null,
       "source_repo": null,
-      "impact": "X.509 certificate bearer profile for OAuth client auth — adjacent to mTLS binding in pkg/keys/mtls.go. Monitor for convergence with WIMSE mTLS spec.",
+      "impact": "X.509 certificate bearer profile for OAuth client auth \u2014 adjacent to mTLS binding in pkg/keys/mtls.go. Monitor for convergence with WIMSE mTLS spec.",
       "used_in": [
         "pkg/keys"
       ],
@@ -789,7 +789,7 @@
       "status": "not-applicable",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-klrc-aiagent-auth/",
-      "_triage": "2026-09-18: AI Agent Authentication and Authorization — wimse-agent-fabric territory.",
+      "_triage": "2026-09-18: AI Agent Authentication and Authorization \u2014 wimse-agent-fabric territory.",
       "last_known_rev": "00"
     },
     {
@@ -801,7 +801,7 @@
       "last_known_rev": "00",
       "implemented_rev": null,
       "source_repo": null,
-      "impact": "Transaction Token Authorization Grant Profile for OAuth identity and authorization chaining. Directly relevant to pkg/txntoken and internal/exchange — formalises how Txn-Tokens chain across OAuth AS boundaries. Monitor for convergence with draft-ietf-oauth-transaction-tokens.",
+      "impact": "Transaction Token Authorization Grant Profile for OAuth identity and authorization chaining. Directly relevant to pkg/txntoken and internal/exchange \u2014 formalises how Txn-Tokens chain across OAuth AS boundaries. Monitor for convergence with draft-ietf-oauth-transaction-tokens.",
       "used_in": [
         "pkg/txntoken",
         "internal/exchange"
@@ -817,7 +817,7 @@
       "last_known_rev": "00",
       "implemented_rev": null,
       "source_repo": null,
-      "impact": "Authorization Posture Mechanism — per-transaction consistency check for OAuth flows. Could complement token exchange in multi-hop scenarios. Monitor.",
+      "impact": "Authorization Posture Mechanism \u2014 per-transaction consistency check for OAuth flows. Could complement token exchange in multi-hop scenarios. Monitor.",
       "used_in": [],
       "_triage": "2026-09-18: individual draft at -00. Novel per-transaction posture concept. Monitor."
     },
@@ -827,7 +827,7 @@
       "status": "not-applicable",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-watts-oauth-agent-revocation-closure/",
-      "_triage": "2026-09-18: Revocation closure for agentic authorization — wimse-agent-fabric territory.",
+      "_triage": "2026-09-18: Revocation closure for agentic authorization \u2014 wimse-agent-fabric territory.",
       "last_known_rev": "00"
     },
     {
@@ -840,9 +840,9 @@
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-aims/",
       "source_repo": null,
-      "impact": "WIMSE WG newly adopted draft on AI Identity Management System. Extends WIMSE workload identity model to AI agent deployments — high relevance to agent fabric but also informs how identity fabric handles AI workloads. Monitor closely as it matures.",
+      "impact": "WIMSE WG newly adopted draft on AI Identity Management System. Extends WIMSE workload identity model to AI agent deployments \u2014 high relevance to agent fabric but also informs how identity fabric handles AI workloads. Monitor closely as it matures.",
       "used_in": [],
-      "_triage": "2026-09-18: newly adopted WIMSE WG document at -00. AI identity management — relevant to both fabric PoCs. Monitor."
+      "_triage": "2026-09-18: newly adopted WIMSE WG document at -00. AI identity management \u2014 relevant to both fabric PoCs. Monitor."
     },
     {
       "id": "draft-ietf-oauth-deferred-token-response",
@@ -853,11 +853,19 @@
       "last_known_rev": "00",
       "implemented_rev": null,
       "source_repo": null,
-      "impact": "Deferred token response for async token issuance — relevant if token exchange needs async policy evaluation (e.g., AuthZEN PDP with latency). Monitor.",
+      "impact": "Deferred token response for async token issuance \u2014 relevant if token exchange needs async policy evaluation (e.g., AuthZEN PDP with latency). Monitor.",
       "used_in": [
         "internal/exchange"
       ],
-      "_triage": "2026-09-18: async token response pattern. Low immediate relevance — synchronous exchange today. Monitor."
+      "_triage": "2026-09-18: async token response pattern. Low immediate relevance \u2014 synchronous exchange today. Monitor."
+    },
+    {
+      "id": "draft-seymour-wimse-connected-flight",
+      "label": "Zero Trust Fabric Layer Agent-to-Agent Chained Trust on a Connected Flight",
+      "status": "discovered",
+      "first_seen": "2026-09-18",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-seymour-wimse-connected-flight/"
     }
   ]
 }
