@@ -1,4 +1,4 @@
-module github.com/example/wimse-identity-fabric
+module github.com/jralmaraz/wimse-identity-fabric
 
 go 1.26.6
 

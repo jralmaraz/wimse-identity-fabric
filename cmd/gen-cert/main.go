@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/example/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
 )
 
 func main() {

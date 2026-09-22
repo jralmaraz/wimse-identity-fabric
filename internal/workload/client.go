@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/example/wimse-identity-fabric/pkg/wpt"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wpt"
 )
 
 // Client wraps an mTLS http.Client and automatically attaches WIT+WPT on each request.

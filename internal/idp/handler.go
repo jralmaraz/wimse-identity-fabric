@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/pkg/federation"
-	"github.com/example/wimse-identity-fabric/pkg/keys"
-	"github.com/example/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/federation"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
 	"github.com/gin-gonic/gin"
 )
 

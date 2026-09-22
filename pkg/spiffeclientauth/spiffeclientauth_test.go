@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/pkg/keys"
-	"github.com/example/wimse-identity-fabric/pkg/spiffeclientauth"
-	"github.com/example/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/spiffeclientauth"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
 )
 
 const (

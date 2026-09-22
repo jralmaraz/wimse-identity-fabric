@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
 	"github.com/golang-jwt/jwt/v5"
 )
 

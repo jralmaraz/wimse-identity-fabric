@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
-	"github.com/example/wimse-identity-fabric/pkg/federation"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/federation"
 )
 
 // TrustPolicy defines allowed cross-domain subject mappings.
