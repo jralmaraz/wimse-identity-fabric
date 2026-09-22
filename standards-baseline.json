@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-09-21",
+  "last_checked": "2026-09-22",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -243,7 +243,7 @@
       "label": "WIMSE Workload Identity Practices",
       "short": "WI-Practices",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "06",
+      "last_known_rev": "07",
       "implemented_rev": "06",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-identity-practices/",
@@ -866,6 +866,30 @@
       "first_seen": "2026-09-18",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-seymour-wimse-connected-flight/"
+    },
+    {
+      "id": "draft-jackson-wimse-evaluation",
+      "label": "Verifier-Side Evaluation Semantics for Delegated Authority Chains",
+      "status": "discovered",
+      "first_seen": "2026-09-22",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-jackson-wimse-evaluation/"
+    },
+    {
+      "id": "draft-atakora-wimse-sadp-delegation",
+      "label": "Capability-Bound Delegation Chains with Scoped Context Disclosure for AI Agents",
+      "status": "discovered",
+      "first_seen": "2026-09-21",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-atakora-wimse-sadp-delegation/"
+    },
+    {
+      "id": "draft-gilda-wimse-agent-audit-record",
+      "label": "An Audit Record Format for AI Agent Authorization Decisions",
+      "status": "discovered",
+      "first_seen": "2026-09-21",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-gilda-wimse-agent-audit-record/"
     }
   ]
 }
