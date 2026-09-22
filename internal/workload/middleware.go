@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/example/wimse-identity-fabric/pkg/wit"
-	"github.com/example/wimse-identity-fabric/pkg/wpt"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wpt"
 	"github.com/gin-gonic/gin"
 )
 

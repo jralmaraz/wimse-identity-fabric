@@ -16,11 +16,11 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/pkg/federation"
-	"github.com/example/wimse-identity-fabric/pkg/keys"
-	"github.com/example/wimse-identity-fabric/pkg/sdwit"
-	"github.com/example/wimse-identity-fabric/pkg/wit"
-	"github.com/example/wimse-identity-fabric/pkg/wpt"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/federation"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/sdwit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wpt"
 )
 
 // ---------- global demo state ----------

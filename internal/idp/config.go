@@ -3,7 +3,7 @@ package idp
 import (
 	"time"
 
-	"github.com/example/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
 )
 
 // IdPConfig holds configuration for the Identity Provider.

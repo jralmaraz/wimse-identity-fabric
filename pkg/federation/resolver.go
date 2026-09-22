@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
 )
 
 // ResolvedEntity holds the verified public keys for an entity and when they expire.

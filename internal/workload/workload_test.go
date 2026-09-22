@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/internal/workload"
-	"github.com/example/wimse-identity-fabric/pkg/keys"
-	"github.com/example/wimse-identity-fabric/pkg/wit"
-	"github.com/example/wimse-identity-fabric/pkg/wpt"
+	"github.com/jralmaraz/wimse-identity-fabric/internal/workload"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wpt"
 )
 
 const (

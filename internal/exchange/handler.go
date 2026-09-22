@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
 	"github.com/gin-gonic/gin"
 )
 

@@ -12,9 +12,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/example/wimse-identity-fabric/internal/exchange"
-	"github.com/example/wimse-identity-fabric/pkg/keys"
-	"github.com/example/wimse-identity-fabric/pkg/wit"
+	"github.com/jralmaraz/wimse-identity-fabric/internal/exchange"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
 )
 
 func main() {
