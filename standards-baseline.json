@@ -236,7 +236,8 @@
       "source_repo": "https://github.com/ietf-wg-wimse",
       "impact": "Alternative to WPT (JWT-based) for workload-to-workload proof using RFC 9421 HTTP Message Signatures. Tracked for future variant of pkg/wpt if WG adopts as primary mechanism.",
       "used_in": [],
-      "_triage": "2026-09-18: WIMSE WG active-draft at rev-06 with no implementation. This is a gap \u2014 unlike individual monitor drafts, http-signature is a WG document on the standards track. Tracked for future pkg/httpsig implementation. See: needs its own tracking issue to prioritise relative to WPT."
+      "_triage": "2026-09-18: WIMSE WG active-draft at rev-06 with no implementation. This is a gap \u2014 unlike individual monitor drafts, http-signature is a WG document on the standards track. Tracked for future pkg/httpsig implementation. See: needs its own tracking issue to prioritise relative to WPT.",
+      "last": "07"
     },
     {
       "id": "draft-ietf-wimse-workload-identity-practices",
@@ -597,7 +598,8 @@
       "source_repo": "https://github.com/oauth-wg/oauth-status-list",
       "impact": "Defines a status claim in WIT/WPT tokens pointing to a revocation bitmap endpoint. Currently PoC has no WIT revocation mechanism \u2014 short TTL is the primary defence. Monitor: if deployment scenarios require revocation before TTL expiry, TSL is the likely mechanism.",
       "used_in": [],
-      "_triage": "2026-09-18: WG document, active-draft. No immediate implementation \u2014 short-lived WIT model (5 min TTL) makes hard revocation optional. Track for future revocation scenarios."
+      "_triage": "2026-09-18: WG document, active-draft. No immediate implementation \u2014 short-lived WIT model (5 min TTL) makes hard revocation optional. Track for future revocation scenarios.",
+      "last": "21"
     },
     {
       "id": "draft-winmagic-oauth-condition-bound-keys",
@@ -612,7 +614,8 @@
       "source_repo": null,
       "impact": "Non-exfiltratable keys bound to presence/condition constraints \u2014 keys physically cannot leave the workload. Adjacent to pkg/keys/mtls.go and WPT cnf binding. Highly relevant if deployed in regulated or high-threat environments where key exfiltration is the primary risk.",
       "used_in": [],
-      "_triage": "2026-09-18: individual-draft, early stage. Relevant design direction for hardware-backed workload keys. Monitor for WG adoption."
+      "_triage": "2026-09-18: individual-draft, early stage. Relevant design direction for hardware-backed workload keys. Monitor for WG adoption.",
+      "last": "00"
     },
     {
       "id": "draft-gazitt-oauth-authzen-claims",
@@ -731,7 +734,8 @@
       "used_in": [
         "pkg/spiffeclientauth"
       ],
-      "_triage": "2026-09-18: active-draft WG document. Close design space to spiffe-client-auth and rfc7523bis. Track for potential future replacement of WIT-as-assertion pattern."
+      "_triage": "2026-09-18: active-draft WG document. Close design space to spiffe-client-auth and rfc7523bis. Track for potential future replacement of WIT-as-assertion pattern.",
+      "last": "11"
     },
     {
       "id": "draft-ietf-oauth-v2-1",
@@ -748,7 +752,8 @@
         "internal/exchange",
         "internal/idp"
       ],
-      "_triage": "2026-09-18: base spec update. No immediate code change \u2014 PoC uses client_credentials + token exchange, both retained in 2.1. Monitor for breaking changes."
+      "_triage": "2026-09-18: base spec update. No immediate code change \u2014 PoC uses client_credentials + token exchange, both retained in 2.1. Monitor for breaking changes.",
+      "last": "16"
     },
     {
       "id": "draft-kemp-oauth-x509-bearer",
