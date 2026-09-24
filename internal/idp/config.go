@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/ssf"
 )
 
 // IdPConfig holds configuration for the Identity Provider.
@@ -26,6 +27,9 @@ type IdPConfig struct {
 	// TrustAnchorSubjects maps subject entity IDs to their Subordinate Statement JWTs.
 	// Populated when this IdP also acts as a Trust Anchor for other entities.
 	TrustAnchorSubjects map[string]string // subjectID → signed SS JWT
+
+	// SSFTransmitter, when set, receives CAEP events on WIT lifecycle changes.
+	SSFTransmitter *ssf.Transmitter
 }
 
 // subjectAllowed reports whether the given subject is permitted.
