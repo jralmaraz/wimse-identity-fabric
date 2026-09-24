@@ -255,7 +255,8 @@
         "pkg/wit",
         "pkg/wpt"
       ],
-      "_triage": "2026-08-07: monitored. Best practices doc, not a protocol spec \u2014 primary home here in wimse-identity-fabric. Validates existing design choices. No implementation needed."
+      "_triage": "2026-08-07: monitored. Best practices doc, not a protocol spec \u2014 primary home here in wimse-identity-fabric. Validates existing design choices. No implementation needed.",
+      "last": "07"
     },
     {
       "id": "draft-gazitt-oauth-authzen-token-exchange",
@@ -847,7 +848,8 @@
       "source_repo": null,
       "impact": "WIMSE WG newly adopted draft on AI Identity Management System. Extends WIMSE workload identity model to AI agent deployments \u2014 high relevance to agent fabric but also informs how identity fabric handles AI workloads. Monitor closely as it matures.",
       "used_in": [],
-      "_triage": "2026-09-18: newly adopted WIMSE WG document at -00. AI identity management \u2014 relevant to both fabric PoCs. Monitor."
+      "_triage": "2026-09-18: newly adopted WIMSE WG document at -00. AI identity management \u2014 relevant to both fabric PoCs. Monitor.",
+      "last": "00"
     },
     {
       "id": "draft-ietf-oauth-deferred-token-response",
