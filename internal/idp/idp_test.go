@@ -2,6 +2,9 @@ package idp_test
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +14,7 @@ import (
 	"github.com/jralmaraz/wimse-identity-fabric/internal/idp"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/federation"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/ssf"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
 )
 
@@ -277,6 +281,122 @@ func TestFederationFetch_NotAnchor(t *testing.T) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("expected 404 for non-anchor IdP, got %d", resp.StatusCode)
+	}
+}
+
+func newConfigWithSSF(t *testing.T) (*idp.IdPConfig, *ssf.Transmitter) {
+	t.Helper()
+	k, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tx := ssf.NewTransmitter("https://idp.cloud-a.example", k)
+	cfg := newConfig(t)
+	cfg.SSFTransmitter = tx
+	return cfg, tx
+}
+
+func TestRevoke_NoTransmitter(t *testing.T) {
+	cfg := newConfig(t)
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	b, _ := json.Marshal(map[string]string{"subject": "spiffe://td/svc"})
+	resp, err := srv.Client().Post(srv.URL+"/wit/revoke", "application/json", bytes.NewReader(b))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotImplemented {
+		t.Errorf("want 501, got %d", resp.StatusCode)
+	}
+}
+
+func TestRevoke_EmitsSessionRevoked(t *testing.T) {
+	cfg, tx := newConfigWithSSF(t)
+	ch := tx.Subscribe()
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	b, _ := json.Marshal(map[string]string{"subject": "spiffe://td/svc", "reason": "policy"})
+	resp, err := srv.Client().Post(srv.URL+"/wit/revoke", "application/json", bytes.NewReader(b))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		t.Fatalf("want 204, got %d", resp.StatusCode)
+	}
+
+	select {
+	case set := <-ch:
+		const wantType = "https://schemas.openid.net/secevent/caep/event-type/session-revoked"
+		if _, ok := set.Events[wantType]; !ok {
+			t.Errorf("expected event type %q in SET events %v", wantType, set.Events)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timeout waiting for SSF event")
+	}
+}
+
+func TestRevoke_MissingSubject(t *testing.T) {
+	cfg, _ := newConfigWithSSF(t)
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	b, _ := json.Marshal(map[string]string{"reason": "oops"})
+	resp, err := srv.Client().Post(srv.URL+"/wit/revoke", "application/json", bytes.NewReader(b))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("want 400, got %d", resp.StatusCode)
+	}
+}
+
+func TestSSFConfig_NotEnabled(t *testing.T) {
+	cfg := newConfig(t)
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	resp, err := srv.Client().Get(srv.URL + "/.well-known/ssf-configuration")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNotFound {
+		t.Errorf("want 404, got %d", resp.StatusCode)
+	}
+}
+
+func TestSSFConfig_Enabled(t *testing.T) {
+	cfg, _ := newConfigWithSSF(t)
+	srv := httptest.NewServer(idp.NewRouter(cfg))
+	defer srv.Close()
+
+	resp, err := srv.Client().Get(srv.URL + "/.well-known/ssf-configuration")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("want 200, got %d", resp.StatusCode)
+	}
+
+	var meta map[string]any
+	json.NewDecoder(resp.Body).Decode(&meta)
+	if meta["issuer"] != cfg.IssuerID {
+		t.Errorf("issuer = %v", meta["issuer"])
+	}
+	if meta["jwks_uri"] == nil {
+		t.Error("missing jwks_uri")
+	}
+	if meta["delivery_methods_supported"] == nil {
+		t.Error("missing delivery_methods_supported")
+	}
+	if meta["event_types_supported"] == nil {
+		t.Error("missing event_types_supported")
 	}
 }
 

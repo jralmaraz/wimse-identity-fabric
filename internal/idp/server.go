@@ -13,8 +13,10 @@ func NewRouter(cfg *IdPConfig) *gin.Engine {
 	r.Use(gin.Recovery())
 
 	r.POST("/wit/issue", IssueHandler(cfg))
+	r.POST("/wit/revoke", RevokeHandler(cfg))
 	r.GET("/.well-known/jwks.json", JWKSHandler(cfg))
 	r.GET("/.well-known/openid-federation", EntityConfigHandler(cfg))
+	r.GET("/.well-known/ssf-configuration", SSFConfigHandler(cfg))
 	r.GET("/federation/fetch", FederationFetchHandler(cfg))
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
