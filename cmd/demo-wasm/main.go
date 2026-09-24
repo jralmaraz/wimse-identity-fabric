@@ -12,11 +12,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http/httptest"
 	"strings"
 	"syscall/js"
 	"time"
 
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/federation"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/httpsig"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/sdwit"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
@@ -37,6 +39,9 @@ var (
 	sdToken    string
 
 	usedJTIs = map[string]bool{}
+
+	// HTTP Message Signature state (Chapter 13).
+	httpsigVerifier = httpsig.NewVerifier()
 
 	// Federation state (Chapter 10).
 	fedAnchorKP  *keys.ECKeyPair // Trust Anchor key pair
@@ -517,6 +522,96 @@ func generateMTLSCert(_ js.Value, _ []js.Value) interface{} {
 	})
 }
 
+// ---------- HTTP Message Signature functions (Chapter 13) ----------
+
+// httpsigSignRequest signs a synthetic GET request to targetURL using the demo workload key.
+// Returns JSON: { "ok": true, "data": { "wit_header", "signature_input", "signature", "nonce", "aud" } }
+func httpsigSignRequest(_ js.Value, args []js.Value) interface{} {
+	if workloadKP == nil {
+		return fail("Generate keys first (Chapter 2)")
+	}
+	if witToken == "" {
+		return fail("Issue a WIT first (Chapter 2)")
+	}
+
+	target := targetURI
+	if len(args) > 0 && args[0].Type() == js.TypeString && args[0].String() != "" {
+		target = args[0].String()
+	}
+
+	req := httptest.NewRequest("GET", target, nil)
+	if err := httpsig.Sign(httpsig.SignOptions{
+		Request:        req,
+		WIT:            witToken,
+		WorkloadKey:    workloadKP.Private,
+		TargetAudience: target,
+		TTL:            5 * time.Minute,
+	}); err != nil {
+		return fail("sign: " + err.Error())
+	}
+
+	sigInput := req.Header.Get("Signature-Input")
+	return ok(map[string]interface{}{
+		"wit_header":      req.Header.Get("Workload-Identity-Token"),
+		"signature_input": sigInput,
+		"signature":       req.Header.Get("Signature"),
+		"nonce":           extractSigParam(sigInput, "nonce"),
+		"aud":             extractSigParam(sigInput, "wimse-aud"),
+	})
+}
+
+// httpsigVerifyRequest reconstructs a signed GET request from raw headers and verifies it.
+// Returns JSON: { "ok": true/false, "subject": "...", "error": "" }
+func httpsigVerifyRequest(_ js.Value, args []js.Value) interface{} {
+	if workloadKP == nil {
+		return fail("Generate keys first (Chapter 2)")
+	}
+	if len(args) < 4 {
+		return fail("expected (witHeader, sigInput, sig, targetURL)")
+	}
+
+	witHdr := args[0].String()
+	sigInput := args[1].String()
+	sig := args[2].String()
+	targetURL := args[3].String()
+
+	req := httptest.NewRequest("GET", targetURL, nil)
+	req.Header.Set("Workload-Identity-Token", witHdr)
+	req.Header.Set("Signature-Input", sigInput)
+	req.Header.Set("Signature", sig)
+
+	aud := extractSigParam(sigInput, "wimse-aud")
+
+	vr, err := httpsigVerifier.Verify(httpsig.VerifyOptions{
+		Request:        req,
+		WorkloadPubKey: workloadKP.Public,
+		ExpectedAud:    aud,
+		CheckReplay:    false,
+	})
+	if err != nil {
+		b, _ := json.Marshal(map[string]interface{}{"ok": false, "subject": "", "error": err.Error()})
+		return js.ValueOf(string(b))
+	}
+	b, _ := json.Marshal(map[string]interface{}{"ok": true, "subject": vr.Subject, "error": ""})
+	return js.ValueOf(string(b))
+}
+
+// extractSigParam extracts a quoted parameter value from a Signature-Input string.
+// e.g. extractSigParam(`...;nonce="abc";...`, "nonce") → "abc"
+func extractSigParam(s, key string) string {
+	needle := key + `="`
+	idx := strings.Index(s, needle)
+	if idx < 0 {
+		return ""
+	}
+	rest := s[idx+len(needle):]
+	end := strings.IndexByte(rest, '"')
+	if end < 0 {
+		return rest
+	}
+	return rest[:end]
+}
+
 // ---------- federation functions (Chapter 10) ----------
 
 const (
@@ -774,6 +869,9 @@ func main() {
 		"buildFederationChain": js.FuncOf(buildFederationChain),
 		"verifyTrustChain":     js.FuncOf(verifyTrustChain),
 		"federatedExchange":    js.FuncOf(federatedExchange),
+		// Chapter 13 — HTTP Message Signatures
+		"httpsigSignRequest":   js.FuncOf(httpsigSignRequest),
+		"httpsigVerifyRequest": js.FuncOf(httpsigVerifyRequest),
 	}))
 
 	// Block forever — WASM modules must not exit.

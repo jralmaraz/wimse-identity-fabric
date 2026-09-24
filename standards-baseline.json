@@ -229,14 +229,16 @@
       "short": "HTTP-Sig",
       "wg": "IETF WIMSE WG",
       "last_known_rev": "07",
-      "implemented_rev": null,
+      "implemented_rev": "07",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-http-signature/",
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-http-signature/",
       "source_repo": "https://github.com/ietf-wg-wimse",
-      "impact": "Alternative to WPT (JWT-based) for workload-to-workload proof using RFC 9421 HTTP Message Signatures. Tracked for future variant of pkg/wpt if WG adopts as primary mechanism.",
-      "used_in": [],
-      "_triage": "2026-09-18: WIMSE WG active-draft at rev-06 with no implementation. This is a gap \u2014 unlike individual monitor drafts, http-signature is a WG document on the standards track. Tracked for future pkg/httpsig implementation. See: needs its own tracking issue to prioritise relative to WPT.",
+      "impact": "Alternative to WPT (JWT-based) for workload-to-workload proof using RFC 9421 HTTP Message Signatures. pkg/httpsig implements Sign + Verify: Workload-Identity-Token header carries WIT, Signature-Input/Signature cover @method/@path/@query/workload-identity-token per \u00a74. @authority excluded for TLS-proxy tolerance. ECDSA P-256/SHA-256 raw 64-byte r||s.",
+      "used_in": [
+        "pkg/httpsig",
+        "cmd/demo-wasm"
+      ],
       "last": "07"
     },
     {
