@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-09-27",
+  "last_checked": "2026-09-28",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -780,7 +780,7 @@
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-reddy-wimse-aggregate-signatures/",
       "short": "AggregateSignatures",
-      "last_known_rev": "00",
+      "last_known_rev": "01",
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-reddy-wimse-aggregate-signatures/",
       "source_repo": null,
@@ -899,6 +899,14 @@
       "first_seen": "2026-09-21",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-gilda-wimse-agent-audit-record/"
+    },
+    {
+      "id": "draft-lee-oauth-dpop-credential-presentation",
+      "label": "Presenting Issuer-Signed JWT Credentials to Resource Servers with DPoP",
+      "status": "discovered",
+      "first_seen": "2026-09-28",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-lee-oauth-dpop-credential-presentation/"
     }
   ]
 }
