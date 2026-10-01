@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-09-30",
+  "last_checked": "2026-10-01",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -947,6 +947,14 @@
       "first_seen": "2026-09-30",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-tulshi-oauth-transactional-access-tokens/"
+    },
+    {
+      "id": "draft-ni-wimse-ai-agent-identity",
+      "label": "WIMSE Applicability for AI Agents",
+      "status": "discovered",
+      "first_seen": "2026-10-01",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ni-wimse-ai-agent-identity/"
     }
   ]
 }
