@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-01",
+  "last_checked": "2026-10-02",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -955,6 +955,46 @@
       "first_seen": "2026-10-01",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ni-wimse-ai-agent-identity/"
+    },
+    {
+      "id": "draft-skyfire-oauth-kyapay-token",
+      "label": "KYAPay Token",
+      "status": "discovered",
+      "first_seen": "2026-10-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-skyfire-oauth-kyapay-token/"
+    },
+    {
+      "id": "draft-skyfire-oauth-using-kyapay-tokens",
+      "label": "Using KYAPay Tokens",
+      "status": "discovered",
+      "first_seen": "2026-10-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-skyfire-oauth-using-kyapay-tokens/"
+    },
+    {
+      "id": "draft-skyfire-oauth-aml-methods",
+      "label": "Anti-Money Laundering Methods Values",
+      "status": "discovered",
+      "first_seen": "2026-10-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-skyfire-oauth-aml-methods/"
+    },
+    {
+      "id": "draft-skyfire-oauth-id-verification",
+      "label": "Identity Verification Methods Values",
+      "status": "discovered",
+      "first_seen": "2026-10-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-skyfire-oauth-id-verification/"
+    },
+    {
+      "id": "draft-skyfire-oauth-amr-values",
+      "label": "Additional Authentication Method Reference Values",
+      "status": "discovered",
+      "first_seen": "2026-10-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-skyfire-oauth-amr-values/"
     }
   ]
 }
