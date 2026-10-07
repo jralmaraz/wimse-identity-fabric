@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-06",
+  "last_checked": "2026-10-07",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -1003,6 +1003,14 @@
       "first_seen": "2026-10-03",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-forten-oauth-sd-jwt-access-token/"
+    },
+    {
+      "id": "draft-lee-wimse-local-tool-call-proof",
+      "label": "Per-Call Proof for Local Tool Invocation by AI Agents",
+      "status": "discovered",
+      "first_seen": "2026-10-07",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-lee-wimse-local-tool-call-proof/"
     }
   ]
 }
