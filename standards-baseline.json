@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-08",
+  "last_checked": "2026-10-09",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -25,7 +25,7 @@
         "federation",
         "connect"
       ],
-      "last_guid": "https://openid.net/?p=74518",
+      "last_guid": "https://openid.net/?p=75421",
       "note": "Catches OIDF spec publications, errata, and public review periods"
     }
   ],
@@ -1011,6 +1011,30 @@
       "first_seen": "2026-10-07",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-lee-wimse-local-tool-call-proof/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-actor-receipts",
+      "label": "OAuth Actor Receipts for Delegation Provenance",
+      "status": "discovered",
+      "first_seen": "2026-10-09",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-actor-receipts/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-actor-profile",
+      "label": "OAuth Actor Profile for Delegation",
+      "status": "discovered",
+      "first_seen": "2026-10-09",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-actor-profile/"
+    },
+    {
+      "id": "draft-zehavi-oauth-audience-bound-token-exchange",
+      "label": "OAuth 2.0 Audience-Bound Token Exchange",
+      "status": "discovered",
+      "first_seen": "2026-10-08",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-zehavi-oauth-audience-bound-token-exchange/"
     }
   ]
 }
