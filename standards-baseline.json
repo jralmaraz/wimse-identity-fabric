@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-09",
+  "last_checked": "2026-10-10",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -1035,6 +1035,14 @@
       "first_seen": "2026-10-08",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-zehavi-oauth-audience-bound-token-exchange/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-actor-proofs",
+      "label": "OAuth Actor-Signed Hop Proofs",
+      "status": "discovered",
+      "first_seen": "2026-10-09",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-actor-proofs/"
     }
   ]
 }
