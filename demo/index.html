@@ -1555,11 +1555,12 @@ const CH_TITLES = [
   'The Problem', 'WIT: Identity Card', 'mTLS: Lock the Channel',
   'WPT: Prove Each Request', 'The Validation Dance', 'Fine-Grained Authorization',
   'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses', 'OpenID Federation',
-  'Transaction Tokens', 'SPIFFE Client Auth', 'HTTP Message Signatures'
+  'Transaction Tokens', 'SPIFFE Client Auth', 'HTTP Message Signatures',
+  'WAG: OAuth Bridge'
 ];
 const CH_SHORT = [
   'Problem', 'WIT', 'mTLS', 'WPT', 'Validation', 'FGA', 'SD-WIT', 'Exchange', 'Attacks', 'OID-FED',
-  'Txn-Token', 'SCA', 'HTTP-Sig'
+  'Txn-Token', 'SCA', 'HTTP-Sig', 'WAG'
 ];
 let cur = 1;
 const done = new Set();
@@ -1593,7 +1594,7 @@ function buildNav() {
 }
 
 function goChapter(n) {
-  if (n < 1 || n > 13) return;
+  if (n < 1 || n > 14) return;
   done.add(cur);
   document.getElementById('ch' + cur).classList.remove('active');
   cur = n;
