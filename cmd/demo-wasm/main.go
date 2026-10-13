@@ -21,6 +21,7 @@ import (
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/httpsig"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/keys"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/sdwit"
+	"github.com/jralmaraz/wimse-identity-fabric/pkg/wag"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/wit"
 	"github.com/jralmaraz/wimse-identity-fabric/pkg/wpt"
 )
@@ -851,6 +852,84 @@ func difference(all, subset []string) []string {
 	return diff
 }
 
+// ---------- WAG (Chapter 14) ----------
+
+const (
+	wagPlatformIssuer = "https://idp.cloud-a.example"
+	wagASIssuer       = "https://as.cloud-a.example"
+	wagWorkloadSub    = "spiffe://cloud-a.example/workload-a"
+	wagScope          = "api:billing-data:read"
+	wagResourceAPI    = "https://api.cloud-b.example/billing"
+)
+
+// wagDemo runs a full Workload Authorization Grant round-trip:
+// PlatformIssuer.Issue → AuthorizationServer.Exchange → access token.
+// Self-contained: generates its own ephemeral keys, does not depend on setup().
+func wagDemo(_ js.Value, _ []js.Value) interface{} {
+	platformKP, err := keys.GenerateECKeyPair()
+	if err != nil {
+		return fail("generate platform key: " + err.Error())
+	}
+	asKP, err := keys.GenerateECKeyPair()
+	if err != nil {
+		return fail("generate AS key: " + err.Error())
+	}
+
+	pi := wag.NewPlatformIssuer(wagPlatformIssuer, platformKP.Private, 0)
+	as := wag.NewAuthorizationServer(wagASIssuer, asKP.Private, 0)
+	if err := as.RegisterPlatform(wag.PlatformRegistration{
+		IssuerID:  wagPlatformIssuer,
+		PublicKey: platformKP.Public,
+	}); err != nil {
+		return fail("register platform: " + err.Error())
+	}
+
+	grantJWT, err := pi.Issue(wag.GrantOptions{
+		Subject:  wagWorkloadSub,
+		Audience: wagASIssuer,
+		Scope:    wagScope,
+	})
+	if err != nil {
+		return fail("issue grant: " + err.Error())
+	}
+
+	resp, err := as.Exchange(grantJWT, "")
+	if err != nil {
+		return fail("exchange grant: " + err.Error())
+	}
+
+	grantRaw := splitDot(grantJWT, 3)
+	atRaw := splitDot(resp.AccessToken, 3)
+
+	toIfaceSlice := func(ss []string) []interface{} {
+		r := make([]interface{}, len(ss))
+		for i, s := range ss {
+			r[i] = s
+		}
+		return r
+	}
+
+	grantPayload := decodeB64JSON(grantRaw[1])
+	atPayload := decodeB64JSON(atRaw[1])
+
+	return ok(map[string]interface{}{
+		"platformIssuer": wagPlatformIssuer,
+		"asIssuer":       wagASIssuer,
+		"workloadSub":    wagWorkloadSub,
+		"resourceAPI":    wagResourceAPI,
+		"scope":          resp.Scope,
+		"expiresIn":      resp.ExpiresIn,
+		// Grant JWT
+		"grantJWT":     grantJWT,
+		"grantParts":   toIfaceSlice(grantRaw),
+		"grantPayload": grantPayload,
+		// Access token
+		"accessToken": resp.AccessToken,
+		"atParts":     toIfaceSlice(atRaw),
+		"atPayload":   atPayload,
+	})
+}
+
 // ---------- main ----------
 
 func main() {
@@ -872,6 +951,8 @@ func main() {
 		// Chapter 13 — HTTP Message Signatures
 		"httpsigSignRequest":   js.FuncOf(httpsigSignRequest),
 		"httpsigVerifyRequest": js.FuncOf(httpsigVerifyRequest),
+		// Chapter 14 — Workload Authorization Grant
+		"wagDemo": js.FuncOf(wagDemo),
 	}))
 
 	// Block forever — WASM modules must not exit.

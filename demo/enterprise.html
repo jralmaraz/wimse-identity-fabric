@@ -236,6 +236,7 @@ code{font-family:monospace;font-size:11px;background:var(--surface2);padding:1px
     <div class="snav-item" onclick="showScene('spiffeclientauth')">12 · SPIFFE Client Auth</div>
     <div class="snav-item" onclick="showScene('identitychaining')">13 · Identity Chaining</div>
     <div class="snav-item" onclick="showScene('standards-vs')">14 · vs Existing Standards</div>
+    <div class="snav-item" onclick="showScene('wag')">15 · WAG OAuth Bridge</div>
   </nav>
   <div class="nav-fade" id="nav-fade"></div>
   <button class="nav-arrow nav-arrow-right" id="nav-next" onclick="navScroll(1)" aria-label="Scroll tabs right">&#8250;</button>
@@ -2913,11 +2914,193 @@ claims, _ := gv.Validate(
   </div>
 
   <div class="callout" style="margin-top:20px">
-    <strong>The WIMSE thesis in one sentence:</strong> Every WIMSE primitive is a <em>precisely-scoped composable layer</em> that closes one specific gap in existing standards — WIT+WPT for ambient token and application-layer identity, SPIFFE Client Auth for shared-secret elimination, Identity Chaining + Txn-Token for cross-domain auditability, OID-FED for federated trust at O(N) cost, SD-WIT for privacy-preserving M2M disclosure — without replacing the OAuth, OIDC, JWT, or TLS infrastructure already deployed.
+    <strong>The WIMSE thesis in one sentence:</strong> Every WIMSE primitive is a <em>precisely-scoped composable layer</em> that closes one specific gap in existing standards — WIT+WPT for ambient token and application-layer identity, SPIFFE Client Auth for shared-secret elimination, Identity Chaining + Txn-Token for cross-domain auditability, OID-FED for federated trust at O(N) cost, SD-WIT for privacy-preserving M2M disclosure, WAG for zero-registration OAuth bootstrap at fleet scale — without replacing the OAuth, OIDC, JWT, or TLS infrastructure already deployed.
   </div>
 
   <div style="display:flex;gap:12px;margin-top:32px;flex-wrap:wrap">
     <button style="padding:9px 20px;border-radius:6px;background:var(--surface2);color:var(--text);font-weight:700;border:1px solid var(--border);cursor:pointer;font-size:13px" onclick="showScene('sprawl')">&larr; The Problem</button>
+    <button style="padding:9px 20px;border-radius:6px;background:var(--orange);color:#0d1117;font-weight:700;border:none;cursor:pointer;font-size:13px" onclick="showScene('solution')">See WIMSE Solution &rarr;</button>
+  </div>
+</div>
+
+<!-- Scenario 16 — WAG OAuth Bridge                                         -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="scene" id="scene-wag">
+  <div class="scene-num">Scenario 16</div>
+  <h1 class="scene-title">Workload Authorization Grant — OAuth Bridge for WIMSE Workloads</h1>
+  <p class="scene-lead">SPIFFE Client Auth still requires every workload to be pre-registered at the AS as a distinct <code>client_id</code> — a per-workload configuration burden that collapses in ephemeral or AI-agent fleets where identities spin up faster than registrations. <strong>WAG</strong> (draft-carleton-workload-authz-grant-01) inverts the model: the <em>platform</em> registers once; any workload the platform issues a grant for is accepted automatically, with zero per-workload registration at the AS.</p>
+
+  <div class="card">
+    <div class="card-title">WAG flow — Platform issues grant, workload exchanges it for an access token</div>
+    <svg viewBox="0 0 820 180" style="width:100%;max-width:820px;display:block;margin:16px auto">
+      <defs>
+        <marker id="arWAGb" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#58a6ff"/></marker>
+        <marker id="arWAGo" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ffa657"/></marker>
+        <marker id="arWAGg" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3fb950"/></marker>
+        <marker id="arWAGp" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#bc8cff"/></marker>
+      </defs>
+
+      <!-- Platform / WIT Issuer -->
+      <rect x="10" y="30" width="155" height="105" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="87" y="57" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="700">Platform / WIT Issuer</text>
+      <text x="87" y="73" text-anchor="middle" fill="#7d8590" font-size="9">spire.platform.example</text>
+      <text x="87" y="90" text-anchor="middle" fill="#3fb950" font-size="9">one-time AS registration</text>
+      <text x="87" y="105" text-anchor="middle" fill="#ffa657" font-size="9">issues wag+jwt per workload</text>
+      <text x="87" y="120" text-anchor="middle" fill="#7d8590" font-size="9">typ: wag+jwt · ES256</text>
+
+      <!-- Workload -->
+      <rect x="220" y="55" width="140" height="70" rx="8" fill="#21262d" stroke="#ffa657" stroke-width="1.5"/>
+      <text x="290" y="82" text-anchor="middle" fill="#ffa657" font-size="11" font-weight="700">Workload</text>
+      <text x="290" y="98" text-anchor="middle" fill="#7d8590" font-size="9">spiffe://platform.example</text>
+      <text x="290" y="112" text-anchor="middle" fill="#7d8590" font-size="9">/workload/svc-a</text>
+
+      <!-- Authorization Server -->
+      <rect x="415" y="30" width="165" height="105" rx="8" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
+      <text x="497" y="57" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="700">Authorization Server</text>
+      <text x="497" y="73" text-anchor="middle" fill="#7d8590" font-size="9">as.platform.example</text>
+      <text x="497" y="90" text-anchor="middle" fill="#7d8590" font-size="9">POST /token · jwt-bearer</text>
+      <text x="497" y="105" text-anchor="middle" fill="#7d8590" font-size="9">verifies wag+jwt sig</text>
+      <text x="497" y="120" text-anchor="middle" fill="#3fb950" font-size="9">issues at+jwt · 15 min</text>
+
+      <!-- Resource API -->
+      <rect x="640" y="55" width="140" height="70" rx="8" fill="#21262d" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="710" y="82" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="700">Resource API</text>
+      <text x="710" y="98" text-anchor="middle" fill="#7d8590" font-size="9">Bearer at+jwt in header</text>
+      <text x="710" y="112" text-anchor="middle" fill="#7d8590" font-size="9">sub = SPIFFE ID</text>
+
+      <!-- Arrows -->
+      <line x1="165" y1="90" x2="218" y2="90" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arWAGb)"/>
+      <text x="191" y="80" fill="#58a6ff" font-size="8" text-anchor="middle">① wag+jwt</text>
+      <line x1="360" y1="82" x2="413" y2="82" stroke="#ffa657" stroke-width="1.5" stroke-dasharray="5,2" marker-end="url(#arWAGo)"/>
+      <text x="386" y="72" fill="#ffa657" font-size="8" text-anchor="middle">② grant_type=jwt-bearer</text>
+      <line x1="413" y1="100" x2="362" y2="100" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arWAGg)"/>
+      <text x="386" y="120" fill="#3fb950" font-size="8" text-anchor="middle">③ access_token (at+jwt)</text>
+      <line x1="580" y1="90" x2="638" y2="90" stroke="#3fb950" stroke-width="1.5" marker-end="url(#arWAGg)"/>
+      <text x="609" y="80" fill="#3fb950" font-size="8" text-anchor="middle">④ API call</text>
+    </svg>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px">The Platform issues a short-lived <code>wag+jwt</code> grant carrying the workload's SPIFFE <code>sub</code>. The AS verifies the Platform's signature (registered once) and mints a standard Bearer token — never seeing or storing the workload identity in advance.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+    <div class="card">
+      <div class="card-title">WAG grant (<code>wag+jwt</code>)</div>
+      <pre style="font-size:11px;background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto;margin-top:10px;color:var(--text);line-height:1.7"><span style="color:var(--muted)"># Header</span>
+{
+  <span style="color:var(--blue)">"alg"</span>: <span style="color:var(--green)">"ES256"</span>,
+  <span style="color:var(--blue)">"typ"</span>: <span style="color:var(--orange)">"wag+jwt"</span>
+}
+<span style="color:var(--muted)"># Payload</span>
+{
+  <span style="color:var(--blue)">"iss"</span>: <span style="color:var(--green)">"https://spire.platform.example"</span>,
+  <span style="color:var(--blue)">"sub"</span>: <span style="color:var(--green)">"spiffe://platform.example/workload/svc-a"</span>,
+  <span style="color:var(--blue)">"aud"</span>: <span style="color:var(--green)">"https://as.platform.example"</span>,
+  <span style="color:var(--blue)">"jti"</span>: <span style="color:var(--purple)">"&lt;random UUID&gt;"</span>,
+  <span style="color:var(--blue)">"scope"</span>: <span style="color:var(--green)">"read:reports"</span>,
+  <span style="color:var(--blue)">"iat"</span>: <span style="color:var(--orange)">1753920000</span>,
+  <span style="color:var(--blue)">"exp"</span>: <span style="color:var(--orange)">1753921800</span>
+}</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Token endpoint — <code>POST /token</code></div>
+      <pre style="font-size:11px;background:var(--bg);padding:12px;border-radius:6px;overflow-x:auto;margin-top:10px;color:var(--text);line-height:1.7"><span style="color:var(--muted)"># application/x-www-form-urlencoded</span>
+grant_type=<span style="color:var(--orange)">urn:ietf:params:oauth:</span>
+  <span style="color:var(--orange)">grant-type:jwt-bearer</span>
+assertion=<span style="color:var(--purple)">&lt;compact wag+jwt&gt;</span>
+scope=<span style="color:var(--green)">read:reports</span>
+
+<span style="color:var(--muted)"># Response</span>
+{
+  <span style="color:var(--blue)">"access_token"</span>: <span style="color:var(--green)">"&lt;at+jwt&gt;"</span>,
+  <span style="color:var(--blue)">"token_type"</span>:   <span style="color:var(--green)">"Bearer"</span>,
+  <span style="color:var(--blue)">"expires_in"</span>:   <span style="color:var(--orange)">900</span>,
+  <span style="color:var(--blue)">"scope"</span>:        <span style="color:var(--green)">"read:reports"</span>
+}</pre>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">WAG vs SPIFFE Client Auth vs Identity Chaining</div>
+    <div style="overflow-x:auto;margin-top:12px">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:8px 12px;color:var(--muted);font-weight:600">Dimension</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--orange);font-weight:600">WAG</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--blue);font-weight:600">SPIFFE Client Auth</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--purple);font-weight:600">Identity Chaining</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:8px 12px;color:var(--muted)">Registration scope</td>
+            <td style="padding:8px 12px;color:var(--text)">Platform registers once; all workloads accepted</td>
+            <td style="padding:8px 12px;color:var(--text)">Each workload is a distinct <code>client_id</code></td>
+            <td style="padding:8px 12px;color:var(--text)">AS-to-AS cross-domain delegation</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:8px 12px;color:var(--muted)">Grant token type</td>
+            <td style="padding:8px 12px;color:var(--text)"><code>wag+jwt</code> (new <code>typ</code>)</td>
+            <td style="padding:8px 12px;color:var(--text)"><code>wit+jwt</code> as <code>client_assertion</code></td>
+            <td style="padding:8px 12px;color:var(--text)">Upstream <code>access_token</code> + actor chain</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:8px 12px;color:var(--muted)">Who registers</td>
+            <td style="padding:8px 12px;color:var(--text)">Platform admin (one-time)</td>
+            <td style="padding:8px 12px;color:var(--text)">Workload operator (per deployment)</td>
+            <td style="padding:8px 12px;color:var(--text)">AS operator (per trust relationship)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:8px 12px;color:var(--muted)">Ephemeral fleets</td>
+            <td style="padding:8px 12px;color:var(--green)">✓ No per-workload config drift</td>
+            <td style="padding:8px 12px;color:var(--text)">✗ client_id registry grows unbounded</td>
+            <td style="padding:8px 12px;color:var(--muted)">N/A (cross-domain, not fleet scaling)</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:8px 12px;color:var(--muted)">Replay protection</td>
+            <td style="padding:8px 12px;color:var(--text)"><code>jti</code> consumed on first use</td>
+            <td style="padding:8px 12px;color:var(--text)"><code>jti</code> consumed on first use</td>
+            <td style="padding:8px 12px;color:var(--text)">Short-lived access tokens</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;color:var(--muted)">Refresh tokens</td>
+            <td style="padding:8px 12px;color:var(--text)">Never issued (draft §5)</td>
+            <td style="padding:8px 12px;color:var(--text)">Possible via client_credentials</td>
+            <td style="padding:8px 12px;color:var(--text)">Varies by AS policy</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+    <div class="card">
+      <div class="card-title">Step-by-step flow</div>
+      <ol style="font-size:12px;color:var(--text);line-height:2;padding-left:18px;margin:10px 0 0">
+        <li><strong>Platform admin</strong> registers the platform issuer ID + public key at the AS — once, ever.</li>
+        <li><strong>Platform / SPIRE</strong> issues a <code>wag+jwt</code> carrying the workload's SPIFFE <code>sub</code>, scoped audience, short TTL, and unique <code>jti</code>.</li>
+        <li><strong>Workload</strong> presents the grant to <code>POST /token</code> using <code>grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer</code>.</li>
+        <li><strong>AS</strong> matches the grant's <code>iss</code> to a registered platform, verifies the ECDSA signature, checks <code>jti</code> for replay, and mints a short-lived <code>at+jwt</code>.</li>
+        <li><strong>Workload</strong> calls the Resource API with the Bearer token. The workload's SPIFFE ID is preserved in <code>sub</code>.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <div class="card-title">Enterprise value</div>
+      <ul style="font-size:12px;color:var(--text);line-height:2;padding-left:18px;margin:10px 0 0">
+        <li><strong>AI agent fleets</strong> — agents spin up and down faster than manual client registration; WAG handles unbounded identity fan-out without AS admin intervention.</li>
+        <li><strong>Ephemeral serverless</strong> — each function invocation gets a fresh grant; the AS never stores per-function state.</li>
+        <li><strong>Multi-tenant SaaS</strong> — the <code>DistinguishingClaim</code> extension lets one platform issuer serve multiple tenants with isolated grants.</li>
+        <li><strong>Zero secret distribution</strong> — no <code>client_secret</code>, no rotation; the Platform's key pair is the only credential to protect.</li>
+        <li><strong>jti replay guard</strong> — stolen grant cannot be re-used; each <code>jti</code> is consumed on first presentation and evicted after expiry.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:16px;font-size:12px">
+    <strong>Spec:</strong> <a href="https://datatracker.ietf.org/doc/html/draft-carleton-workload-authz-grant-01" style="color:var(--blue)" target="_blank" rel="noopener">draft-carleton-workload-authz-grant-01</a> · Grant type: <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> · Token header type: <code>wag+jwt</code> · No refresh tokens · Replay tracked by <code>jti</code> up to grant expiry · Implementation in <code>pkg/wag/</code>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:32px;flex-wrap:wrap">
+    <button style="padding:9px 20px;border-radius:6px;background:var(--surface2);color:var(--text);font-weight:700;border:1px solid var(--border);cursor:pointer;font-size:13px" onclick="showScene('standards-vs')">&larr; WIMSE vs Standards</button>
     <button style="padding:9px 20px;border-radius:6px;background:var(--orange);color:#0d1117;font-weight:700;border:none;cursor:pointer;font-size:13px" onclick="showScene('solution')">See WIMSE Solution &rarr;</button>
   </div>
 </div>

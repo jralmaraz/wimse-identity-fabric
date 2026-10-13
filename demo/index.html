@@ -38,7 +38,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ch-dot:hover:not(.active){border-color:var(--blue);color:var(--blue)}
 .ch-connector{width:36px;height:2px;background:var(--border);flex-shrink:0;transition:background 0.3s;margin-top:14px}
 .ch-connector.done{background:var(--green)}
-.ch-tooltip{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;display:none;z-index:20;pointer-events:none}
+.ch-tooltip{position:absolute;top:38px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;display:none;z-index:200;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .ch-dot:hover .ch-tooltip{display:block}
 .ch-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
 .ch-label{font-size:9px;color:var(--muted);white-space:nowrap;text-align:center;max-width:58px;overflow:hidden;text-overflow:ellipsis}
@@ -248,7 +248,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 1 — The Problem
 ═══════════════════════════════════════════ -->
 <section class="chapter active" id="ch1">
-  <div class="ch-num">Chapter 1 of 12</div>
+  <div class="ch-num">Chapter 1 of 14</div>
   <h1 class="ch-title">The Problem</h1>
   <p class="ch-lead">Two workloads on the internet want to talk. But how does <strong>Workload&nbsp;B</strong> know the request really came from <strong>Workload&nbsp;A</strong> — and not an attacker?</p>
 
@@ -305,7 +305,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 2 — WIT
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch2">
-  <div class="ch-num">Chapter 2 of 12</div>
+  <div class="ch-num">Chapter 2 of 14</div>
   <h1 class="ch-title">WIT: Your Identity Card</h1>
   <p class="ch-lead">The <strong>Workload Identity Token (WIT)</strong> is a signed JWT issued by a trusted Identity Provider. It carries the workload's URI-based identity and a public key for proof-of-possession.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/" target="_blank">draft-ietf-wimse-workload-creds-02</a> &nbsp;|&nbsp; <code>typ: wit+jwt</code> &nbsp;|&nbsp; alg: ES256</div>
@@ -371,7 +371,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 3 — mTLS
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch3">
-  <div class="ch-num">Chapter 3 of 12</div>
+  <div class="ch-num">Chapter 3 of 14</div>
   <h1 class="ch-title">mTLS: Lock the Channel</h1>
   <p class="ch-lead"><strong>Mutual TLS</strong> adds a transport-layer identity layer: both sides present X.509 certificates with SPIFFE URI Subject Alternative Names before any data flows.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/" target="_blank">draft-ietf-wimse-mutual-tls-02</a> &nbsp;|&nbsp; EC P-256, TLS 1.3+, URI SAN</div>
@@ -433,7 +433,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 4 — WPT
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch4">
-  <div class="ch-num">Chapter 4 of 12</div>
+  <div class="ch-num">Chapter 4 of 14</div>
   <h1 class="ch-title">WPT: Prove Each Request</h1>
   <p class="ch-lead">A <strong>Workload Proof Token (WPT)</strong> is a short-lived, per-request JWT signed with the workload's private key. It binds to the WIT and to the exact target URI — making token theft useless.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/" target="_blank">draft-ietf-wimse-wpt-01</a> &nbsp;|&nbsp; <code>typ: application/wpt+jwt</code> &nbsp;|&nbsp; TTL: 5 minutes</div>
@@ -481,7 +481,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 5 — Validation Dance
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch5">
-  <div class="ch-num">Chapter 5 of 12</div>
+  <div class="ch-num">Chapter 5 of 14</div>
   <h1 class="ch-title">The Validation Dance</h1>
   <p class="ch-lead">When Workload B receives a request it runs <strong>9 checks</strong> before letting it through. Each one protects against a specific attack class.</p>
 
@@ -522,7 +522,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 6 — Fine-Grained Authorization
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch6">
-  <div class="ch-num">Chapter 6 of 12</div>
+  <div class="ch-num">Chapter 6 of 14</div>
   <h1 class="ch-title">Fine-Grained Authorization</h1>
   <p class="ch-lead"><strong>Authentication</strong> answers &ldquo;who are you?&rdquo; — <strong>Authorization</strong> answers &ldquo;what are you allowed to do?&rdquo; The WIT's <code>sub</code> and <code>trust_domain</code> drive fine-grained access control.</p>
 
@@ -600,7 +600,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 7 — Selective Disclosure
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch7">
-  <div class="ch-num">Chapter 7 of 12</div>
+  <div class="ch-num">Chapter 7 of 14</div>
   <h1 class="ch-title">Selective Disclosure</h1>
   <p class="ch-lead">An <strong>SD-WIT</strong> uses the SD-JWT standard to let a workload present only the claims a specific service needs — without re-issuance. Hidden claims are replaced with cryptographic hashes.</p>
   <div class="spec-ref">Format: JWT <code>_sd</code> hash array + Base64URL disclosures after <code>~</code> separator</div>
@@ -663,7 +663,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 8 — Token Exchange
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch8">
-  <div class="ch-num">Chapter 8 of 12</div>
+  <div class="ch-num">Chapter 8 of 14</div>
   <h1 class="ch-title">Token Exchange</h1>
   <p class="ch-lead">Workload A (cloud-a.example) needs to call Workload B (cloud-b.example). Problem: B only trusts its own IdP. A <strong>Token Exchange Service</strong> bridges the trust domains.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-arch/" target="_blank">draft-ietf-wimse-arch-08</a> — token exchange at trust-domain boundaries</div>
@@ -765,7 +765,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 9 — Attacks & Defenses
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch9">
-  <div class="ch-num">Chapter 9 of 12</div>
+  <div class="ch-num">Chapter 9 of 14</div>
   <h1 class="ch-title">Attacks &amp; Defenses</h1>
   <p class="ch-lead">What happens when an attacker captures a valid WPT and tries to replay it? WIMSE's <code>jti</code> tracking makes replay attacks impossible — even with a perfectly valid, unexpired stolen token.</p>
 
@@ -862,7 +862,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Ch 10 — OpenID Federation
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch10">
-  <div class="ch-num">Chapter 10 of 12</div>
+  <div class="ch-num">Chapter 10 of 14</div>
   <h1 class="ch-title">OpenID Federation</h1>
   <p class="ch-lead">Two organisations have their own IdPs and never exchanged a single key out-of-band. <strong>OpenID Federation 1.0</strong> lets a shared Trust Anchor publish cryptographically-signed <em>Subordinate Statements</em> that vouch for each IdP, so any relying party can verify the chain at runtime.</p>
   <div class="spec-ref">Spec: <a href="https://openid.net/specs/openid-federation-1_0.html" target="_blank">OpenID Federation 1.0</a> — entity statements, trust chains, trust anchors</div>
@@ -1004,7 +1004,7 @@ select:focus{outline:none;border-color:var(--blue)}
      Chapter 11 — Transaction Tokens
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch11">
-  <div class="ch-num">Chapter 11 of 12</div>
+  <div class="ch-num">Chapter 11 of 14</div>
   <h1 class="ch-title">Transaction Tokens</h1>
   <p class="ch-lead">A WIT answers <em>"who is this workload?"</em> — but in a microservice call chain, the receiving service also needs to know <em>"why is this call happening?"</em> <strong>Transaction Tokens</strong> (<code>txntoken+jwt</code>, draft-ietf-oauth-transaction-tokens-11) capture the full originating context — user identity, authorisation details, and transaction ID — so every hop in a chain can trust the same root decision without re-authenticating the user.</p>
   <div class="spec-ref">Spec: draft-ietf-oauth-transaction-tokens-11 &nbsp;|&nbsp; <code>typ: txntoken+jwt</code> &nbsp;|&nbsp; immutable across call chain</div>
@@ -1142,7 +1142,7 @@ claims, _ := v.Validate(tok)
      Chapter 12 — SPIFFE Client Auth
 ═══════════════════════════════════════════ -->
 <section class="chapter" id="ch12">
-  <div class="ch-num">Chapter 12 of 12</div>
+  <div class="ch-num">Chapter 12 of 14</div>
   <h1 class="ch-title">SPIFFE Client Authentication</h1>
   <p class="ch-lead">Workloads already carry WITs that cryptographically prove their SPIFFE identity. Traditional OAuth <code>client_credentials</code> flows require a <code>client_secret</code> — a credential that must be stored, rotated, and protected. <strong>SPIFFE Client Auth</strong> (draft-ietf-oauth-spiffe-client-auth-02) eliminates the secret entirely: the WIT itself becomes the <em>client assertion</em>.</p>
   <div class="spec-ref">Spec: draft-ietf-oauth-spiffe-client-auth-02 &nbsp;|&nbsp; RFC 7523 JWT Bearer client assertion &nbsp;|&nbsp; <code>client_assertion_type: jwt-bearer</code></div>
@@ -1282,7 +1282,7 @@ tok, err := auth.Authenticate(
 </section>
 
 <section class="chapter" id="ch13">
-  <div class="ch-num">Chapter 13 of 13</div>
+  <div class="ch-num">Chapter 13 of 14</div>
   <h1 class="ch-title">HTTP Message Signatures: Sign the Request</h1>
   <p class="ch-lead">Instead of attaching a separate proof JWT (the WPT approach), the <em>HTTP request itself</em> is signed. The WIT rides in the <code>Workload-Identity-Token</code> header. The signature covers the method, path, query, and the WIT header — binding proof, identity, and request in one atomic operation.</p>
   <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-http-signature/" target="_blank">draft-ietf-wimse-http-signature-07</a> &nbsp;|&nbsp; RFC 9421 HTTP Message Signatures</div>
@@ -1395,6 +1395,134 @@ tok, err := auth.Authenticate(
 
   <div class="ch-footer">
     <button class="btn btn-secondary" onclick="goChapter(12)">&larr; Ch 12</button>
+    <button class="btn btn-primary" onclick="goChapter(14)">Next: WAG OAuth Bridge &rarr;</button>
+  </div>
+</section>
+
+<section class="chapter" id="ch14">
+  <div class="ch-num">Chapter 14 of 14</div>
+  <h1 class="ch-title">WAG: The OAuth Bridge for WIMSE Workloads</h1>
+  <p class="ch-lead">A workload with a WIT can now bootstrap OAuth access tokens from any authorization server — without per-workload pre-registration. The platform registers once; every workload it signs for is accepted on first presentation. This is the outbound leg that connects WIMSE identity to the broader OAuth ecosystem.</p>
+  <div class="spec-ref">Spec: <a href="https://datatracker.ietf.org/doc/html/draft-carleton-workload-authz-grant-01" target="_blank">draft-carleton-workload-authz-grant-01</a> &nbsp;|&nbsp; RFC 7523 JWT Authorization Grants</div>
+
+  <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:13px">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border)">
+        <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600">Dimension</th>
+        <th style="padding:8px 12px;text-align:left;color:var(--orange)">Before WAG</th>
+        <th style="padding:8px 12px;text-align:left;color:var(--blue)">With WAG</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 12px;color:var(--muted)">AS registration</td>
+        <td style="padding:8px 12px">Every workload registered individually</td>
+        <td style="padding:8px 12px">Platform registered once — covers all workloads</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 12px;color:var(--muted)">New workload</td>
+        <td style="padding:8px 12px">Admin action required at AS</td>
+        <td style="padding:8px 12px">Accepted on first valid grant presentation</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 12px;color:var(--muted)">Grant format</td>
+        <td style="padding:8px 12px">client_credentials or static secret</td>
+        <td style="padding:8px 12px"><code>typ: wag+jwt</code> — signed by platform key</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px;color:var(--muted)">WIT relationship</td>
+        <td style="padding:8px 12px">Unrelated</td>
+        <td style="padding:8px 12px">Same issuer, same key, same SPIFFE sub — WIT is the natural WAG substrate</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 3-node SVG animation -->
+  <div class="diagram">
+    <svg id="wag-svg" viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg">
+      <!-- Wires -->
+      <line x1="130" y1="65" x2="290" y2="65" class="wire wire-tls" id="wag-wire-pa"/>
+      <line x1="410" y1="65" x2="570" y2="65" class="wire wire-tls" id="wag-wire-ar"/>
+      <!-- Platform / WIT Issuer -->
+      <rect x="10" y="30" width="120" height="80" rx="8" class="node-box hi" id="wag-node-platform"/>
+      <text x="70" y="53" class="node-lbl">Platform</text>
+      <text x="70" y="67" class="node-sub">WIT Issuer</text>
+      <text x="70" y="80" class="node-sub" style="fill:var(--orange)">wag+jwt</text>
+      <text x="70" y="95" class="node-sub" id="wag-status-platform" style="fill:var(--muted)">idle</text>
+      <!-- Authorization Server -->
+      <rect x="290" y="30" width="120" height="80" rx="8" class="node-box" id="wag-node-as"/>
+      <text x="350" y="53" class="node-lbl">Auth Server</text>
+      <text x="350" y="67" class="node-sub">platform-registered</text>
+      <text x="350" y="80" class="node-sub" style="fill:var(--blue)">issues at+jwt</text>
+      <text x="350" y="95" class="node-sub" id="wag-status-as" style="fill:var(--muted)">waiting…</text>
+      <!-- Resource API -->
+      <rect x="570" y="30" width="120" height="80" rx="8" class="node-box" id="wag-node-api"/>
+      <text x="630" y="53" class="node-lbl">Resource API</text>
+      <text x="630" y="67" class="node-sub">OAuth-protected</text>
+      <text x="630" y="80" class="node-sub">validates at+jwt</text>
+      <text x="630" y="95" class="node-sub" id="wag-status-api" style="fill:var(--muted)">waiting…</text>
+      <!-- Packet: WAG grant → AS -->
+      <rect id="wag-pkt-grant"     x="130" y="56" width="70" height="18" rx="4" fill="var(--orange)" style="visibility:hidden;opacity:0.9"/>
+      <text id="wag-pkt-grant-lbl" x="165"  y="69" class="pkt-lbl" style="visibility:hidden">wag+jwt</text>
+      <!-- Packet: access token → Platform (return) -->
+      <rect id="wag-pkt-at-ret"     x="290" y="76" width="70" height="18" rx="4" fill="var(--blue)" style="visibility:hidden;opacity:0.9"/>
+      <text id="wag-pkt-at-ret-lbl" x="325"  y="89" class="pkt-lbl" style="visibility:hidden">at+jwt</text>
+      <!-- Packet: Bearer call → API -->
+      <rect id="wag-pkt-api"     x="130" y="56" width="70" height="18" rx="4" fill="var(--green)" style="visibility:hidden;opacity:0.9"/>
+      <text id="wag-pkt-api-lbl" x="165"  y="69" class="pkt-lbl" style="visibility:hidden">Bearer</text>
+      <!-- Footer labels -->
+      <text x="210" y="128" text-anchor="middle" fill="var(--orange)" font-family="monospace" font-size="9">grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer</text>
+      <text x="490" y="128" text-anchor="middle" fill="var(--green)" font-family="monospace" font-size="9">Authorization: Bearer &lt;at+jwt&gt;</text>
+    </svg>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+    <button class="btn btn-primary" id="btn-wag-run" onclick="doWagDemo()">Run WAG Demo (WASM)</button>
+    <div id="wag-run-status" style="font-size:12px;color:var(--muted)"></div>
+  </div>
+
+  <!-- Results panels, hidden until demo runs -->
+  <div id="wag-out" style="display:none">
+    <!-- Grant JWT -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px">
+        Step 1 — Workload Authorization Grant <span style="color:var(--orange)">wag+jwt</span> (Platform → AS)
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">
+        <code>iss</code>=platform issuer &nbsp;·&nbsp; <code>sub</code>=SPIFFE ID &nbsp;·&nbsp; <code>aud</code>=AS &nbsp;·&nbsp; <code>scope</code>=billing read &nbsp;·&nbsp; <code>jti</code>=single-use
+      </div>
+      <pre id="wag-grant-jwt" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all"></pre>
+    </div>
+    <!-- Access token -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px">
+        Step 2 — Access Token <span style="color:var(--blue)">at+jwt</span> (AS → Workload)
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">
+        <code>iss</code>=AS &nbsp;·&nbsp; <code>sub</code>=SPIFFE ID (preserved) &nbsp;·&nbsp; <code>scope</code>=<span id="wag-scope-val"></span> &nbsp;·&nbsp; <code>exp</code>=<span id="wag-exp-val"></span>s
+      </div>
+      <pre id="wag-at-jwt" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all"></pre>
+    </div>
+    <!-- Step 3 note -->
+    <div style="padding:10px 14px;border-radius:7px;background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.3);font-size:12px;color:var(--muted);margin-bottom:16px">
+      <strong style="color:var(--green)">Step 3 — API Call</strong>&nbsp; The workload attaches the access token as <code>Authorization: Bearer &lt;at+jwt&gt;</code> to every call to <code id="wag-api-val"></code>. The resource server validates the <code>at+jwt</code> signature and scope — it never sees the WAG grant or the platform key.
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>No per-workload registration:</strong> the AS accepted a workload it had never seen before. The platform key is the only trust anchor. Any workload the platform signs a grant for inherits that trust — new workloads start working immediately without an admin touching the AS.
+  </div>
+
+  <div class="callout ok">
+    <strong>typ: "wag+jwt"</strong> disambiguates the grant from a WIT (<code>wit+jwt</code>) and the access token (<code>at+jwt</code>), closing the JWT-type confusion attack (RFC 8725 §3.11) flagged as an open issue in the draft. <code>jti</code> replay protection ensures each grant can only be exchanged once.
+  </div>
+
+  <div class="callout" style="background:rgba(139,148,158,.07)">
+    <strong>Connection to wimse-agent-fabric:</strong> an AI agent carries a WIT as its SPIFFE identity. WAG is how that agent bootstraps scoped OAuth tokens to call external APIs — before CB4A vaults and re-issues them per-request with DPoP binding.
+  </div>
+
+  <div class="ch-footer">
+    <button class="btn btn-secondary" onclick="goChapter(13)">&larr; Ch 13</button>
     <button class="btn btn-green" onclick="goChapter(1)">Start Over</button>
   </div>
 </section>
@@ -1427,11 +1555,12 @@ const CH_TITLES = [
   'The Problem', 'WIT: Identity Card', 'mTLS: Lock the Channel',
   'WPT: Prove Each Request', 'The Validation Dance', 'Fine-Grained Authorization',
   'Selective Disclosure', 'Token Exchange', 'Attacks & Defenses', 'OpenID Federation',
-  'Transaction Tokens', 'SPIFFE Client Auth', 'HTTP Message Signatures'
+  'Transaction Tokens', 'SPIFFE Client Auth', 'HTTP Message Signatures',
+  'WAG: OAuth Bridge'
 ];
 const CH_SHORT = [
   'Problem', 'WIT', 'mTLS', 'WPT', 'Validation', 'FGA', 'SD-WIT', 'Exchange', 'Attacks', 'OID-FED',
-  'Txn-Token', 'SCA', 'HTTP-Sig'
+  'Txn-Token', 'SCA', 'HTTP-Sig', 'WAG'
 ];
 let cur = 1;
 const done = new Set();
@@ -1465,7 +1594,7 @@ function buildNav() {
 }
 
 function goChapter(n) {
-  if (n < 1 || n > 13) return;
+  if (n < 1 || n > 14) return;
   done.add(cur);
   document.getElementById('ch' + cur).classList.remove('active');
   cur = n;
@@ -2309,6 +2438,75 @@ async function doHttpsigVerify() {
     const err = r.error || (r.data && r.data.error) || 'verification failed';
     out.innerHTML = `<div class="verdict deny"><div class="verdict-icon">&#x2717;</div><div><strong>Verification failed${tamper ? ' (path tampered)' : ''}</strong><br><span style="font-size:12px;font-weight:400">${err}</span></div></div>`;
   }
+}
+
+// ═══════════════════════════════════════════
+// Chapter 14 — WAG Demo
+// ═══════════════════════════════════════════
+function wagSleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function doWagDemo() {
+  if (!wasmReady) { alert('WASM not ready yet — wait a moment and try again.'); return; }
+  const btn = document.getElementById('btn-wag-run');
+  const status = document.getElementById('wag-run-status');
+  btn.disabled = true; btn.textContent = '…running';
+  status.textContent = 'generating keys and running round-trip…';
+
+  // Reset nodes
+  nodeClass('wag-node-platform', 'hi');
+  nodeClass('wag-node-as', '');
+  nodeClass('wag-node-api', '');
+  const pStat = document.getElementById('wag-status-platform');
+  const aStat = document.getElementById('wag-status-as');
+  const rStat = document.getElementById('wag-status-api');
+  if (pStat) { pStat.textContent = 'signing…'; pStat.style.fill = 'var(--orange)'; }
+  if (aStat) { aStat.textContent = 'waiting…'; aStat.style.fill = 'var(--muted)'; }
+  if (rStat) { rStat.textContent = 'waiting…'; rStat.style.fill = 'var(--muted)'; }
+
+  await wagSleep(80);
+  const r = wcall('wagDemo');
+  if (!r.ok) { alert('WAG error: ' + r.error); btn.disabled = false; btn.textContent = 'Run WAG Demo (WASM)'; return; }
+  const d = r.data;
+
+  // Animate: grant flies Platform → AS
+  status.textContent = 'step 1 — WAG grant flying to AS…';
+  await animPktWithLabel('wag-pkt-grant', 'wag-pkt-grant-lbl', 130, 290, 900);
+  nodeClass('wag-node-as', 'ok');
+  if (aStat) { aStat.textContent = '✓ grant verified'; aStat.style.fill = 'var(--green)'; }
+
+  await wagSleep(300);
+
+  // Animate: access token returns AS → Platform
+  status.textContent = 'step 2 — access token returning…';
+  await animPktWithLabel('wag-pkt-at-ret', 'wag-pkt-at-ret-lbl', 290, 130, 900);
+  nodeClass('wag-node-platform', 'ok');
+  if (pStat) { pStat.textContent = '✓ token received'; pStat.style.fill = 'var(--green)'; }
+
+  await wagSleep(300);
+
+  // Animate: Bearer API call Platform → Resource
+  status.textContent = 'step 3 — calling resource API…';
+  await animPktWithLabel('wag-pkt-api', 'wag-pkt-api-lbl', 130, 570, 1100);
+  nodeClass('wag-node-api', 'ok');
+  if (rStat) { rStat.textContent = '✓ 200 OK'; rStat.style.fill = 'var(--green)'; }
+
+  // Populate result panels
+  const colors = ['#f85149', '#a5d6ff', '#3fb950'];
+  function colorJWT(parts) {
+    return parts.map((p, i) =>
+      `<span style="color:${colors[i]}">${p}</span>`
+    ).join('<span style="color:var(--muted)">.</span>');
+  }
+
+  document.getElementById('wag-grant-jwt').innerHTML = colorJWT(d.grantParts);
+  document.getElementById('wag-at-jwt').innerHTML    = colorJWT(d.atParts);
+  document.getElementById('wag-scope-val').textContent = d.scope;
+  document.getElementById('wag-exp-val').textContent   = d.expiresIn;
+  document.getElementById('wag-api-val').textContent   = d.resourceAPI;
+
+  document.getElementById('wag-out').style.display = 'block';
+  status.textContent = 'done — ' + d.workloadSub;
+  btn.disabled = false; btn.textContent = 'Run Again';
 }
 
 // ═══════════════════════════════════════════
