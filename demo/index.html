@@ -38,7 +38,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .ch-dot:hover:not(.active){border-color:var(--blue);color:var(--blue)}
 .ch-connector{width:36px;height:2px;background:var(--border);flex-shrink:0;transition:background 0.3s;margin-top:14px}
 .ch-connector.done{background:var(--green)}
-.ch-tooltip{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;display:none;z-index:20;pointer-events:none}
+.ch-tooltip{position:absolute;top:38px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;white-space:nowrap;display:none;z-index:200;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .ch-dot:hover .ch-tooltip{display:block}
 .ch-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
 .ch-label{font-size:9px;color:var(--muted);white-space:nowrap;text-align:center;max-width:58px;overflow:hidden;text-overflow:ellipsis}
