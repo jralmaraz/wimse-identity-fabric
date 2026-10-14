@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-13",
+  "last_checked": "2026-10-14",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -351,7 +351,7 @@
       "label": "Credential Delegation Protocol for AI Agents in Multi-System Environments",
       "short": "CredDelegation",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "00",
+      "last_known_rev": "01",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-sweeney-wimse-credential-delegation/",
@@ -1059,6 +1059,14 @@
       "first_seen": "2026-10-12",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-liu-oauth-authorization-schemas/"
+    },
+    {
+      "id": "draft-mw-oauth-actor-chain",
+      "label": "OAuth Actor Chain: Protocol and Interoperability",
+      "status": "discovered",
+      "first_seen": "2026-10-13",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mw-oauth-actor-chain/"
     }
   ]
 }
