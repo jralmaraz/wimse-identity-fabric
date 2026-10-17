@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-16",
+  "last_checked": "2026-10-17",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -1067,6 +1067,30 @@
       "first_seen": "2026-10-13",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-mw-oauth-actor-chain/"
+    },
+    {
+      "id": "draft-heigh-wimse-workload-identity-metadata",
+      "label": "Workload Identity Metadata",
+      "status": "discovered",
+      "first_seen": "2026-10-16",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-heigh-wimse-workload-identity-metadata/"
+    },
+    {
+      "id": "draft-forten-oauth-scope-metadata-document",
+      "label": "OAuth Scope Metadata Document",
+      "status": "discovered",
+      "first_seen": "2026-10-17",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-forten-oauth-scope-metadata-document/"
+    },
+    {
+      "id": "draft-mora-oauth-entity-profiles",
+      "label": "OAuth 2.0 Entity Profiles",
+      "status": "discovered",
+      "first_seen": "2026-10-16",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mora-oauth-entity-profiles/"
     }
   ]
 }
