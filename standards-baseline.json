@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-20",
+  "last_checked": "2026-10-21",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -1115,6 +1115,14 @@
       "first_seen": "2026-10-19",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-chen-oauth-agent-intent-token/"
+    },
+    {
+      "id": "draft-shankarlingam-oauth-agent-dns-link",
+      "label": "Linking an Agent's DNS Name to its OAuth Client",
+      "status": "discovered",
+      "first_seen": "2026-10-20",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-shankarlingam-oauth-agent-dns-link/"
     }
   ]
 }
