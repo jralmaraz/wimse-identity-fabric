@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-21",
+  "last_checked": "2026-10-22",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -1123,6 +1123,30 @@
       "first_seen": "2026-10-20",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-shankarlingam-oauth-agent-dns-link/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-mission-resource-access",
+      "label": "Mission Resource Access Profile for OAuth 2.0",
+      "status": "discovered",
+      "first_seen": "2026-10-22",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-mission-resource-access/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-mission",
+      "label": "Mission-Bound Authorization for OAuth 2.0",
+      "status": "discovered",
+      "first_seen": "2026-10-21",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-mission/"
+    },
+    {
+      "id": "draft-gerber-oauth-client-metadata-lookup",
+      "label": "OAuth Client Metadata Lookup",
+      "status": "discovered",
+      "first_seen": "2026-10-21",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-gerber-oauth-client-metadata-lookup/"
     }
   ]
 }
