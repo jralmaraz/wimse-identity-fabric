@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-24",
+  "last_checked": "2026-10-25",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -88,7 +88,7 @@
       "label": "WIMSE Mutual TLS Binding",
       "short": "mTLS",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "02",
+      "last_known_rev": "03",
       "implemented_rev": "02",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/",
