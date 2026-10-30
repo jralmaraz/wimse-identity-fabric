@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-29",
+  "last_checked": "2026-10-30",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -246,7 +246,7 @@
       "label": "WIMSE Workload Identity Practices",
       "short": "WI-Practices",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "07",
+      "last_known_rev": "08",
       "implemented_rev": "06",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-identity-practices/",
@@ -1211,6 +1211,38 @@
       "first_seen": "2026-10-28",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-client-ip-ranges/"
+    },
+    {
+      "id": "draft-reddy-wimse-oauth-dialog-binding",
+      "label": "Binding Agent Dialogs to WIMSE and OAuth Credentials",
+      "status": "discovered",
+      "first_seen": "2026-10-30",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-reddy-wimse-oauth-dialog-binding/"
+    },
+    {
+      "id": "draft-durga-wimse-ctx-isolation",
+      "label": "Cryptographic Separation of Untrusted Data-Plane Context from Control-Plane Tool Invocations in Autonomous AI Agents",
+      "status": "discovered",
+      "first_seen": "2026-10-30",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-durga-wimse-ctx-isolation/"
+    },
+    {
+      "id": "draft-ietf-oauth-delegate-sd-jwt",
+      "label": "Delegate SD-JWT",
+      "status": "discovered",
+      "first_seen": "2026-10-30",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-delegate-sd-jwt/"
+    },
+    {
+      "id": "draft-chen-oauth-agent-revocation",
+      "label": "OAuth 2.0 Agent Authorization Explicit Revocation",
+      "status": "discovered",
+      "first_seen": "2026-10-30",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-chen-oauth-agent-revocation/"
     }
   ]
 }
