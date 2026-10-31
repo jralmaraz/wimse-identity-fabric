@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-30",
+  "last_checked": "2026-10-31",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -35,7 +35,7 @@
       "label": "WIMSE Workload Identity Credentials (WIT)",
       "short": "WIT",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "02",
+      "last_known_rev": "03",
       "implemented_rev": "02",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/",
@@ -351,7 +351,7 @@
       "label": "Credential Delegation Protocol for AI Agents in Multi-System Environments",
       "short": "CredDelegation",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "01",
+      "last_known_rev": "02",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-sweeney-wimse-credential-delegation/",
@@ -746,7 +746,7 @@
       "status": "active-draft",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/",
-      "last_known_rev": "16",
+      "last_known_rev": "17",
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-oauth-v2-1/",
       "source_repo": null,
@@ -1243,6 +1243,38 @@
       "first_seen": "2026-10-30",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-chen-oauth-agent-revocation/"
+    },
+    {
+      "id": "draft-williams-oauth-poi-chained-state",
+      "label": "Proof-of-Intent (PoI) Chained State, Multi-Party Escalation, and Concurrency Extension",
+      "status": "discovered",
+      "first_seen": "2026-10-31",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-williams-oauth-poi-chained-state/"
+    },
+    {
+      "id": "draft-williams-oauth-poi-core",
+      "label": "Cryptographic Proof-of-Intent (PoI) Core Protocol for Human-in-the-Loop (HITL) Step-Up Authorization",
+      "status": "discovered",
+      "first_seen": "2026-10-31",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-williams-oauth-poi-core/"
+    },
+    {
+      "id": "draft-ietf-oauth-identity-assertion-authz-grant",
+      "label": "Identity Assertion JWT Authorization Grant",
+      "status": "discovered",
+      "first_seen": "2026-10-31",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-identity-assertion-authz-grant/"
+    },
+    {
+      "id": "draft-parecki-oauth-jwt-dpop-grant",
+      "label": "OAuth 2.0 JWT Authorization Grant with DPoP Binding",
+      "status": "discovered",
+      "first_seen": "2026-10-30",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-parecki-oauth-jwt-dpop-grant/"
     }
   ]
 }
