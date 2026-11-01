@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-10-31",
+  "last_checked": "2026-11-01",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -319,7 +319,7 @@
       "label": "SD-JWT-based Verifiable Digital Credentials (SD-JWT VC)",
       "short": "SD-JWT-VC",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "22",
+      "last_known_rev": "23",
       "implemented_rev": null,
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/",
@@ -1275,6 +1275,14 @@
       "first_seen": "2026-10-30",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-parecki-oauth-jwt-dpop-grant/"
+    },
+    {
+      "id": "draft-araut-oauth-transaction-tokens-for-agents",
+      "label": "Transaction Tokens For Agents",
+      "status": "discovered",
+      "first_seen": "2026-10-31",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-araut-oauth-transaction-tokens-for-agents/"
     }
   ]
 }
