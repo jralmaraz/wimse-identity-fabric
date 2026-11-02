@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-11-01",
+  "last_checked": "2026-11-02",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -176,7 +176,7 @@
       "label": "OAuth 2.0 SPIFFE Client Authentication",
       "short": "SPIFFE-ClientAuth",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "02",
+      "last_known_rev": "03",
       "implemented_rev": "02",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-spiffe-client-auth/",
@@ -396,7 +396,7 @@
       "label": "OAuth 2.0 Delegated Authorization",
       "short": "DelegatedAuthz",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "03",
+      "last_known_rev": "04",
       "implemented_rev": null,
       "status": "individual-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-li-oauth-delegated-authorization/",
@@ -844,7 +844,7 @@
       "status": "active-draft",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-aims/",
-      "last_known_rev": "00",
+      "last_known_rev": "01",
       "implemented_rev": null,
       "api_url": "https://datatracker.ietf.org/api/v1/doc/document/draft-ietf-wimse-aims/",
       "source_repo": null,
@@ -1283,6 +1283,54 @@
       "first_seen": "2026-10-31",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-araut-oauth-transaction-tokens-for-agents/"
+    },
+    {
+      "id": "draft-liu-oauth-authorization-evidence",
+      "label": "Authorization Evidence and Audit Trail for OAuth 2.0 Access Tokens",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-liu-oauth-authorization-evidence/"
+    },
+    {
+      "id": "draft-liu-oauth-delegation-chaining",
+      "label": "Delegation Chaining for the Identity Assertion JWT Authorization Grant",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-liu-oauth-delegation-chaining/"
+    },
+    {
+      "id": "draft-liu-oauth-scenario-discovery-authz",
+      "label": "Scenario-Based Service Discovery and Authorization Protocol in Agent Environments",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-liu-oauth-scenario-discovery-authz/"
+    },
+    {
+      "id": "draft-rosomakho-oauth-txn-challenge",
+      "label": "OAuth Transaction Authorization Challenge",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-rosomakho-oauth-txn-challenge/"
+    },
+    {
+      "id": "draft-davliatshin-oauth-attenuation-chains-report",
+      "label": "Independent Implementation and Formal Analysis of Attenuating Delegation Chains for AI Agents",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-davliatshin-oauth-attenuation-chains-report/"
+    },
+    {
+      "id": "draft-rosenberg-oauth-aauth",
+      "label": "AAuth - Agentic Authorization OAuth 2.1 Extension",
+      "status": "discovered",
+      "first_seen": "2026-11-01",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-rosenberg-oauth-aauth/"
     }
   ]
 }
