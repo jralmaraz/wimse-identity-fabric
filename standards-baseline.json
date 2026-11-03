@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-11-02",
+  "last_checked": "2026-11-03",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -1331,6 +1331,54 @@
       "first_seen": "2026-11-01",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-rosenberg-oauth-aauth/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-cimd-sw-stmt-registration",
+      "label": "Client ID Metadata Document Software Statement Registration",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-cimd-sw-stmt-registration/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-cimd-sw-stmt-lifecycle",
+      "label": "Client ID Metadata Document Software Statement Lifecycle",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-cimd-sw-stmt-lifecycle/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-cimd-sw-stmt",
+      "label": "Client ID Metadata Document Software Statement",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-cimd-sw-stmt/"
+    },
+    {
+      "id": "draft-mcguinness-oauth-grant-catalog",
+      "label": "OAuth Authorization Grant Catalog",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-grant-catalog/"
+    },
+    {
+      "id": "draft-emelia-oauth-as-metadata-dpop-required",
+      "label": "OAuth Authorization Server Metadata Parameter for Requiring DPoP",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-emelia-oauth-as-metadata-dpop-required/"
+    },
+    {
+      "id": "draft-ietf-oauth-client-id-metadata-document",
+      "label": "OAuth Client ID Metadata Document",
+      "status": "discovered",
+      "first_seen": "2026-11-02",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/"
     }
   ]
 }
