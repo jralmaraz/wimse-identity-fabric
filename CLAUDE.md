@@ -87,7 +87,7 @@ Use `jwt.WithAudience` (singular) — not `jwt.WithAudiences`.
 
 ## govulncheck
 Pinned at v1.6.0 everywhere — do not upgrade without updating all projects.
-`go get toolchain@go1.27.2` (or later) required to clear stdlib vulns in Go 1.27.x.
+`go get toolchain@go1.27.4` (or later) required to clear stdlib vulns in Go 1.27.x (GO-2026-6859 net/http, GO-2026-6809 crypto/x509).
 
 ## ECKeyPair type
 `keys.ECKeyPair.Public` is `*ecdsa.PublicKey` (pointer). Pass it directly to `RegisterPlatform` — do NOT take `&platformKey.Public` (that yields `**ecdsa.PublicKey`).

@@ -2,7 +2,7 @@ module github.com/jralmaraz/wimse-identity-fabric
 
 go 1.26.6
 
-toolchain go1.27.2
+toolchain go1.27.4
 
 require (
 	github.com/gin-gonic/gin v1.12.0
