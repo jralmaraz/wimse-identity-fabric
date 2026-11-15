@@ -31,6 +31,8 @@ Not AI-agent-specific (see wimse-agent-fabric for that layer).
 | `internal/idp/` | IdP server |
 | `internal/workload/` | Workload helpers |
 | `cmd/demo-wasm/` | WASM entry point (all demo functions) |
+| `internal/lab/` | Local multi-cloud lab: trust bundle, net/http WIMSE verifier + agent, observer events; `attest/` attestors, `cloud/` SigV4 + AWS/GCP clients (stdlib only) |
+| `cmd/lab-*` | Lab binaries: `lab-issuer`, `lab-workload`, `lab-observer`, `lab-bootstrap` — see `deploy/local-multicloud/README.md` |
 | `demo/` | Browser demo: `index.html` (cinematic journey) + `enterprise.html` + `wimse.wasm` |
 
 ## Demo — cinematic journey (index.html)

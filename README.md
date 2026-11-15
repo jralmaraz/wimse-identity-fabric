@@ -7,6 +7,7 @@ A Go implementation of the **IETF WIMSE** (Workload Identity in Multi-System Env
 **Demos:**
 - [Standard PoC](https://wimse-identity-fabric.pages.dev) — 10-chapter interactive story running live WASM crypto in your browser
 - [Enterprise Demo](https://wimse-identity-fabric.pages.dev/enterprise.html) — Identity sprawl, WIMSE solution, IdP integration patterns (Okta, Entra ID, Keycloak, Vault), centralised vs distributed, secrets management
+- [Local multi-cloud lab](deploy/local-multicloud/README.md) — `make lab-up`: AWS + GCP emulated with Floci in Docker, two trust domains, attested WITs, a cross-cloud WIT/WPT/Txn-Token call chain, RFC 8693 exchange into cloud STS, and a live transaction observer with an attack suite
 
 ## Table of Contents
 
@@ -871,6 +872,15 @@ Each Disclosure: base64url(JSON(["<16-byte-salt>", "<claim_name>", <value>]))
 ---
 
 ### Local Development
+
+#### Multi-cloud lab (Docker + Floci emulators)
+
+```bash
+make lab-up        # observer at http://localhost:8080
+make lab-local     # same flow as plain processes, no Docker
+```
+
+See [deploy/local-multicloud/README.md](deploy/local-multicloud/README.md).
 
 #### Phase 2 — IdP only
 
