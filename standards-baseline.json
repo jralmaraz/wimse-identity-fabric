@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-11-15",
+  "last_checked": "2026-11-16",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -319,7 +319,7 @@
       "label": "SD-JWT-based Verifiable Digital Credentials (SD-JWT VC)",
       "short": "SD-JWT-VC",
       "wg": "IETF OAuth WG",
-      "last_known_rev": "26",
+      "last_known_rev": "27",
       "implemented_rev": null,
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/",
@@ -1379,6 +1379,38 @@
       "first_seen": "2026-11-02",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/"
+    },
+    {
+      "id": "draft-nandakumar-wimse-delegator-bound-chains",
+      "label": "Delegator-Bound Delegation Chains for AI Agents",
+      "status": "discovered",
+      "first_seen": "2026-11-16",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-nandakumar-wimse-delegator-bound-chains/"
+    },
+    {
+      "id": "draft-nandakumar-wimse-wpt-message-binding",
+      "label": "Message Binding for Workload Proof Tokens",
+      "status": "discovered",
+      "first_seen": "2026-11-16",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-nandakumar-wimse-wpt-message-binding/"
+    },
+    {
+      "id": "draft-skyfire-oauth-kyapay-token-exchange",
+      "label": "KYAPay Token Exchange",
+      "status": "discovered",
+      "first_seen": "2026-11-16",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-skyfire-oauth-kyapay-token-exchange/"
+    },
+    {
+      "id": "draft-schrock-oauth-exact-action-identifiers",
+      "label": "Exact-Action Identifiers in OAuth Authorization Details",
+      "status": "discovered",
+      "first_seen": "2026-11-15",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-schrock-oauth-exact-action-identifiers/"
     }
   ]
 }
