@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-11-16",
+  "last_checked": "2026-11-17",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -25,7 +25,7 @@
         "federation",
         "connect"
       ],
-      "last_guid": "https://openid.net/?p=75421",
+      "last_guid": "https://openid.net/?p=77344",
       "note": "Catches OIDF spec publications, errata, and public review periods"
     }
   ],
@@ -105,7 +105,7 @@
       "label": "WIMSE Architecture",
       "short": "Arch",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "08",
+      "last_known_rev": "09",
       "implemented_rev": "08",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-arch/",
@@ -1411,6 +1411,38 @@
       "first_seen": "2026-11-15",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-schrock-oauth-exact-action-identifiers/"
+    },
+    {
+      "id": "draft-chandra-wimse-partition-tolerant-renewal",
+      "label": "Extend-Only, Threshold-Attested Authority Renewal for Partitioned Agent Meshes",
+      "status": "discovered",
+      "first_seen": "2026-11-17",
+      "wg": "IETF WIMSE WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-chandra-wimse-partition-tolerant-renewal/"
+    },
+    {
+      "id": "draft-craig-oauth-rar-payment-mandates",
+      "label": "Rich Authorization Requests Profile for Agent Payment Mandates, Approval Reasons and Receipts",
+      "status": "discovered",
+      "first_seen": "2026-11-17",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-craig-oauth-rar-payment-mandates/"
+    },
+    {
+      "id": "draft-radusch-oauth-subject-proof",
+      "label": "OAuth 2.0 Subject-Proof Callers for Token Introspection and Revocation",
+      "status": "discovered",
+      "first_seen": "2026-11-17",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-radusch-oauth-subject-proof/"
+    },
+    {
+      "id": "draft-nandakumar-oauth-actor-bound-token-exchange",
+      "label": "OAuth 2.0 Token Exchange with Actor-Bound Tokens",
+      "status": "discovered",
+      "first_seen": "2026-11-16",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-nandakumar-oauth-actor-bound-token-exchange/"
     }
   ]
 }
