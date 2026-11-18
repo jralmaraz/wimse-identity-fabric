@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-11-17",
+  "last_checked": "2026-11-18",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -1443,6 +1443,14 @@
       "first_seen": "2026-11-16",
       "wg": "IETF OAuth WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-nandakumar-oauth-actor-bound-token-exchange/"
+    },
+    {
+      "id": "draft-zehavi-oauth-aud-bound-authz",
+      "label": "OAuth 2.0 Audience-Bound Client Authorization",
+      "status": "discovered",
+      "first_seen": "2026-11-18",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-zehavi-oauth-aud-bound-authz/"
     }
   ]
 }
