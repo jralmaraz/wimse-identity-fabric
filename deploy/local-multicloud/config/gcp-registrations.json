@@ -1,0 +1,9 @@
+[
+  {
+    "workload": "payments",
+    "id": "spiffe://gcp.wimse.local/ns/shop/sa/payments",
+    "docker_label": "payments",
+    "gcp_service_account": "payments",
+    "join_token": "dev-only-payments-27be"
+  }
+]

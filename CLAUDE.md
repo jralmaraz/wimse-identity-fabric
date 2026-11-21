@@ -31,6 +31,8 @@ Not AI-agent-specific (see wimse-agent-fabric for that layer).
 | `internal/idp/` | IdP server |
 | `internal/workload/` | Workload helpers |
 | `cmd/demo-wasm/` | WASM entry point (all demo functions) |
+| `internal/lab/` | Local multi-cloud lab: trust bundle, net/http WIMSE verifier + agent, observer events; `attest/` attestors, `cloud/` SigV4 + AWS/GCP clients (stdlib only) |
+| `cmd/lab-*` | Lab binaries: `lab-issuer`, `lab-workload`, `lab-observer`, `lab-bootstrap` — see `deploy/local-multicloud/README.md` |
 | `demo/` | Browser demo: `index.html` (cinematic journey) + `enterprise.html` + `wimse.wasm` |
 
 ## Demo — cinematic journey (index.html)
@@ -85,7 +87,7 @@ Use `jwt.WithAudience` (singular) — not `jwt.WithAudiences`.
 
 ## govulncheck
 Pinned at v1.6.0 everywhere — do not upgrade without updating all projects.
-`go get toolchain@go1.27.2` (or later) required to clear stdlib vulns in Go 1.27.x.
+`go get toolchain@go1.27.4` (or later) required to clear stdlib vulns in Go 1.27.x (GO-2026-6859 net/http, GO-2026-6809 crypto/x509).
 
 ## ECKeyPair type
 `keys.ECKeyPair.Public` is `*ecdsa.PublicKey` (pointer). Pass it directly to `RegisterPlatform` — do NOT take `&platformKey.Public` (that yields `**ecdsa.PublicKey`).

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WIMSE multi-cloud lab — transactions</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #fff; --ink: #1d2433; --muted: #6b7385; --line: #e3e6ec;
+    --aws: #c76b00; --aws-bg: #fff4e6; --gcp: #1a63d6; --gcp-bg: #eaf1fd; --bad: #c62a2a; --good: #1f8a4c;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, Segoe UI, sans-serif; color: var(--ink); background: var(--bg); }
+  header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 18px; background: var(--panel);
+           border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; }
+  header h1 small { color: var(--muted); font-weight: 400; }
+  button { font: inherit; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  button.danger { color: var(--bad); border-color: #f1c4c4; }
+  button:disabled { opacity: .5; cursor: progress; }
+  select { font: inherit; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line); }
+  .spacer { flex: 1; }
+  .status { color: var(--muted); font-size: 12px; }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 460px; height: calc(100vh - 58px); }
+  #timeline { overflow: auto; padding: 0 0 40px; }
+  #details { border-left: 1px solid var(--line); background: var(--panel); overflow: auto; padding: 16px 18px; }
+  .lanes { display: grid; position: sticky; top: 0; z-index: 3; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .lane-head { text-align: center; padding: 8px 2px 6px; font-weight: 600; font-size: 12px; }
+  .lane-head span { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
+  .lane-head.aws { color: var(--aws); background: var(--aws-bg); }
+  .lane-head.gcp { color: var(--gcp); background: var(--gcp-bg); }
+  .lane-head.x { color: var(--bad); }
+  .rows { position: relative; }
+  .row { position: relative; height: 46px; cursor: pointer; }
+  .row:hover, .row.sel { background: rgba(29, 36, 51, .05); }
+  .guide { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); }
+  .arrow { position: absolute; top: 27px; height: 2px; background: var(--good); }
+  .arrow.bad { background: var(--bad); }
+  .arrow.cloud { background: repeating-linear-gradient(90deg, var(--muted) 0 6px, transparent 6px 10px); }
+  .arrow.cloud.bad { background: repeating-linear-gradient(90deg, var(--bad) 0 6px, transparent 6px 10px); }
+  .arrow::after { content: ""; position: absolute; top: -5px; border: 6px solid transparent; }
+  .arrow.right::after { right: -6px; border-left-color: inherit; border-left: 8px solid var(--ac); border-right: 0; }
+  .arrow.left::after { left: -6px; border-right: 8px solid var(--ac); border-left: 0; }
+  .label { position: absolute; top: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+           text-align: center; color: var(--ink); }
+  .kind { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; padding: 0 5px; border-radius: 4px;
+          background: #eef0f4; color: var(--muted); margin-right: 4px; }
+  .kind.bad { background: #fde8e8; color: var(--bad); }
+  .trace-sep { padding: 6px 12px; font-size: 11px; color: var(--muted); font-family: var(--mono); border-top: 1px dashed var(--line); }
+  .empty { padding: 60px 20px; text-align: center; color: var(--muted); }
+  #details h2 { font-size: 15px; margin: 0 0 4px; }
+  #details .meta { color: var(--muted); font-size: 12px; margin-bottom: 12px; font-family: var(--mono); }
+  .checks { list-style: none; padding: 0; margin: 0 0 16px; }
+  .checks li { padding: 6px 0 6px 24px; position: relative; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .checks li::before { position: absolute; left: 2px; top: 6px; font-weight: 700; }
+  .checks li.ok::before { content: "✓"; color: var(--good); }
+  .checks li.no::before { content: "✗"; color: var(--bad); }
+  .checks li b { display: block; font-weight: 600; }
+  .checks li span { color: var(--muted); word-break: break-word; }
+  .tok { border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+  .tok h3 { margin: 0; font-size: 13px; padding: 7px 10px; background: #f3f4f7; display: flex; justify-content: space-between; }
+  .tok h3 em { font-style: normal; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+  pre { margin: 0; padding: 8px 10px; font: 12px/1.45 var(--mono); white-space: pre-wrap; word-break: break-all; }
+  pre.hdr { color: #7a3fb5; border-bottom: 1px dashed var(--line); }
+  details summary { cursor: pointer; padding: 6px 10px; font-size: 12px; color: var(--muted); }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .pill.ok { background: #e3f4ea; color: var(--good); }
+  .pill.no { background: #fde8e8; color: var(--bad); }
+  #attackResults table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  #attackResults td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .legend { font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 22px; height: 2px; vertical-align: middle; margin: 0 4px 0 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>WIMSE multi-cloud lab <small>live transactions</small></h1>
+  <button class="primary" id="btnCheckout">Run checkout</button>
+  <button id="btnShortcut">orders → ledger shortcut</button>
+  <button class="danger" id="btnAttacks">Run attack suite</button>
+  <select id="traceFilter"><option value="">All traces</option></select>
+  <button id="btnClear">Clear</button>
+  <span class="spacer"></span>
+  <span class="legend"><i style="background:var(--good)"></i>accepted<i style="background:var(--bad)"></i>rejected<i style="background:repeating-linear-gradient(90deg,var(--muted) 0 6px,transparent 6px 10px)"></i>cloud API</span>
+  <span class="status" id="status">connecting…</span>
+</header>
+<main>
+  <section id="timeline">
+    <div class="lanes" id="laneHeads"></div>
+    <div class="rows" id="rows"><div class="empty">No transactions yet. Press <b>Run checkout</b>.</div></div>
+  </section>
+  <aside id="details">
+    <h2>How to read this</h2>
+    <p>Each arrow is one transaction posted by the component that handled it. Click an arrow to see the decoded
+      tokens (WIT, WPT, Txn-Token, exchanged JWT) and every verification step the receiver ran.</p>
+    <p><b>orders</b> and <b>ledger</b> get their identity from <b>issuer-aws</b> (trust domain <code>aws.wimse.local</code>);
+      <b>payments</b> from <b>issuer-gcp</b> (<code>gcp.wimse.local</code>). Cross-cloud calls verify the other cloud's WIT via the federated trust bundle.</p>
+    <div id="attackResults"></div>
+  </aside>
+</main>
+<script>
+const LANES = [
+  { id: "client", label: "client", sub: "end user · setup" },
+  { id: "issuer-aws", label: "issuer-aws", sub: "aws.wimse.local", g: "aws" },
+  { id: "orders", label: "orders", sub: "AWS", g: "aws" },
+  { id: "ledger", label: "ledger", sub: "AWS", g: "aws" },
+  { id: "floci-aws", label: "Floci AWS", sub: "STS · IAM · DynamoDB", g: "aws" },
+  { id: "payments", label: "payments", sub: "GCP", g: "gcp" },
+  { id: "issuer-gcp", label: "issuer-gcp", sub: "gcp.wimse.local", g: "gcp" },
+  { id: "floci-gcp", label: "Floci GCP", sub: "IAM · STS · KMS", g: "gcp" },
+  { id: "attacker", label: "attacker", sub: "replays & forgeries", g: "x" },
+];
+const laneIdx = id => {
+  let clean = (id || "").replace(/\?$/, "");
+  if (clean === "bootstrap") clean = "client";
+  const i = LANES.findIndex(l => l.id === clean);
+  return i >= 0 ? i : LANES.length - 1;
+};
+const events = [];
+let selected = null;
+const $ = id => document.getElementById(id);
+
+function renderHeads() {
+  const cols = `repeat(${LANES.length}, minmax(96px, 1fr))`;
+  $("laneHeads").style.gridTemplateColumns = cols;
+  $("laneHeads").innerHTML = LANES.map(l => `<div class="lane-head ${l.g || ""}">${l.label}<span>${l.sub}</span></div>`).join("");
+}
+
+function visible() {
+  const f = $("traceFilter").value;
+  return events.filter(e => !f || e.trace_id === f);
+}
+
+function render() {
+  const rows = $("rows");
+  const list = visible();
+  if (!list.length) { rows.innerHTML = '<div class="empty">No transactions yet. Press <b>Run checkout</b>.</div>'; return; }
+  const n = LANES.length;
+  const pct = i => ((i + 0.5) / n) * 100;
+  let html = "", lastTrace = null;
+  for (const e of list) {
+    if (e.trace_id !== lastTrace) {
+      html += `<div class="trace-sep">trace ${e.trace_id}</div>`;
+      lastTrace = e.trace_id;
+    }
+    let a = laneIdx(e.src), b = laneIdx(e.dst);
+    const left = Math.min(pct(a), pct(b)), width = Math.max(Math.abs(pct(b) - pct(a)), 3);
+    const dir = b >= a ? "right" : "left";
+    const cls = ["arrow", dir, e.ok ? "" : "bad", e.kind === "cloud" ? "cloud" : ""].join(" ");
+    const color = e.ok ? "var(--good)" : "var(--bad)";
+    const guides = LANES.map((_, i) => `<div class="guide" style="left:${pct(i)}%"></div>`).join("");
+    const what = e.method ? `${e.method} ${e.path} ` : "";
+    const status = e.status ? ` · ${e.status}` : "";
+    const labelW = Math.max(width, 34), labelL = Math.max(0, Math.min(100 - labelW, left + width / 2 - labelW / 2));
+    html += `<div class="row ${selected === e.id ? "sel" : ""}" data-id="${e.id}">${guides}
+      <div class="label" style="left:${labelL}%;width:${labelW}%" title="${esc(e.summary)}"><span class="kind ${e.ok ? "" : "bad"}">${e.kind}</span>${esc(what + short(e.summary))}${status}</div>
+      <div class="${cls}" style="left:${left}%;width:${width}%;--ac:${color}"></div></div>`;
+  }
+  rows.innerHTML = html;
+  rows.querySelectorAll(".row").forEach(r => r.onclick = () => select(r.dataset.id));
+}
+
+function short(s) { return (s || "").length > 90 ? s.slice(0, 88) + "…" : s; }
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function decode(tok) {
+  try {
+    const [h, p] = tok.split(".").slice(0, 2).map(x => JSON.parse(atob(x.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(x.length / 4) * 4, "="))));
+    return { h, p };
+  } catch { return null; }
+}
+
+function fmtClaims(p) {
+  const out = { ...p };
+  for (const k of ["iat", "exp", "nbf"]) if (typeof out[k] === "number") out[k] = `${out[k]}  (${new Date(out[k] * 1000).toLocaleTimeString()})`;
+  return JSON.stringify(out, null, 2);
+}
+
+function select(id) {
+  selected = id;
+  const e = events.find(x => x.id === id);
+  if (!e) return;
+  render();
+  const checks = (e.checks || []).map(c => `<li class="${c.ok ? "ok" : "no"}"><b>${esc(c.name)}</b><span>${esc(c.detail)}</span></li>`).join("");
+  const toks = Object.entries(e.tokens || {}).map(([name, raw]) => {
+    const d = decode(raw);
+    const typ = d?.h?.typ ? d.h.typ : "";
+    return `<div class="tok"><h3>${esc(name)} <em>${esc(typ)}</em></h3>
+      ${d ? `<pre class="hdr">${esc(JSON.stringify(d.h, null, 2))}</pre><pre>${esc(fmtClaims(d.p))}</pre>` : ""}
+      <details><summary>raw (${raw.length} chars)</summary><pre>${esc(raw)}</pre></details></div>`;
+  }).join("");
+  $("details").innerHTML = `
+    <h2>${esc(e.src)} → ${esc(e.dst)} <span class="pill ${e.ok ? "ok" : "no"}">${e.ok ? "OK" : "REJECTED"}${e.status ? " " + e.status : ""}</span></h2>
+    <div class="meta">${esc(e.kind)} ${esc(e.method || "")} ${esc(e.path || "")} · ${new Date(e.ts * 1000).toLocaleTimeString()} · trace ${esc(e.trace_id)}</div>
+    <p>${esc(e.summary)}</p>
+    ${checks ? `<h3 style="font-size:13px">Verification steps</h3><ul class="checks">${checks}</ul>` : ""}
+    ${toks ? `<h3 style="font-size:13px">Tokens on the wire</h3>${toks}` : ""}
+    <div id="attackResults">${lastAttackHTML}</div>`;
+}
+
+function addEvent(e) {
+  events.push(e);
+  const sel = $("traceFilter");
+  if (![...sel.options].some(o => o.value === e.trace_id)) {
+    const o = document.createElement("option");
+    o.value = e.trace_id; o.textContent = e.trace_id === "attacks" || e.trace_id === "bootstrap" ? e.trace_id : "trace " + e.trace_id.slice(0, 8);
+    sel.appendChild(o);
+  }
+}
+
+let renderPending = false;
+function scheduleRender() {
+  if (renderPending) return;
+  renderPending = true;
+  requestAnimationFrame(() => { renderPending = false; render(); const t = $("timeline"); t.scrollTop = t.scrollHeight; });
+}
+
+async function boot() {
+  renderHeads();
+  const initial = await fetch("api/events").then(r => r.json()).catch(() => []);
+  (initial || []).forEach(addEvent);
+  render();
+  const es = new EventSource("api/stream");
+  es.onopen = () => $("status").textContent = "live";
+  es.onerror = () => $("status").textContent = "reconnecting…";
+  es.onmessage = m => { addEvent(JSON.parse(m.data)); scheduleRender(); };
+}
+
+let lastAttackHTML = "";
+async function run(btn, path) {
+  btn.disabled = true;
+  try {
+    const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    const body = await r.json().catch(() => ({}));
+    if (Array.isArray(body)) {
+      const blocked = body.filter(x => x.blocked).length;
+      lastAttackHTML = `<h3 style="font-size:13px;margin-top:18px">Attack suite: ${blocked}/${body.length} blocked as expected</h3><table>` +
+        body.map(x => `<tr><td><span class="pill ${x.blocked ? "ok" : "no"}">${x.observed}</span></td><td><b>${esc(x.name)}</b><br><span class="status">${esc(x.reason)}</span></td></tr>`).join("") + "</table>";
+      $("attackResults").innerHTML = lastAttackHTML;
+    } else if (body.trace_id) {
+      $("traceFilter").value = "";
+    } else if (body.error) {
+      alert(body.error);
+    }
+  } finally { btn.disabled = false; }
+}
+$("btnCheckout").onclick = e => run(e.target, "api/run/checkout");
+$("btnShortcut").onclick = e => run(e.target, "api/run/direct-ledger");
+$("btnAttacks").onclick = e => run(e.target, "api/run/attacks");
+$("btnClear").onclick = async () => { await fetch("api/clear", { method: "POST" }); events.length = 0; $("traceFilter").length = 1; render(); };
+$("traceFilter").onchange = render;
+boot();
+</script>
+</body>
+</html>

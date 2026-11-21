@@ -1,0 +1,17 @@
+[
+  {
+    "workload": "orders",
+    "id": "spiffe://aws.wimse.local/ns/shop/sa/orders",
+    "aws_role": "orders-task",
+    "docker_label": "orders",
+    "join_token": "dev-only-orders-6f1d",
+    "entry_point": true
+  },
+  {
+    "workload": "ledger",
+    "id": "spiffe://aws.wimse.local/ns/shop/sa/ledger",
+    "aws_role": "ledger-task",
+    "docker_label": "ledger",
+    "join_token": "dev-only-ledger-93ac"
+  }
+]

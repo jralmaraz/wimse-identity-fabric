@@ -1,0 +1,169 @@
+# WIMSE local multi-cloud lab
+#
+#   docker compose -f deploy/local-multicloud/docker-compose.yml up --build
+#   open http://localhost:8080        # transaction observer
+#
+# Two "clouds", each a private network with its own Floci emulator, WIMSE
+# issuer (trust domain) and workloads. An "interconnect" network stands in
+# for the internet / cloud interconnect between them.
+#
+#   aws-vpc:  floci-aws, issuer-aws (aws.wimse.local), orders, ledger
+#   gcp-vpc:  floci-gcp, issuer-gcp (gcp.wimse.local), payments
+#
+# LAB ONLY: the issuers mount the Docker socket (Docker workload attestation)
+# and the observer receives raw tokens.
+
+x-build: &build
+  context: ../..
+  dockerfile: Dockerfile
+
+x-domains: &trust-domains
+  TRUST_DOMAINS: aws.wimse.local=http://issuer-aws:8080,gcp.wimse.local=http://issuer-gcp:8080
+
+x-common: &common
+  OBSERVER_URL: http://observer:8080
+  AWS_ENDPOINT_URL: http://floci-aws:4566
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  GCP_ENDPOINT_URL: http://floci-gcp:4588
+  GCP_PROJECT: wimse-lab
+  CLOUD: floci
+
+x-ids:
+  orders: &orders-id spiffe://aws.wimse.local/ns/shop/sa/orders
+  payments: &payments-id spiffe://gcp.wimse.local/ns/shop/sa/payments
+  wif-audience: &wif-audience //iam.googleapis.com/projects/0/locations/global/workloadIdentityPools/wimse-lab/providers/issuer-gcp
+
+services:
+  # ── emulated clouds ─────────────────────────────────────────────────────────
+  floci-aws:
+    image: floci/floci:latest
+    networks: [aws-vpc]
+    ports: ["4566:4566"]
+
+  floci-gcp:
+    image: floci/floci-gcp:latest
+    networks: [gcp-vpc]
+    ports: ["4588:4588"]
+
+  bootstrap:
+    build: { <<: *build, args: { BINARY: lab-bootstrap } }
+    environment:
+      <<: *common
+      ISSUER_AWS_URL: http://issuer-aws:8080
+    networks: [aws-vpc, gcp-vpc, interconnect]
+    depends_on: [floci-aws, floci-gcp, observer]
+    restart: "no"
+
+  # ── observer UI ─────────────────────────────────────────────────────────────
+  observer:
+    build: { <<: *build, args: { BINARY: lab-observer } }
+    environment:
+      ORDERS_URL: http://orders:8080
+      PAYMENTS_URL: http://payments:8080
+      LEDGER_URL: http://ledger:8080
+    networks: [interconnect]
+    ports: ["8080:8080"]
+
+  # ── AWS trust domain ────────────────────────────────────────────────────────
+  issuer-aws:
+    build: { <<: *build, args: { BINARY: lab-issuer } }
+    user: "0:0" # needs the Docker socket for the docker attestor (lab only)
+    environment:
+      <<: [*common]
+      TRUST_DOMAIN: aws.wimse.local
+      PUBLIC_URL: http://issuer-aws:8080
+      SERVICE_NAME: issuer-aws
+      TRUST_DOMAINS: aws.wimse.local=http://issuer-aws:8080
+      REGISTRATIONS_FILE: /config/aws-registrations.json
+      ATTESTORS: aws-sts,docker
+      TXN_AUDIENCE: urn:wimse-lab:shop
+      EXCHANGE_AUDIENCES: sts.amazonaws.com
+    volumes:
+      - ./config:/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [aws-vpc, interconnect]
+
+  orders:
+    build: { <<: *build, args: { BINARY: lab-workload } }
+    labels: { wimse.workload: orders }
+    environment:
+      <<: [*common, *trust-domains]
+      ROLE: orders
+      SELF_URL: http://orders:8080
+      ISSUER_URL: http://issuer-aws:8080
+      EVIDENCE: aws-sts,docker
+      AWS_ROLE_ARN: arn:aws:iam::000000000000:role/orders-task
+      PAYMENTS_URL: http://payments:8080
+      LEDGER_URL: http://ledger:8080
+    networks: [aws-vpc, interconnect]
+    ports: ["9000:8080"]
+    depends_on:
+      issuer-aws: { condition: service_started }
+      bootstrap: { condition: service_completed_successfully }
+
+  ledger:
+    build: { <<: *build, args: { BINARY: lab-workload } }
+    labels: { wimse.workload: ledger }
+    environment:
+      <<: [*common, *trust-domains]
+      ROLE: ledger
+      SELF_URL: http://ledger:8080
+      ISSUER_URL: http://issuer-aws:8080
+      EVIDENCE: aws-sts,docker
+      AWS_ROLE_ARN: arn:aws:iam::000000000000:role/ledger-task
+      POLICY: /entries=spiffe://gcp.wimse.local/ns/shop/sa/payments
+      TXN_ISSUER: http://issuer-aws:8080
+      TXN_AUDIENCE: urn:wimse-lab:shop
+      EXPECT_ORIGIN: *orders-id
+      LEDGER_ROLE_ARN: arn:aws:iam::000000000000:role/ledger-data
+      LEDGER_TABLE: wimse-ledger
+    networks: [aws-vpc, interconnect]
+    depends_on:
+      issuer-aws: { condition: service_started }
+      bootstrap: { condition: service_completed_successfully }
+
+  # ── GCP trust domain ────────────────────────────────────────────────────────
+  issuer-gcp:
+    build: { <<: *build, args: { BINARY: lab-issuer } }
+    user: "0:0"
+    environment:
+      <<: [*common]
+      TRUST_DOMAIN: gcp.wimse.local
+      PUBLIC_URL: http://issuer-gcp:8080
+      SERVICE_NAME: issuer-gcp
+      TRUST_DOMAINS: gcp.wimse.local=http://issuer-gcp:8080
+      REGISTRATIONS_FILE: /config/gcp-registrations.json
+      ATTESTORS: docker+gcp-iam,docker
+      EXCHANGE_AUDIENCES: *wif-audience
+    volumes:
+      - ./config:/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [gcp-vpc, interconnect]
+
+  payments:
+    build: { <<: *build, args: { BINARY: lab-workload } }
+    labels: { wimse.workload: payments }
+    environment:
+      <<: [*common, *trust-domains]
+      ROLE: payments
+      SELF_URL: http://payments:8080
+      ISSUER_URL: http://issuer-gcp:8080
+      EVIDENCE: docker
+      POLICY: /charge=spiffe://aws.wimse.local/ns/shop/sa/orders
+      TXN_ISSUER: http://issuer-aws:8080
+      TXN_AUDIENCE: urn:wimse-lab:shop
+      LEDGER_URL: http://ledger:8080
+      GCP_WIF_AUDIENCE: *wif-audience
+      GCP_KMS_RING: wimse-lab
+      GCP_KMS_KEY: card-data
+    networks: [gcp-vpc, interconnect]
+    depends_on:
+      issuer-gcp: { condition: service_started }
+      bootstrap: { condition: service_completed_successfully }
+
+networks:
+  aws-vpc: {}
+  gcp-vpc: {}
+  interconnect: {}
