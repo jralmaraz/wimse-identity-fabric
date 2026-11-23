@@ -1,7 +1,7 @@
 {
   "_comment": "Tracks IETF/OpenID drafts implemented in this PoC. Updated daily by the standards-tracker GitHub Actions workflow. Set implemented_rev when the PoC code is updated to match a new revision.",
   "_tracking_policy": "docs/standards-tracking.md",
-  "last_checked": "2026-11-22",
+  "last_checked": "2026-11-23",
   "wg_feeds": [
     {
       "name": "IETF WIMSE WG",
@@ -246,7 +246,7 @@
       "label": "WIMSE Workload Identity Practices",
       "short": "WI-Practices",
       "wg": "IETF WIMSE WG",
-      "last_known_rev": "08",
+      "last_known_rev": "09",
       "implemented_rev": "06",
       "status": "active-draft",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-identity-practices/",
@@ -1499,6 +1499,14 @@
       "first_seen": "2026-11-21",
       "wg": "IETF WIMSE WG",
       "datatracker_url": "https://datatracker.ietf.org/doc/draft-munoz-wimse-authorization-evidence/"
+    },
+    {
+      "id": "draft-hood-oauth-over-agtp",
+      "label": "OAuth 2.0 over the Agent Transfer Protocol",
+      "status": "discovered",
+      "first_seen": "2026-11-23",
+      "wg": "IETF OAuth WG",
+      "datatracker_url": "https://datatracker.ietf.org/doc/draft-hood-oauth-over-agtp/"
     }
   ]
 }
